@@ -1,74 +1,7 @@
 <ion-content class="riwayat-tiket-content">
   <div class="dashboard-container">
     <!-- ===== SIDEBAR ===== -->
-    <div class="sidebar" [class.open]="isSidebarOpen">
-      <div class="sidebar-header">
-        <div class="sidebar-logo">
-       <div class="logo-icon-wrapper">
-  <img src="../../../assets/logo bakrie.png" alt="Logo" class="logo-img" />
-</div>
-          <span class="logo-text">Helpdesk<br>Ticketing System</span>
-        </div>
-        <ion-button class="sidebar-close" fill="clear" (click)="toggleSidebar()">
-          <ion-icon name="close-outline"></ion-icon>
-        </ion-button>
-      </div>
-
-      <div class="sidebar-user">
-        <div class="avatar-wrapper">
-          <img
-            [src]="'https://ui-avatars.com/api/?name=' + (user.nama || 'Teknisi') + '&background=2563eb&color=fff&size=128&bold=true'"
-            alt="Avatar"
-            class="sidebar-avatar"
-          />
-          <div class="online-status"></div>
-        </div>
-        <div class="sidebar-user-info">
-          <h4 class="sidebar-username">{{ user.nama || 'Teknisi' }}</h4>
-          <p class="sidebar-userrole">🔧 Teknisi</p>
-        </div>
-      </div>
-
-      <div class="sidebar-menu">
-        <div class="menu-label">MAIN MENU</div>
-        <div class="menu-item" [class.active]="activeMenu === 'dashboard-teknisi'" (click)="goToDashboardTeknisi()">
-          <div class="menu-icon-wrapper"><ion-icon name="home-outline" class="menu-icon"></ion-icon></div>
-          <span class="menu-text">Dashboard</span>
-        </div>
-
-        <div class="menu-label">TICKET MANAGEMENT</div>
-        <div class="menu-item" [class.active]="activeMenu === 'ticket'" (click)="goToTicket()">
-          <div class="menu-icon-wrapper"><ion-icon name="list-outline" class="menu-icon"></ion-icon></div>
-          <span class="menu-text">Ticket</span>
-        </div>
-        <div class="menu-item" [class.active]="activeMenu === 'proses-tiket'" (click)="goToProsesTiket()">
-          <div class="menu-icon-wrapper"><ion-icon name="construct-outline" class="menu-icon"></ion-icon></div>
-          <span class="menu-text">Proses Tiket</span>
-        </div>
-        <div class="menu-item" [class.active]="activeMenu === 'riwayat-tiket'" (click)="goToRiwayatTiket()">
-          <div class="menu-icon-wrapper"><ion-icon name="time-outline" class="menu-icon"></ion-icon></div>
-          <span class="menu-text">Riwayat Tiket</span>
-        </div>
-        <div class="menu-label">PREVENTIVE</div>
-<div class="menu-item" [class.active]="activeMenu === 'schedule-tersedia'" (click)="goToScheduleTersedia()">
-  <ion-icon name="calendar-outline" class="menu-icon"></ion-icon>
-  <span class="menu-text">Schedule Tersedia</span>
-</div>
-
-        <div class="menu-label">LAINNYA</div>
-        <div class="menu-item" [class.active]="activeMenu === 'pengaturan'" (click)="goToPengaturan()">
-          <div class="menu-icon-wrapper"><ion-icon name="settings-outline" class="menu-icon"></ion-icon></div>
-          <span class="menu-text">Pengaturan</span>
-        </div>
-        <div class="menu-item logout-item" (click)="logout()">
-          <div class="menu-icon-wrapper"><ion-icon name="log-out-outline" class="menu-icon"></ion-icon></div>
-          <span class="menu-text">Keluar</span>
-        </div>
-      </div>
-    </div>
-
-    <!-- ===== OVERLAY (mobile) ===== -->
-    <div class="sidebar-overlay" [class.open]="isSidebarOpen" (click)="toggleSidebar()"></div>
+    <app-teknisi-sidebar [(isSidebarOpen)]="isSidebarOpen" [activeMenu]="activeMenu"></app-teknisi-sidebar>
 
     <!-- ===== MAIN CONTENT ===== -->
     <div class="main-content">
@@ -81,7 +14,7 @@
           <span class="page-title-inline">{{ getPageTitle() }}</span>
         </div>
         <div class="header-right">
-          <div class="header-avatar" (click)="goToProfile()">
+          <div class="header-avatar" routerLink="/teknisi/profile">
             <img
               [src]="'https://ui-avatars.com/api/?name=' + (user.nama || 'Teknisi') + '&background=2563eb&color=fff&size=64&bold=true'"
               alt="Avatar"

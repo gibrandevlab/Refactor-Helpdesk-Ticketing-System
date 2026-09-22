@@ -2,6 +2,7 @@ import { Component, OnInit, OnDestroy, ViewChild, ElementRef } from '@angular/co
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import { SidebarComponent } from '../shared/components/sidebar/sidebar.component';
 import {
   IonContent,
   IonHeader,
@@ -151,6 +152,7 @@ function toLocalDateStr(input: any): string {
     IonCheckbox,
     IonPopover,
     IonDatetime,
+    SidebarComponent,
   ],
 })
 export class SchedulePage implements OnInit, OnDestroy {

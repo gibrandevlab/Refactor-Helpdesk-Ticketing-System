@@ -1,52 +1,7 @@
 <ion-content class="asset-content">
   <div class="dashboard-container">
     <!-- ===== SIDEBAR (USER) ===== -->
-    <div class="sidebar" [class.open]="isSidebarOpen">
-      <div class="sidebar-header">
-        <div class="sidebar-logo">
-        <div class="logo-icon-wrapper">
-  <img src="../../../assets/logo bakrie.png" alt="Logo" class="logo-img" />
-</div>
-          <span class="logo-text">Helpdesk<br>Ticketing System</span>
-        </div>
-        <ion-button class="sidebar-close" fill="clear" (click)="toggleSidebar()">
-          <ion-icon name="close-outline"></ion-icon>
-        </ion-button>
-      </div>
-
-      <div class="sidebar-menu">
-        <div class="menu-label">MAIN MENU</div>
-        <div class="menu-item" [class.active]="activeMenu === 'dashboard-user'" (click)="goToDashboardUser()">
-          <ion-icon name="home-outline" class="menu-icon"></ion-icon>
-          <span class="menu-text">Dashboard</span>
-        </div>
-        <div class="menu-item" [class.active]="activeMenu === 'my-ticket'" (click)="goToMyTicket()">
-          <ion-icon name="ticket-outline" class="menu-icon"></ion-icon>
-          <span class="menu-text">My Ticket</span>
-        </div>
-        <div class="menu-item" [class.active]="activeMenu === 'input-aset'" (click)="goToInputAset()">
-          <ion-icon name="cube-outline" class="menu-icon"></ion-icon>
-          <span class="menu-text">Input Aset</span>
-        </div>
-        <div class="menu-item" [class.active]="activeMenu === 'laporan-feedback'" (click)="goToLaporanFeedback()">
-          <ion-icon name="chatbox-ellipses-outline" class="menu-icon"></ion-icon>
-          <span class="menu-text">Feedback</span>
-        </div>
-
-        <div class="menu-label">LAINNYA</div>
-        <div class="menu-item" [class.active]="activeMenu === 'pengaturan'" (click)="goToPengaturan()">
-          <ion-icon name="settings-outline" class="menu-icon"></ion-icon>
-          <span class="menu-text">Pengaturan</span>
-        </div>
-        <div class="menu-item logout-item" (click)="logout()">
-          <ion-icon name="log-out-outline" class="menu-icon"></ion-icon>
-          <span class="menu-text">Keluar</span>
-        </div>
-      </div>
-    </div>
-
-    <!-- ===== OVERLAY (mobile) ===== -->
-    <div class="sidebar-overlay" [class.open]="isSidebarOpen" (click)="toggleSidebar()"></div>
+    <app-users-sidebar [(isSidebarOpen)]="isSidebarOpen" [activeMenu]="activeMenu"></app-users-sidebar>
 
     <!-- ===== MAIN CONTENT ===== -->
     <div class="main-content">
@@ -60,10 +15,7 @@
         </div>
         <div class="header-right">
           <div class="header-avatar" (click)="goToProfile()">
-            <img
-              [src]="'https://ui-avatars.com/api/?name=' + user.nama + '&background=2563eb&color=fff&size=64&bold=true'"
-              alt="Avatar"
-            />
+            <img [src]="'https://ui-avatars.com/api/?name=' + user.nama + '&background=2563eb&color=fff&size=64&bold=true'" alt="Avatar" />
             <span class="header-avatar-name">{{ user.nama }}</span>
           </div>
         </div>

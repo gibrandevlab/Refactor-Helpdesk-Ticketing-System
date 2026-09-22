@@ -7,6 +7,7 @@ import { firstValueFrom } from 'rxjs';
 import { TicketService, AssignedTicketApiRow, ChecklistItemApiRow, ChecklistApprovalRow } from '../../services/ticket.service';
 import { ChatService, ChatMessage } from '../../services/chat.service';
 import { environment } from '../../../environments/environment';
+import { SidebarComponent } from '../shared/component/sidebar/sidebar.component';
 
 import pdfMake from 'pdfmake/build/pdfmake';
 import pdfFonts from 'pdfmake/build/vfs_fonts';
@@ -61,7 +62,7 @@ export type ChecklistSection =
   templateUrl: './proses.page.html',
   styleUrls: ['./proses.page.scss'],
   standalone: true,
-  imports: [CommonModule, FormsModule, IonicModule],
+  imports: [CommonModule, FormsModule, IonicModule, SidebarComponent],
 })
 export class ProsesTiketPage implements OnInit, OnDestroy {
   @ViewChild('chatContainer') chatContainer!: ElementRef;

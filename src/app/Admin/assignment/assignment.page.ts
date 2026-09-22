@@ -6,6 +6,7 @@ import { IonContent, IonButton, IonIcon, IonSelect, IonSelectOption } from '@ion
 import { AssignmentService } from '../../services/assignment.service ';
 import { TicketService } from '../../services/ticket.service'; // 🔥 Tambahkan TicketService
 import { TeknisiOption } from '../../services/teknisi.service';
+import { SidebarComponent } from '../shared/components/sidebar/sidebar.component';
 
 export interface AssignmentTicket {
   no: number;
@@ -28,7 +29,7 @@ export interface AssignmentTicket {
   templateUrl: './assignment.page.html',
   styleUrls: ['./assignment.page.scss'],
   standalone: true,
-  imports: [CommonModule, FormsModule, IonContent, IonButton, IonIcon, IonSelect, IonSelectOption],
+  imports: [CommonModule, FormsModule, IonContent, IonButton, IonIcon, IonSelect, IonSelectOption, SidebarComponent],
 })
 export class AssignmentTicketPage implements OnInit {
   isSidebarOpen = false;

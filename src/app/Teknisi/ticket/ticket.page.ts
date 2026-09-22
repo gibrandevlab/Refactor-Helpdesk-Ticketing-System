@@ -5,6 +5,7 @@ import { Router } from '@angular/router';
 import { IonicModule } from '@ionic/angular';
 import { TicketService, AssignedTicketApiRow } from '../../services/ticket.service';
 import { environment } from '../../../environments/environment';
+import { SidebarComponent } from '../shared/component/sidebar/sidebar.component';
 
 export interface TeknisiTicket {
   id: string;
@@ -27,7 +28,7 @@ export interface TeknisiTicket {
   templateUrl: './ticket.page.html',
   styleUrls: ['./ticket.page.scss'],
   standalone: true,
-  imports: [CommonModule, FormsModule, IonicModule],
+  imports: [CommonModule, FormsModule, IonicModule, SidebarComponent],
 })
 export class TeknisiTicketPage implements OnInit, OnDestroy {
   isSidebarOpen = false;

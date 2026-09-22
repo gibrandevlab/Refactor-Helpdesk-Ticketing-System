@@ -1,10 +1,11 @@
 import { Component, OnInit, AfterViewInit, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router';
-import { HttpClientModule } from '@angular/common/http'; 
-import { IonContent, IonButton, IonIcon, IonBadge, IonSpinner } from '@ionic/angular/standalone';
+import { Router, RouterLink } from '@angular/router';
+import { HttpClientModule } from '@angular/common/http';
+import { IonContent, IonButton, IonIcon, IonSpinner } from '@ionic/angular/standalone';
 import Chart from 'chart.js/auto';
-import { DashboardService } from '../../services/dashboard.service'; // Import Service baru
+import { DashboardService } from '../../services/dashboard.service';
+import { SidebarComponent } from '../shared/components/sidebar/sidebar.component';
 
 interface Activity {
   icon: string;
@@ -18,7 +19,16 @@ interface Activity {
   templateUrl: './dashboard.page.html',
   styleUrls: ['./dashboard.page.scss'],
   standalone: true,
-  imports: [CommonModule, HttpClientModule, IonContent, IonButton, IonIcon, IonBadge, IonSpinner],
+  imports: [
+    CommonModule,
+    HttpClientModule,
+    IonContent,
+    IonButton,
+    IonIcon,
+    IonSpinner,
+    SidebarComponent,
+    RouterLink
+  ],
   providers: [DashboardService]
 })
 export class DashboardPage implements OnInit, AfterViewInit {
@@ -26,8 +36,7 @@ export class DashboardPage implements OnInit, AfterViewInit {
   @ViewChild('feedbackChart') feedbackChartRef!: ElementRef<HTMLCanvasElement>;
 
   isSidebarOpen = false;
-  isLoading = true; // Ubah jadi true agar memuat loading dulu
-  activeMenu = 'dashboard';
+  isLoading = true;
 
   user = {
     nama: 'Admin',
@@ -36,7 +45,7 @@ export class DashboardPage implements OnInit, AfterViewInit {
 
   pendingCount = 0;
 
-  // Data Statistik (akan diisi dari API)
+  // Data Statistik
   totalTicket = 0;
   totalTicketTrend = 0;
 
@@ -72,19 +81,16 @@ export class DashboardPage implements OnInit, AfterViewInit {
 
   constructor(
     private router: Router,
-    private dashboardService: DashboardService // Inject Service
+    private dashboardService: DashboardService
   ) {}
 
   ngOnInit() {
-    this.activeMenu = 'dashboard';
     this.loadDashboardData();
   }
 
-  ngAfterViewInit() {
-    // Chart akan dirender setelah data API diterima di loadDashboardData
-  }
+  ngAfterViewInit() {}
 
-  // 🔥 AMBIL DATA DARI BACKEND
+  // AMBIL DATA DARI BACKEND
   loadDashboardData() {
     this.isLoading = true;
     this.dashboardService.getAdminDashboard().subscribe({
@@ -102,28 +108,22 @@ export class DashboardPage implements OnInit, AfterViewInit {
         this.totalAsset = summary.total_asset || 0;
         this.pendingCount = this.waitingApproval;
 
-        // 2. Mapping Data Grafik Bulanan (Bisa dihitung manual jika tabel v_dashboard_summary belum ada)
+        // 2. Mapping Data Grafik Bulanan
         const months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
         const currentYear = new Date().getFullYear();
-        
-        // Inisialisasi array kosong 12 bulan
+
         let totals = Array(12).fill(0);
         let closed = Array(12).fill(0);
         let progress = Array(12).fill(0);
         let waiting = Array(12).fill(0);
 
-        // Isi data dari API (Jika API mengembalikan data per bulan dalam format 'YYYY-MM')
         const tiketBulanan = data.tiketBulanan || [];
         tiketBulanan.forEach((item: any) => {
           const [year, month] = item.bulan.split('-');
-          // Hanya ambil data tahun ini agar grafik tidak campur tahun lalu
           if (parseInt(year) === currentYear) {
             const index = parseInt(month) - 1;
-            // 📌 Catatan: Backend controller Anda hanya mengirim total (`jumlah`). 
-            // Untuk grafik Closed/On Progress/Waiting, Anda perlu update controller agar mengirim 4 dataset.
-            // Untuk sementara, kita set semua garis menjadi data total yang sama agar grafik muncul.
             totals[index] = item.jumlah || 0;
-            closed[index] = Math.floor(item.jumlah * 0.7) || 0; // Dummy sementara
+            closed[index] = Math.floor(item.jumlah * 0.7) || 0;
             progress[index] = Math.floor(item.jumlah * 0.2) || 0;
             waiting[index] = Math.floor(item.jumlah * 0.1) || 0;
           }
@@ -156,7 +156,7 @@ export class DashboardPage implements OnInit, AfterViewInit {
     });
   }
 
-  // ===== HELPER UNTUK AKTIVITAS =====
+  // HELPER UNTUK AKTIVITAS
   getActivityIcon(status: string): string {
     const s = (status || '').toLowerCase();
     if (s.includes('solved') || s.includes('selesai')) return 'checkmark-circle-outline';
@@ -196,10 +196,9 @@ export class DashboardPage implements OnInit, AfterViewInit {
     return 'Baru saja';
   }
 
-  // ===== CHART RENDER =====
+  // CHART RENDER
   private renderTicketChart() {
     if (!this.ticketChartRef) return;
-    // Hancurkan chart lama jika ada untuk mencegah error canvas ganda
     if (this.lineChart) {
       this.lineChart.destroy();
     }
@@ -248,57 +247,9 @@ export class DashboardPage implements OnInit, AfterViewInit {
     });
   }
 
-  // ===== NAVIGASI =====
-  toggleSidebar() { this.isSidebarOpen = !this.isSidebarOpen; }
-  setActiveMenu(menu: string) {
-    this.activeMenu = menu;
-    if (window.innerWidth < 1024) this.isSidebarOpen = false;
-  }
-
-  goToDashboard() { this.setActiveMenu('dashboard'); this.router.navigate(['/dashboard']); }
-  goToListTicket() { this.setActiveMenu('list-ticket'); this.router.navigate(['/list']); }
-  goToApprovalTicket() { this.setActiveMenu('approval-ticket'); this.router.navigate(['/approval']); }
-  goToAssignmentTicket() { this.setActiveMenu('assignment-ticket'); this.router.navigate(['/assignment']); }
-  goToKaryawan() { this.setActiveMenu('karyawan'); this.router.navigate(['/karyawan']); }
-  goToUser() { this.setActiveMenu('user'); this.router.navigate(['/users']); }
-  goToJabatan() { this.setActiveMenu('jabatan'); this.router.navigate(['/jabatan']); }
-  goToDepartemen() { this.setActiveMenu('departemen'); this.router.navigate(['/departemen']); }
-  goToBagianDepartemen() { this.setActiveMenu('bagian-departemen'); this.router.navigate(['/bagian-departemen']); }
-  goToKategori() { this.setActiveMenu('kategori'); this.router.navigate(['/kategori']); }
-  goToSubKategori() { this.setActiveMenu('sub-kategori'); this.router.navigate(['/sub-kategori']); }
-  goToTeknisi() { this.setActiveMenu('teknisi'); this.router.navigate(['/teknisi']); }
-  goToInventory() { this.setActiveMenu('inventory'); this.router.navigate(['/inventory']); }
-  goToSchedule() { this.setActiveMenu('schedule'); this.router.navigate(['/schedule']); }
-  goToLaporanFeedback() { this.setActiveMenu('laporan-feedback'); this.router.navigate(['/laporan-feedback']); }
-  goToStatistikTicket() { this.setActiveMenu('statistik-ticket'); this.router.navigate(['/statistik-ticket']); }
-  goToProfile() { this.setActiveMenu('profile'); this.router.navigate(['/profile']); }
-  goToNotifikasi() { this.setActiveMenu('notifikasi'); }
-
-  logout() { this.router.navigate(['/login']); }
-
-  getPageTitle(): string {
-    const titles: Record<string, string> = {
-      'dashboard': 'Dashboard',
-      'list-ticket': 'List Ticket',
-      'approval-ticket': 'Approval Ticket',
-      'assignment-ticket': 'Assignment Ticket',
-      'karyawan': 'Karyawan',
-      'user': 'User',
-      'jabatan': 'Jabatan',
-      'departemen': 'Departemen',
-      'bagian-departemen': 'Bagian Departemen',
-      'kategori': 'Kategori',
-      'sub-kategori': 'Sub Kategori',
-      'teknisi': 'Teknisi',
-      'inventory': 'Inventory',
-      'schedule': 'Schedule',
-      'laporan-feedback': 'Laporan Feedback',
-      'statistik-ticket': 'Statistik Ticket',
-      'profile': 'Profile',
-      'notifikasi': 'Notifikasi',
-      'pengaturan': 'Pengaturan',
-    };
-    return titles[this.activeMenu] ?? 'Dashboard';
+  // EVENT HANDLER
+  toggleSidebar() {
+    this.isSidebarOpen = !this.isSidebarOpen;
   }
 
   getPageSubtitle(): string {

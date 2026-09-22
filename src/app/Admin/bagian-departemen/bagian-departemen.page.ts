@@ -7,6 +7,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { BagianDepartemenService } from '../../services/bagian-departemen.service';
 import { DepartemenService } from '../../services/departemen.services';
 import { BagianDepartemen } from '../../models/Bagian departemen.model ';
+import { SidebarComponent } from '../shared/components/sidebar/sidebar.component';
 
 // Bentuk sederhana untuk dropdown Departemen (id + nama saja)
 interface DepartemenOption {
@@ -19,7 +20,7 @@ interface DepartemenOption {
   templateUrl: './bagian-departemen.page.html',
   styleUrls: ['./bagian-departemen.page.scss'],
   standalone: true,
-  imports: [CommonModule, FormsModule, IonicModule],
+  imports: [CommonModule, FormsModule, IonicModule, SidebarComponent],
 })
 export class BagianDepartemenPage implements OnInit {
   isSidebarOpen = false;

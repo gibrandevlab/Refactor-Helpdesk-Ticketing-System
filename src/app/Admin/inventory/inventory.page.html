@@ -1,109 +1,10 @@
 <ion-content class="inventory-content">
   <div class="dashboard-container">
     <!-- ===== SIDEBAR ===== -->
-    <div class="sidebar" [class.open]="isSidebarOpen">
-      <div class="sidebar-header">
-        <div class="sidebar-logo">
-       <div class="logo-icon-wrapper">
-  <img src="../../../assets/logo bakrie.png" alt="Logo" class="logo-img" />
-</div>
-          <span class="logo-text">Helpdesk<br>Ticketing System</span>
-        </div>
-        <ion-button class="sidebar-close" fill="clear" (click)="toggleSidebar()">
-          <ion-icon name="close-outline"></ion-icon>
-        </ion-button>
-      </div>
-
-      <div class="sidebar-menu">
-        <div class="menu-label">MAIN MENU</div>
-        <div class="menu-item" [class.active]="activeMenu === 'dashboard'" (click)="goToDashboard()">
-          <ion-icon name="home-outline" class="menu-icon"></ion-icon>
-          <span class="menu-text">Dashboard</span>
-        </div>
-
-        <div class="menu-label">TICKET MANAGEMENT</div>
-        <div class="menu-item" [class.active]="activeMenu === 'list-ticket'" (click)="goToListTicket()">
-          <ion-icon name="list-outline" class="menu-icon"></ion-icon>
-          <span class="menu-text">List Ticket</span>
-        </div>
-        <div class="menu-item" [class.active]="activeMenu === 'approval-ticket'" (click)="goToApprovalTicket()">
-          <ion-icon name="checkmark-done-outline" class="menu-icon"></ion-icon>
-          <span class="menu-text">Approval Ticket</span>
-        </div>
-        <div class="menu-item" [class.active]="activeMenu === 'assignment-ticket'" (click)="goToAssignmentTicket()">
-          <ion-icon name="clipboard-outline" class="menu-icon"></ion-icon>
-          <span class="menu-text">Assignment Ticket</span>
-        </div>
-
-        <div class="menu-label">MASTER DATA</div>
-        <div class="menu-item" [class.active]="activeMenu === 'karyawan'" (click)="goToKaryawan()">
-          <ion-icon name="people-outline" class="menu-icon"></ion-icon>
-          <span class="menu-text">Karyawan</span>
-        </div>
-        <div class="menu-item" [class.active]="activeMenu === 'user'" (click)="goToUser()">
-          <ion-icon name="person-outline" class="menu-icon"></ion-icon>
-          <span class="menu-text">User</span>
-        </div>
-        <div class="menu-item" [class.active]="activeMenu === 'jabatan'" (click)="goToJabatan()">
-          <ion-icon name="ribbon-outline" class="menu-icon"></ion-icon>
-          <span class="menu-text">Jabatan</span>
-        </div>
-        <div class="menu-item" [class.active]="activeMenu === 'departemen'" (click)="goToDepartemen()">
-          <ion-icon name="business-outline" class="menu-icon"></ion-icon>
-          <span class="menu-text">Departemen</span>
-        </div>
-        <div class="menu-item" [class.active]="activeMenu === 'bagian-departemen'" (click)="goToBagianDepartemen()">
-          <ion-icon name="git-branch-outline" class="menu-icon"></ion-icon>
-          <span class="menu-text">Bagian Departemen</span>
-        </div>
-        <div class="menu-item" [class.active]="activeMenu === 'teknisi'" (click)="goToTeknisi()">
-          <ion-icon name="construct-outline" class="menu-icon"></ion-icon>
-          <span class="menu-text">Teknisi</span>
-        </div>
-
-        <div class="menu-label">ASSET MANAGEMENT</div>
-        <div class="menu-item" [class.active]="activeMenu === 'inventory'" (click)="goToInventory()">
-          <ion-icon name="cube-outline" class="menu-icon"></ion-icon>
-          <span class="menu-text">Inventory</span>
-        </div>
-
-        <div class="menu-item" [class.active]="activeMenu === 'schedule'" (click)="goToSchedule()">
-          <div class="menu-icon-wrapper">
-            <ion-icon name="calendar-outline" class="menu-icon"></ion-icon>
-          </div>
-          <span class="menu-text">Schedule Preventive</span>
-        </div>
-
-        <div class="menu-label">COMPLAINT MANAGEMENT</div>
-        <div class="menu-item" [class.active]="activeMenu === 'kategori'" (click)="goToKategori()">
-          <ion-icon name="pricetags-outline" class="menu-icon"></ion-icon>
-          <span class="menu-text">Kategori</span>
-        </div>
-        <div class="menu-item" [class.active]="activeMenu === 'sub-kategori'" (click)="goToSubKategori()">
-          <ion-icon name="pricetag-outline" class="menu-icon"></ion-icon>
-          <span class="menu-text">Sub Kategori</span>
-        </div>
-
-        <div class="menu-label">REPORT</div>
-        <div class="menu-item" [class.active]="activeMenu === 'laporan-feedback'" (click)="goToLaporanFeedback()">
-          <ion-icon name="chatbox-ellipses-outline" class="menu-icon"></ion-icon>
-          <span class="menu-text">Laporan Feedback</span>
-        </div>
-        <div class="menu-item" [class.active]="activeMenu === 'statistik-ticket'" (click)="goToStatistikTicket()">
-          <ion-icon name="bar-chart-outline" class="menu-icon"></ion-icon>
-          <span class="menu-text">Statistik Ticket</span>
-        </div>
-
-        <div class="menu-label">LAINNYA</div>
-        <div class="menu-item" [class.active]="activeMenu === 'pengaturan'" (click)="setActiveMenu('pengaturan')">
-          <ion-icon name="settings-outline" class="menu-icon"></ion-icon>
-          <span class="menu-text">Pengaturan</span>
-        </div>
-      </div>
-    </div>
-
-    <!-- ===== OVERLAY (mobile) ===== -->
-    <div class="sidebar-overlay" [class.open]="isSidebarOpen" (click)="toggleSidebar()"></div>
+    <app-sidebar
+      [isSidebarOpen]="isSidebarOpen"
+      (closeSidebar)="isSidebarOpen = false">
+    </app-sidebar>
 
     <!-- ===== MAIN CONTENT ===== -->
     <div class="main-content">
@@ -116,7 +17,7 @@
           <span class="page-title-inline">Inventory</span>
         </div>
         <div class="header-right">
-          <div class="header-avatar" (click)="goToProfile()">
+          <div class="header-avatar" routerLink="/admin/profile">
             <img [src]="'https://ui-avatars.com/api/?name=Admin&background=2563eb&color=fff&size=64&bold=true'" alt="Avatar" />
             <span class="header-avatar-name">Admin</span>
           </div>
@@ -133,7 +34,6 @@
             </div>
           </div>
           <div class="header-right">
-            <!-- 🔥 BARU: tombol export data tabel (ikut filter aktif) ke Excel -->
             <ion-button class="export-btn" fill="outline" (click)="exportToExcel()">
               <ion-icon name="download-outline" slot="start"></ion-icon>
               Export Excel
@@ -154,7 +54,7 @@
             <ion-select
               [(ngModel)]="filterJenisStats"
               (ionChange)="loadStats(); onFilterChange()"
-              interface="action-sheet"
+              interface="popover"
               placeholder="Semua Jenis"
               class="stats-filter">
               <ion-select-option value="">Semua Jenis</ion-select-option>
@@ -190,13 +90,13 @@
             <input type="text" placeholder="Cari Kode Asset / Nama Barang..." [(ngModel)]="searchTerm" (ngModelChange)="onFilterChange()" class="filter-input" />
           </div>
           <div class="filter-group">
-            <ion-select [(ngModel)]="filterDept" interface="action-sheet" (ionChange)="onFilterChange()" placeholder="Filter Departemen">
+            <ion-select [(ngModel)]="filterDept" interface="popover" (ionChange)="onFilterChange()" placeholder="Filter Departemen">
               <ion-select-option value="">Semua Departemen</ion-select-option>
               <ion-select-option *ngFor="let d of deptOptions" [value]="d">{{ d }}</ion-select-option>
             </ion-select>
           </div>
           <div class="filter-group">
-            <ion-select [(ngModel)]="filterKategori" interface="action-sheet" (ionChange)="onFilterChange()" placeholder="Filter Kategori">
+            <ion-select [(ngModel)]="filterKategori" interface="popover" (ionChange)="onFilterChange()" placeholder="Filter Kategori">
               <ion-select-option value="">Semua Kategori</ion-select-option>
               <ion-select-option *ngFor="let k of kategoriOptions" [value]="k">{{ k }}</ion-select-option>
             </ion-select>
@@ -353,7 +253,7 @@
               <ion-select
                 [(ngModel)]="formData.nik_pemegang"
                 (ionChange)="onPemegangChange()"
-                interface="action-sheet"
+                interface="popover"
                 class="form-select"
                 placeholder="Pilih Karyawan / Pemegang">
                 <ion-select-option [value]="null">Tidak ada pemegang</ion-select-option>
@@ -363,26 +263,23 @@
               </p>
             </div>
 
-            <!-- Muncul hanya saat edit, dicatat di riwayat pemegang kalau pemegang diganti -->
             <div class="form-group" *ngIf="isEditing">
               <label class="form-label">Keterangan Perpindahan Pemegang</label>
               <ion-input type="text" placeholder="Contoh: Pemegang lama resign" [(ngModel)]="formData.keterangan_pindah" class="form-input"></ion-input>
             </div>
 
-            <!-- Departemen: ion-select yang bisa dipilih manual, tidak lagi readonly -->
             <div class="form-group">
               <label class="form-label">Departemen <span class="required">*</span></label>
               <ion-select
                 [(ngModel)]="formData.id_departemen"
                 (ionChange)="onDepartemenChange()"
-                interface="action-sheet"
+                interface="popover"
                 class="form-select"
                 placeholder="Pilih Departemen">
                 <ion-select-option *ngFor="let d of departemenList" [value]="d.idDepartemen">{{ d.namaDepartemen }}</ion-select-option>
               </ion-select>
             </div>
 
-            <!-- Muncul hanya saat edit, dicatat di riwayat departemen kalau departemen berubah -->
             <div class="form-group" *ngIf="isEditing">
               <label class="form-label">Keterangan Perpindahan Departemen</label>
               <ion-input type="text" placeholder="Contoh: Asset dialihkan ke Finance & Accounting" [(ngModel)]="formData.keterangan_pindah_departemen" class="form-input"></ion-input>
@@ -390,15 +287,14 @@
 
             <div class="form-group">
               <label class="form-label">Kategori <span class="required">*</span></label>
-              <ion-select [(ngModel)]="formData.id_kategori" interface="action-sheet" class="form-select" placeholder="Pilih Kategori">
+              <ion-select [(ngModel)]="formData.id_kategori" interface="popover" class="form-select" placeholder="Pilih Kategori">
                 <ion-select-option *ngFor="let kat of kategoriList" [value]="kat.idKategori">{{ kat.namaKategori }}</ion-select-option>
               </ion-select>
             </div>
 
-            <!-- Status Asset -->
             <div class="form-group">
               <label class="form-label">Status Asset</label>
-              <ion-select [(ngModel)]="formData.status_aset" interface="action-sheet" class="form-select" placeholder="Pilih Status">
+              <ion-select [(ngModel)]="formData.status_aset" interface="popover" class="form-select" placeholder="Pilih Status">
                 <ion-select-option value="Aktif">Aktif</ion-select-option>
                 <ion-select-option value="Tidak Aktif">Tidak Aktif</ion-select-option>
               </ion-select>
@@ -448,7 +344,6 @@
               </div>
             </div>
 
-            <!-- Tombol simpan hanya untuk tab Profile -->
             <div class="modal-actions">
               <ion-button class="cancel-modal-btn" fill="outline" color="medium" (click)="closeModal()">
                 Batal
@@ -460,7 +355,7 @@
             </div>
           </ng-container>
 
-          <!-- ===================== TAB: HARDWARE (fixed fields) ===================== -->
+          <!-- ===================== TAB: HARDWARE ===================== -->
           <ng-container *ngIf="isEditing && activeDetailTab === 'hardware'">
             <div class="detail-form-card">
               <h4>Detail Hardware</h4>
@@ -529,7 +424,7 @@
             </div>
           </ng-container>
 
-          <!-- ===================== TAB: SOFTWARE (fixed fields) ===================== -->
+          <!-- ===================== TAB: SOFTWARE ===================== -->
           <ng-container *ngIf="isEditing && activeDetailTab === 'software'">
             <div class="detail-form-card">
               <h4>Detail Software</h4>
@@ -537,7 +432,7 @@
               <div class="form-row">
                 <div class="form-group">
                   <label class="form-label">Operating System</label>
-                  <ion-select [(ngModel)]="softwareDetail.operating_system" interface="action-sheet" class="form-select" placeholder="Pilih Operating System">
+                  <ion-select [(ngModel)]="softwareDetail.operating_system" interface="popover" class="form-select" placeholder="Pilih Operating System">
                     <ion-select-option *ngFor="let os of osOptions" [value]="os">{{ os }}</ion-select-option>
                   </ion-select>
                 </div>
@@ -550,7 +445,7 @@
               <div class="form-row">
                 <div class="form-group">
                   <label class="form-label">MS Office</label>
-                  <ion-select [(ngModel)]="softwareDetail.ms_office" interface="action-sheet" class="form-select" placeholder="Pilih MS Office">
+                  <ion-select [(ngModel)]="softwareDetail.ms_office" interface="popover" class="form-select" placeholder="Pilih MS Office">
                     <ion-select-option *ngFor="let ms of msOfficeOptions" [value]="ms">{{ ms }}</ion-select-option>
                   </ion-select>
                 </div>
@@ -563,14 +458,14 @@
               <div class="form-row">
                 <div class="form-group">
                   <label class="form-label">ERP</label>
-                  <ion-select [(ngModel)]="softwareDetail.erp" interface="action-sheet" class="form-select">
+                  <ion-select [(ngModel)]="softwareDetail.erp" interface="popover" class="form-select">
                     <ion-select-option value="TIDAK">TIDAK</ion-select-option>
                     <ion-select-option value="ADA">ADA</ion-select-option>
                   </ion-select>
                 </div>
                 <div class="form-group">
                   <label class="form-label">WMS</label>
-                  <ion-select [(ngModel)]="softwareDetail.wms" interface="action-sheet" class="form-select">
+                  <ion-select [(ngModel)]="softwareDetail.wms" interface="popover" class="form-select">
                     <ion-select-option value="TIDAK">TIDAK</ion-select-option>
                     <ion-select-option value="ADA">ADA</ion-select-option>
                   </ion-select>
@@ -580,14 +475,14 @@
               <div class="form-row">
                 <div class="form-group">
                   <label class="form-label">ERIS</label>
-                  <ion-select [(ngModel)]="softwareDetail.eris" interface="action-sheet" class="form-select">
+                  <ion-select [(ngModel)]="softwareDetail.eris" interface="popover" class="form-select">
                     <ion-select-option value="TIDAK">TIDAK</ion-select-option>
                     <ion-select-option value="ADA">ADA</ion-select-option>
                   </ion-select>
                 </div>
                 <div class="form-group">
                   <label class="form-label">CMMS</label>
-                  <ion-select [(ngModel)]="softwareDetail.cmms" interface="action-sheet" class="form-select">
+                  <ion-select [(ngModel)]="softwareDetail.cmms" interface="popover" class="form-select">
                     <ion-select-option value="TIDAK">TIDAK</ion-select-option>
                     <ion-select-option value="ADA">ADA</ion-select-option>
                   </ion-select>
@@ -597,14 +492,14 @@
               <div class="form-row">
                 <div class="form-group">
                   <label class="form-label">Visio</label>
-                  <ion-select [(ngModel)]="softwareDetail.visio" interface="action-sheet" class="form-select">
+                  <ion-select [(ngModel)]="softwareDetail.visio" interface="popover" class="form-select">
                     <ion-select-option value="TIDAK">TIDAK</ion-select-option>
                     <ion-select-option value="ADA">ADA</ion-select-option>
                   </ion-select>
                 </div>
                 <div class="form-group">
                   <label class="form-label">AutoCAD</label>
-                  <ion-select [(ngModel)]="softwareDetail.autocad" interface="action-sheet" class="form-select">
+                  <ion-select [(ngModel)]="softwareDetail.autocad" interface="popover" class="form-select">
                     <ion-select-option value="TIDAK">TIDAK</ion-select-option>
                     <ion-select-option value="ADA">ADA</ion-select-option>
                   </ion-select>
@@ -614,14 +509,14 @@
               <div class="form-row">
                 <div class="form-group">
                   <label class="form-label">Kaspersky</label>
-                  <ion-select [(ngModel)]="softwareDetail.kaspersky" interface="action-sheet" class="form-select">
+                  <ion-select [(ngModel)]="softwareDetail.kaspersky" interface="popover" class="form-select">
                     <ion-select-option value="TIDAK">TIDAK</ion-select-option>
                     <ion-select-option value="ADA">ADA</ion-select-option>
                   </ion-select>
                 </div>
                 <div class="form-group">
                   <label class="form-label">Ms Project</label>
-                  <ion-select [(ngModel)]="softwareDetail.ms_project" interface="action-sheet" class="form-select">
+                  <ion-select [(ngModel)]="softwareDetail.ms_project" interface="popover" class="form-select">
                     <ion-select-option value="TIDAK">TIDAK</ion-select-option>
                     <ion-select-option value="ADA">ADA</ion-select-option>
                   </ion-select>
@@ -631,7 +526,7 @@
               <div class="form-row">
                 <div class="form-group">
                   <label class="form-label">Acrobat</label>
-                  <ion-select [(ngModel)]="softwareDetail.acrobat" interface="action-sheet" class="form-select">
+                  <ion-select [(ngModel)]="softwareDetail.acrobat" interface="popover" class="form-select">
                     <ion-select-option value="TIDAK">TIDAK</ion-select-option>
                     <ion-select-option value="ADA">ADA</ion-select-option>
                   </ion-select>
@@ -667,7 +562,6 @@
           <!-- ===================== TAB: HISTORY ===================== -->
           <ng-container *ngIf="isEditing && activeDetailTab === 'history'">
 
-            <!-- Sub-tab: Riwayat Tiket vs Riwayat Pemegang vs Riwayat Departemen -->
             <div class="history-subtabs">
               <button
                 class="history-subtab-btn"
@@ -689,9 +583,7 @@
               </button>
             </div>
 
-            <!-- ===== SUB-TAB: RIWAYAT TIKET (dikelompokkan per periode pemegang) ===== -->
             <ng-container *ngIf="historySubTab === 'tiket'">
-
               <div class="history-summary">
                 <ion-icon name="pricetags-outline"></ion-icon>
                 <div>
@@ -748,7 +640,6 @@
               </div>
             </ng-container>
 
-            <!-- ===== SUB-TAB: RIWAYAT PEMEGANG ===== -->
             <ng-container *ngIf="historySubTab === 'pemegang'">
               <div class="history-summary">
                 <ion-icon name="swap-horizontal-outline"></ion-icon>
@@ -778,7 +669,6 @@
               </div>
             </ng-container>
 
-            <!-- ===== SUB-TAB: RIWAYAT DEPARTEMEN ===== -->
             <ng-container *ngIf="historySubTab === 'departemen'">
               <div class="history-summary">
                 <ion-icon name="business-outline"></ion-icon>

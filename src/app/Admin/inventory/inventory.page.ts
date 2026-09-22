@@ -8,6 +8,7 @@ import * as XLSX from 'xlsx';
 import { forkJoin } from 'rxjs';
 import { DepartemenService } from 'src/app/services/departemen.services';
 import { KaryawanService } from 'src/app/services/karyawan.service';
+import { SidebarComponent } from '../shared/components/sidebar/sidebar.component';
 import {
   InventoryService,
   InventoryStat,
@@ -43,7 +44,7 @@ type HistorySubTab = 'tiket' | 'pemegang' | 'departemen';
   templateUrl: './inventory.page.html',
   styleUrls: ['./inventory.page.scss'],
   standalone: true,
-  imports: [CommonModule, FormsModule, IonicModule],
+  imports: [CommonModule, FormsModule, IonicModule, SidebarComponent],
 })
 export class InventoryPage implements OnInit {
   isSidebarOpen = false;

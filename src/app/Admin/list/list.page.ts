@@ -8,6 +8,7 @@ import { InventoryService, InventoryItem } from '../../services/inventory.servic
 import { KategoriService } from '../../services/kategori.service';
 import { SubKategoriService } from '../../services/sub-kategori.service';
 import { DepartemenService } from '../../services/departemen.services';
+import { SidebarComponent } from '../shared/components/sidebar/sidebar.component';
 
 export interface ListTicket {
   id_ticket: string;
@@ -31,7 +32,7 @@ export interface ListTicket {
   templateUrl: './list.page.html',
   styleUrls: ['./list.page.scss'],
   standalone: true,
-  imports: [CommonModule, FormsModule, IonicModule],
+  imports: [CommonModule, FormsModule, IonicModule, SidebarComponent],
 })
 export class ListTicketPage implements OnInit, OnDestroy {
   isSidebarOpen = false;

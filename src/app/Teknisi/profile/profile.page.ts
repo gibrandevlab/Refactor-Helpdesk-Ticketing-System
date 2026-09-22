@@ -5,13 +5,14 @@ import { Router } from '@angular/router';
 import { IonicModule } from '@ionic/angular';
 import { TicketService } from '../../services/ticket.service';
 import { environment } from '../../../environments/environment';
+import { SidebarComponent } from '../shared/component/sidebar/sidebar.component';
 
 @Component({
   selector: 'app-teknisi-profile',
   templateUrl: './profile.page.html',
   styleUrls: ['./profile.page.scss'],
   standalone: true,
-  imports: [CommonModule, FormsModule, IonicModule],
+  imports: [CommonModule, FormsModule, IonicModule, SidebarComponent],
 })
 export class TeknisiProfilePage implements OnInit {
   isSidebarOpen = false;

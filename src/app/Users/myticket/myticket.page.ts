@@ -10,6 +10,7 @@ import { AssetService } from '../../services/asset.service';
 import { Asset } from '../../models/asset.model';
 import { ChatService, ChatMessage } from '../../services/chat.service';
 import { environment } from '../../../environments/environment';
+import { SidebarComponent } from '../shared/components/sidebar/sidebar.component';
 
 import pdfMake from 'pdfmake/build/pdfmake';
 import pdfFonts from 'pdfmake/build/vfs_fonts';
@@ -53,7 +54,7 @@ export type ChecklistSection =
   templateUrl: './myticket.page.html',
   styleUrls: ['./myticket.page.scss'],
   standalone: true,
-  imports: [CommonModule, FormsModule, IonicModule],
+  imports: [CommonModule, FormsModule, IonicModule, SidebarComponent],
 })
 export class MyTicketPage implements OnInit {
   @ViewChild('chatContainer') chatContainer!: ElementRef;

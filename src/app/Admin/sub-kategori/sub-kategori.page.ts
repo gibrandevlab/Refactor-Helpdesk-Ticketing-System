@@ -5,6 +5,7 @@ import { Router } from '@angular/router';
 import { IonicModule } from '@ionic/angular';
 import { SubKategoriService, SubKategoriRow } from '../../services/sub-kategori.service';
 import { Kategori } from '../../services/kategori.service';
+import { SidebarComponent } from '../shared/components/sidebar/sidebar.component';
 
 export interface SubKategori {
   id: number;
@@ -17,7 +18,7 @@ export interface SubKategori {
   templateUrl: './sub-kategori.page.html',
   styleUrls: ['./sub-kategori.page.scss'],
   standalone: true,
-  imports: [CommonModule, FormsModule, IonicModule],
+  imports: [CommonModule, FormsModule, IonicModule, SidebarComponent],
 })
 export class SubKategoriPage implements OnInit {
   isSidebarOpen = false;

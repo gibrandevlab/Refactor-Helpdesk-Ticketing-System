@@ -1,74 +1,7 @@
 <ion-content class="users-dashboard-content">
   <div class="dashboard-container">
     <!-- ===== SIDEBAR ===== -->
-    <div class="sidebar" [class.open]="isSidebarOpen">
-      <div class="sidebar-header">
-        <div class="sidebar-logo">
-   <div class="logo-icon-wrapper">
-  <img src="../../../assets/logo bakrie.png" alt="Logo" class="logo-img" />
-</div>
-          <span class="logo-text">Helpdesk<br>Ticketing System</span>
-        </div>
-        <ion-button class="sidebar-close" fill="clear" (click)="toggleSidebar()">
-          <ion-icon name="close-outline"></ion-icon>
-        </ion-button>
-      </div>
-
-      <!-- Profil User di Sidebar -->
-      <div class="sidebar-user">
-        <div class="avatar-wrapper">
-          <img
-            [src]="'https://ui-avatars.com/api/?name=' + (user.nama || 'User') + '&background=2563eb&color=fff&size=128&bold=true'"
-            alt="Avatar"
-            class="sidebar-avatar"
-          />
-          <div class="online-status"></div>
-        </div>
-        <div class="sidebar-user-info">
-          <h4 class="sidebar-username">{{ user.nama || 'User' }}</h4>
-          <p class="sidebar-userrole">👤 User</p>
-        </div>
-      </div>
-
-      <div class="sidebar-menu">
-        <div class="menu-label">MAIN MENU</div>
-        <div class="menu-item" [class.active]="activeMenu === 'dashboard-user'" (click)="goToDashboardUser()">
-          <div class="menu-icon-wrapper"><ion-icon name="home-outline" class="menu-icon"></ion-icon></div>
-          <span class="menu-text">Dashboard</span>
-        </div>
-
-        <div class="menu-label">TICKET MANAGEMENT</div>
-        <div class="menu-item" [class.active]="activeMenu === 'my-ticket'" (click)="goToMyTicket()">
-          <div class="menu-icon-wrapper"><ion-icon name="list-outline" class="menu-icon"></ion-icon></div>
-          <span class="menu-text">My Ticket + New Ticket</span>
-        </div>
-
-        <div class="menu-label">ASSET</div>
-        <div class="menu-item" [class.active]="activeMenu === 'input-aset'" (click)="goToInputAset()">
-          <div class="menu-icon-wrapper"><ion-icon name="cube-outline" class="menu-icon"></ion-icon></div>
-          <span class="menu-text">Asset</span>
-        </div>
-
-        <div class="menu-label">FEEDBACK</div>
-        <div class="menu-item" [class.active]="activeMenu === 'laporan-feedback'" (click)="goToLaporanFeedback()">
-          <div class="menu-icon-wrapper"><ion-icon name="chatbox-ellipses-outline" class="menu-icon"></ion-icon></div>
-          <span class="menu-text">Laporan Feedback</span>
-        </div>
-
-        <div class="menu-label">LAINNYA</div>
-        <div class="menu-item" [class.active]="activeMenu === 'pengaturan'" (click)="goToPengaturan()">
-          <div class="menu-icon-wrapper"><ion-icon name="settings-outline" class="menu-icon"></ion-icon></div>
-          <span class="menu-text">Pengaturan</span>
-        </div>
-        <div class="menu-item logout-item" (click)="logout()">
-          <div class="menu-icon-wrapper"><ion-icon name="log-out-outline" class="menu-icon"></ion-icon></div>
-          <span class="menu-text">Keluar</span>
-        </div>
-      </div>
-    </div>
-
-    <!-- ===== OVERLAY (mobile) ===== -->
-    <div class="sidebar-overlay" [class.open]="isSidebarOpen" (click)="toggleSidebar()"></div>
+    <app-users-sidebar [(isSidebarOpen)]="isSidebarOpen" [activeMenu]="activeMenu"></app-users-sidebar>
 
     <!-- ===== MAIN CONTENT ===== -->
     <div class="main-content">
@@ -82,10 +15,7 @@
         </div>
         <div class="header-right">
           <div class="header-avatar" (click)="goToProfile()">
-            <img
-              [src]="'https://ui-avatars.com/api/?name=' + (user.nama || 'User') + '&background=2563eb&color=fff&size=64&bold=true'"
-              alt="Avatar"
-            />
+            <img [src]="'https://ui-avatars.com/api/?name=' + (user.nama || 'User') + '&background=2563eb&color=fff&size=64&bold=true'" alt="Avatar" />
             <span class="header-avatar-name">{{ user.nama }}</span>
           </div>
         </div>

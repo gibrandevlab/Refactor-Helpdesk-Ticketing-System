@@ -1,0 +1,71 @@
+<!-- ===== SIDEBAR ===== -->
+<div class="sidebar" [class.open]="isSidebarOpen">
+  <div class="sidebar-header">
+    <div class="sidebar-logo">
+      <div class="logo-icon-wrapper">
+        <img src="assets/logo bakrie.png" alt="Logo" class="logo-img" />
+      </div>
+      <span class="logo-text">Helpdesk<br>Ticketing System</span>
+    </div>
+    <ion-button class="sidebar-close" fill="clear" (click)="toggleSidebar()">
+      <ion-icon name="close-outline"></ion-icon>
+    </ion-button>
+  </div>
+
+  <!-- Profil Teknisi di Sidebar -->
+  <div class="sidebar-user">
+    <div class="avatar-wrapper">
+      <img
+        [src]="'https://ui-avatars.com/api/?name=' + (user.nama || 'Teknisi') + '&background=2563eb&color=fff&size=128&bold=true'"
+        alt="Avatar"
+        class="sidebar-avatar"
+      />
+      <div class="online-status"></div>
+    </div>
+    <div class="sidebar-user-info">
+      <h4 class="sidebar-username">{{ user.nama || 'Teknisi' }}</h4>
+      <p class="sidebar-userrole">🔧 Teknisi</p>
+    </div>
+  </div>
+
+  <div class="sidebar-menu">
+    <div class="menu-label">MAIN MENU</div>
+    <div class="menu-item" [class.active]="activeMenu === 'dashboard-teknisi' || activeMenu === 'dashborad' || activeMenu === 'dashboard'" (click)="navigateTo('teknisi/dashboard')">
+      <div class="menu-icon-wrapper"><ion-icon name="home-outline" class="menu-icon"></ion-icon></div>
+      <span class="menu-text">Dashboard</span>
+    </div>
+
+    <div class="menu-label">TICKET MANAGEMENT</div>
+    <div class="menu-item" [class.active]="activeMenu === 'ticket'" (click)="navigateTo('teknisi/ticket')">
+      <div class="menu-icon-wrapper"><ion-icon name="list-outline" class="menu-icon"></ion-icon></div>
+      <span class="menu-text">Ticket</span>
+    </div>
+    <div class="menu-item" [class.active]="activeMenu === 'proses-tiket' || activeMenu === 'proses'" (click)="navigateTo('teknisi/proses')">
+      <div class="menu-icon-wrapper"><ion-icon name="construct-outline" class="menu-icon"></ion-icon></div>
+      <span class="menu-text">Proses Tiket</span>
+    </div>
+    <div class="menu-item" [class.active]="activeMenu === 'riwayat-tiket' || activeMenu === 'riwayat'" (click)="navigateTo('teknisi/riwayat')">
+      <div class="menu-icon-wrapper"><ion-icon name="time-outline" class="menu-icon"></ion-icon></div>
+      <span class="menu-text">Riwayat Tiket</span>
+    </div>
+
+    <div class="menu-label">PREVENTIVE</div>
+    <div class="menu-item" [class.active]="activeMenu === 'schedule-tersedia' || activeMenu === 'schedule'" (click)="navigateTo('teknisi/schedule-tersedia')">
+      <div class="menu-icon-wrapper"><ion-icon name="calendar-outline" class="menu-icon"></ion-icon></div>
+      <span class="menu-text">Schedule Tersedia</span>
+    </div>
+
+    <div class="menu-label">LAINNYA</div>
+    <div class="menu-item" [class.active]="activeMenu === 'profile'" (click)="navigateTo('teknisi/profile')">
+      <div class="menu-icon-wrapper"><ion-icon name="person-outline" class="menu-icon"></ion-icon></div>
+      <span class="menu-text">Profil Saya</span>
+    </div>
+    <div class="menu-item logout-item" (click)="logout()">
+      <div class="menu-icon-wrapper"><ion-icon name="log-out-outline" class="menu-icon"></ion-icon></div>
+      <span class="menu-text">Keluar</span>
+    </div>
+  </div>
+</div>
+
+<!-- ===== OVERLAY (mobile) ===== -->
+<div class="sidebar-overlay" [class.open]="isSidebarOpen" (click)="toggleSidebar()"></div>

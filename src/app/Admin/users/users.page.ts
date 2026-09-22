@@ -5,6 +5,7 @@ import { Router } from '@angular/router';
 import { IonicModule } from '@ionic/angular';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { KaryawanService, AvailableKaryawan } from '../../services/karyawan.service';
+import { SidebarComponent } from '../shared/components/sidebar/sidebar.component';
 
 export interface User {
   id_user?: number;
@@ -23,7 +24,7 @@ export interface User {
   templateUrl: './users.page.html',
   styleUrls: ['./users.page.scss'],
   standalone: true,
-  imports: [CommonModule, FormsModule, IonicModule],
+  imports: [CommonModule, FormsModule, IonicModule, SidebarComponent],
 })
 export class UsersPage implements OnInit {
   isSidebarOpen = false;

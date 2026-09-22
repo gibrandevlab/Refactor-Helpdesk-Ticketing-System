@@ -8,6 +8,7 @@ import { TeknisiService } from 'src/app/services/teknisi.service';
 import { UserService } from 'src/app/services/user.service';
 import { Kategori, KategoriService } from 'src/app/services/kategori.service';
 import { Teknisi } from 'src/app/models/teknisi.model';
+import { SidebarComponent } from '../shared/components/sidebar/sidebar.component';
 
 interface TeknisiFormData {
   nik: string;
@@ -20,7 +21,7 @@ interface TeknisiFormData {
   templateUrl: './teknisi.page.html',
   styleUrls: ['./teknisi.page.scss'],
   standalone: true,
-  imports: [CommonModule, FormsModule, IonicModule],
+  imports: [CommonModule, FormsModule, IonicModule, SidebarComponent],
 })
 export class TeknisiPage implements OnInit {
   isSidebarOpen = false;

@@ -7,6 +7,7 @@ import { ScheduleService, DepartmentSchedule, Schedule } from '../../services/sc
 import { TeknisiService } from '../../services/teknisi.service';
 import { forkJoin, of, Subscription } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
+import { SidebarComponent } from '../shared/component/sidebar/sidebar.component';
 
 export interface TimelineDay {
   date: Date;
@@ -45,7 +46,7 @@ export interface TeknisiKlaimItem {
   templateUrl: './schedule.page.html',
   styleUrls: ['./schedule.page.scss'],
   standalone: true,
-  imports: [CommonModule, FormsModule, IonicModule],
+  imports: [CommonModule, FormsModule, IonicModule, SidebarComponent],
 })
 export class ScheduleTersediaPage implements OnInit, OnDestroy {
   isSidebarOpen = false;

@@ -8,6 +8,7 @@ import { AssetService } from 'src/app/services/asset.service';
 import { DepartemenService } from 'src/app/services/departemen.services';
 import { KategoriService } from 'src/app/services/kategori.service';
 import { Asset } from 'src/app/models/asset.model';
+import { SidebarComponent } from '../shared/components/sidebar/sidebar.component';
 
 interface DepartemenOption {
   idDepartemen: number;
@@ -26,7 +27,7 @@ interface AssetFormData {
   templateUrl: './asset.page.html',
   styleUrls: ['./asset.page.scss'],
   standalone: true,
-  imports: [CommonModule, FormsModule, IonicModule],
+  imports: [CommonModule, FormsModule, IonicModule, SidebarComponent],
 })
 export class AssetPage implements OnInit {
   isSidebarOpen = false;

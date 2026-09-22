@@ -4,9 +4,9 @@
   --sidebar-bg-hover: #1e2a4a;
   --content-bg: #f4f6fb;
   --card-bg: #ffffff;
-  --text-dark: #1e293b;
-  --text-muted: #64748b;
-  --border-color: #e2e8f0;
+  --text-dark: #0f172a;      /* Teks utama gelap pekat agar tajam */
+  --text-muted: #475569;     /* Teks sekunder/label jelas dibaca */
+  --border-color: #cbd5e1;   /* Garis pembatas jelas */
   --danger: #ef4444;
 }
 
@@ -17,141 +17,6 @@
 .dashboard-container {
   display: flex;
   min-height: 100vh;
-}
-
-/* ===================== SIDEBAR ===================== */
-.sidebar {
-  width: 250px;
-  background: var(--sidebar-bg);
-  color: #fff;
-  display: flex;
-  flex-direction: column;
-  position: fixed;
-  top: 0;
-  left: 0;
-  bottom: 0;
-  z-index: 1000;
-  overflow-y: auto;
-  transition: transform 0.3s ease;
-
-  @media (max-width: 992px) {
-    transform: translateX(-100%);
-    &.open {
-      transform: translateX(0);
-    }
-  }
-}
-
-.sidebar-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 18px 20px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-}
-
-.sidebar-logo {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.logo-icon-wrapper {
-  width: 60px;
-  height: 60px;
-  border-radius: 10px;
-  background: transparent;   /* hapus biru */
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  overflow: visible;         /* biar gak kepotong wrapper */
-}
-
-.logo-img {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;       /* biar keliatan penuh, gak ke-crop/mengecil */
-}
-
-.logo-text {
-  font-weight: 700;
-  font-size: 14px;
-  line-height: 1.25;
-}
-
-.sidebar-close {
-  display: none;
-  @media (max-width: 992px) {
-    display: block;
-    --color: #fff;
-  }
-}
-
-.sidebar-menu {
-  flex: 1;
-  padding: 8px 10px 24px;
-}
-
-.menu-label {
-  font-size: 10.5px;
-  font-weight: 700;
-  letter-spacing: 0.6px;
-  color: rgba(255, 255, 255, 0.35);
-  padding: 16px 10px 6px;
-}
-
-.menu-item {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 9px 10px;
-  border-radius: 8px;
-  cursor: pointer;
-  color: rgba(255, 255, 255, 0.75);
-  font-size: 13.5px;
-  transition: background 0.15s ease, color 0.15s ease;
-
-  &:hover {
-    background: var(--sidebar-bg-hover);
-    color: #fff;
-  }
-
-  &.active {
-    background: var(--primary);
-    color: #fff;
-  }
-}
-
-.menu-icon-wrapper {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 17px;
-  width: 20px;
-}
-
-.menu-text {
-  flex: 1;
-}
-
-.sidebar-overlay {
-  display: none;
-  @media (max-width: 992px) {
-    display: block;
-    position: fixed;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.4);
-    z-index: 999;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.2s ease;
-
-    &.open {
-      opacity: 1;
-      pointer-events: auto;
-    }
-  }
 }
 
 /* ===================== MAIN CONTENT ===================== */
@@ -263,6 +128,7 @@
   display: flex;
   align-items: center;
   gap: 14px;
+  border: 1px solid var(--border-color);
 }
 
 .stat-icon {
@@ -279,8 +145,8 @@
   }
 
   &.blue { background: var(--primary); }
-  &.green { background: #22c55e; }
-  &.orange { background: #f59e0b; }
+  &.green { background: #16a34a; }
+  &.orange { background: #d97706; }
 }
 
 .stat-info {
@@ -294,6 +160,7 @@
     margin: 0;
     font-size: 13px;
     color: var(--text-muted);
+    font-weight: 500;
   }
 }
 
@@ -323,6 +190,11 @@
     font-size: 13px;
     width: 100%;
     background: transparent;
+    color: var(--text-dark);
+
+    &::placeholder {
+      color: #94a3b8;
+    }
   }
 
   .search-icon {
@@ -338,10 +210,11 @@
   select {
     border: 1px solid var(--border-color);
     border-radius: 8px;
-    padding: 8px 10px;
+    padding: 8px 12px;
     font-size: 13px;
     color: var(--text-dark);
     background: var(--card-bg);
+    font-weight: 500;
   }
 }
 
@@ -358,6 +231,7 @@
   background: var(--card-bg);
   border-radius: 14px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+  border: 1px solid var(--border-color);
   overflow: hidden;
 }
 
@@ -378,20 +252,20 @@
   }
 
   thead th {
-    background: var(--content-bg);
-    color: var(--text-muted);
-    font-weight: 600;
-    font-size: 11.5px;
+    background: #e2e8f0;
+    color: #1e293b;
+    font-weight: 700;
+    font-size: 12px;
     letter-spacing: 0.3px;
     text-transform: uppercase;
-    border-bottom: 1px solid var(--border-color);
+    border-bottom: 2px solid var(--border-color);
   }
 
   tbody tr {
     border-bottom: 1px solid var(--border-color);
 
     &:hover {
-      background: #fafbfe;
+      background: #f1f5f9;
     }
 
     &:last-child {
@@ -402,25 +276,28 @@
   td {
     color: var(--text-dark);
     white-space: normal;
+    font-weight: 500;
   }
 }
 
 .nik-id {
-  font-weight: 600;
-  color: var(--primary);
+  font-weight: 700;
+  color: #1d4ed8;
 }
 
 .fw-bold {
   font-weight: 700;
+  color: var(--text-dark);
 }
 
 .dept-badge {
-  background: #e2e8f0;
-  padding: 3px 10px;
+  background: #cbd5e1;
+  padding: 4px 10px;
   border-radius: 20px;
   font-size: 12px;
-  font-weight: 500;
-  color: #475569;
+  font-weight: 700;
+  color: #0f172a;
+  display: inline-block;
 }
 
 .action-buttons {
@@ -439,6 +316,7 @@
   text-align: center;
   padding: 32px 0;
   color: var(--text-muted);
+  font-weight: 600;
   white-space: normal;
 }
 
@@ -450,11 +328,13 @@
   gap: 12px;
   padding: 14px 18px;
   border-top: 1px solid var(--border-color);
+  background: #f8fafc;
 }
 
 .table-info {
   font-size: 12.5px;
-  color: var(--text-muted);
+  color: var(--text-dark);
+  font-weight: 600;
 }
 
 .pagination {
@@ -471,17 +351,20 @@
   justify-content: center;
   border-radius: 6px;
   font-size: 12.5px;
-  color: var(--text-muted);
+  color: var(--text-dark);
+  font-weight: 600;
   cursor: pointer;
+  border: 1px solid var(--border-color);
 
   &:hover {
-    background: var(--content-bg);
+    background: #e2e8f0;
   }
 
   &.active {
     background: var(--primary);
     color: #fff;
-    font-weight: 600;
+    border-color: var(--primary);
+    font-weight: 700;
   }
 }
 
@@ -511,25 +394,35 @@
 .form-label {
   display: block;
   font-size: 13px;
-  font-weight: 600;
-  color: var(--text-dark);
-  margin-bottom: 4px;
+  font-weight: 700;
+  color: #0f172a !important;
+  margin-bottom: 6px;
 }
 
 .required {
   color: var(--danger);
 }
 
-.form-input, .form-select, .form-textarea {
-  --background: #ffffff;
-  --border-radius: 8px;
-  --border-color: var(--border-color);
-  --padding-start: 14px;
-  --padding-end: 14px;
+/* Memperjelas warna teks di dalam ion-input dan ion-select Ionic */
+ion-input, ion-select {
+  --color: #0f172a !important;
+  --placeholder-color: #64748b !important;
+  --placeholder-opacity: 1;
+  background: #ffffff !important;
   border: 1px solid var(--border-color);
   border-radius: 8px;
-  background: #ffffff;
   font-size: 14px;
+  font-weight: 500;
+  margin-top: 4px;
+}
+
+.form-input, .form-select, .form-textarea {
+  background: #ffffff !important;
+  color: #0f172a !important;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  --padding-start: 14px;
+  --padding-end: 14px;
 }
 
 .modal-actions {

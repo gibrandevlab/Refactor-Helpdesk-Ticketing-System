@@ -1,69 +1,7 @@
 <ion-content class="my-ticket-content">
   <div class="dashboard-container">
     <!-- ===== SIDEBAR ===== -->
-    <div class="sidebar" [class.open]="isSidebarOpen">
-      <div class="sidebar-header">
-        <div class="sidebar-logo">
-         <div class="logo-icon-wrapper">
-  <img src="../../../assets/logo bakrie.png" alt="Logo" class="logo-img" />
-</div>
-          <span class="logo-text">Helpdesk<br>Ticketing System</span>
-        </div>
-        <ion-button class="sidebar-close" fill="clear" (click)="toggleSidebar()">
-          <ion-icon name="close-outline"></ion-icon>
-        </ion-button>
-      </div>
-
-      <div class="sidebar-user">
-        <div class="avatar-wrapper">
-          <img [src]="'https://ui-avatars.com/api/?name=' + (user.nama || 'User') + '&background=2563eb&color=fff&size=128&bold=true'" alt="Avatar" class="sidebar-avatar" />
-          <div class="online-status"></div>
-        </div>
-        <div class="sidebar-user-info">
-          <h4 class="sidebar-username">{{ user.nama || 'User' }}</h4>
-          <p class="sidebar-userrole">👤 User</p>
-        </div>
-      </div>
-
-      <div class="sidebar-menu">
-        <div class="menu-label">MAIN MENU</div>
-        <div class="menu-item" [class.active]="activeMenu === 'dashboard-user'" (click)="goToDashboardUser()">
-          <ion-icon name="home-outline" class="menu-icon"></ion-icon>
-          <span>Dashboard</span>
-        </div>
-
-        <div class="menu-label">TICKET MANAGEMENT</div>
-        <div class="menu-item" [class.active]="activeMenu === 'my-ticket'" (click)="goToMyTicket()">
-          <ion-icon name="list-outline" class="menu-icon"></ion-icon>
-          <span>My Ticket + New Ticket</span>
-        </div>
-
-        <div class="menu-label">ASSET</div>
-        <div class="menu-item" [class.active]="activeMenu === 'input-aset'" (click)="goToInputAset()">
-          <ion-icon name="cube-outline" class="menu-icon"></ion-icon>
-          <span>Asset</span>
-        </div>
-
-        <div class="menu-label">FEEDBACK</div>
-        <div class="menu-item" [class.active]="activeMenu === 'laporan-feedback'" (click)="goToLaporanFeedback()">
-          <ion-icon name="chatbox-ellipses-outline" class="menu-icon"></ion-icon>
-          <span>Laporan Feedback</span>
-        </div>
-
-        <div class="menu-label">LAINNYA</div>
-        <div class="menu-item" [class.active]="activeMenu === 'pengaturan'" (click)="goToPengaturan()">
-          <ion-icon name="settings-outline" class="menu-icon"></ion-icon>
-          <span>Pengaturan</span>
-        </div>
-        <div class="menu-item logout-item" (click)="logout()">
-          <ion-icon name="log-out-outline" class="menu-icon"></ion-icon>
-          <span>Keluar</span>
-        </div>
-      </div>
-    </div>
-
-    <!-- ===== OVERLAY (mobile) ===== -->
-    <div class="sidebar-overlay" [class.open]="isSidebarOpen" (click)="toggleSidebar()"></div>
+    <app-users-sidebar [(isSidebarOpen)]="isSidebarOpen" [activeMenu]="activeMenu"></app-users-sidebar>
 
     <!-- ===== MAIN CONTENT ===== -->
     <div class="main-content">
@@ -165,8 +103,8 @@
                           {{ t.progress }}%
                         </span>
                         <div class="progress-bar-mini" style="flex:1; height: 6px; background: #e2e8f0; border-radius: 4px; overflow: hidden;">
-                          <div class="progress-fill" [style.width.%]="t.progress" 
-                               [style.background]="t.progress === 100 ? '#22c55e' : '#2563eb'" 
+                          <div class="progress-fill" [style.width.%]="t.progress"
+                               [style.background]="t.progress === 100 ? '#22c55e' : '#2563eb'"
                                style="height: 100%; transition: width 0.3s;">
                           </div>
                         </div>
@@ -184,13 +122,13 @@
                   <!-- END KOLOM PROGRES -->
                   <td>
                     <!-- Timer Countdown / Status Jeda -->
-                    <div *ngIf="t.status !== 'Selesai' && t.status !== 'Solved' && t.deadline" 
-                         class="countdown-timer" 
+                    <div *ngIf="t.status !== 'Selesai' && t.status !== 'Solved' && t.deadline"
+                         class="countdown-timer"
                          [ngClass]="{'is-late': t.isPaused !== 1 && isDeadlineLate(t), 'is-paused': t.isPaused === 1}">
-                      <ion-icon [name]="t.isPaused === 1 ? 'pause-circle-outline' : 'timer-outline'"></ion-icon> 
+                      <ion-icon [name]="t.isPaused === 1 ? 'pause-circle-outline' : 'timer-outline'"></ion-icon>
                       {{ getCountdownText(t) }}
                     </div>
-                    
+
                     <!-- Tampilkan Tanggal & Waktu Selesai -->
                     <div *ngIf="t.status === 'Selesai' || t.status === 'Solved'" class="text-success fw-bold">
                       <ion-icon name="checkmark-circle-outline"></ion-icon>
@@ -262,7 +200,7 @@
     </ion-header>
     <ion-content class="modal-content ion-padding">
       <div *ngIf="isHistoryLoading" class="loading-state" style="text-align: center; padding: 20px;">Memuat riwayat teknisi...</div>
-      
+
       <div *ngIf="!isHistoryLoading && selectedTicketHistory.length === 0" class="empty-state" style="text-align: center; padding: 20px;">
         Belum ada catatan atau riwayat progres yang diberikan oleh teknisi.
       </div>

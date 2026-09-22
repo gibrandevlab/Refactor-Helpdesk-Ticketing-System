@@ -2,13 +2,14 @@ import { Component, OnInit, AfterViewInit, ViewChild, ElementRef } from '@angula
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { IonContent, IonButton, IonIcon, IonBadge, IonSpinner } from '@ionic/angular/standalone';
+import { SidebarComponent } from '../shared/component/sidebar/sidebar.component';
 
 @Component({
   selector: 'app-teknisi-dashboard',
   templateUrl: './dashborad.page.html',
   styleUrls: ['./dashborad.page.scss'],
   standalone: true,
-  imports: [CommonModule, IonContent, IonButton, IonIcon, IonSpinner],
+  imports: [CommonModule, IonContent, IonButton, IonIcon, IonSpinner, SidebarComponent],
 })
 export class TeknisiDashboardPage implements OnInit {
   

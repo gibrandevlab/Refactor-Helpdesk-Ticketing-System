@@ -5,13 +5,14 @@ import { Router } from '@angular/router';
 import { IonicModule } from '@ionic/angular';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Kategori, KategoriService } from '../../services/kategori.service';
+import { SidebarComponent } from '../shared/components/sidebar/sidebar.component';
 
 @Component({
   selector: 'app-kategori',
   templateUrl: './kategori.page.html',
   styleUrls: ['./kategori.page.scss'],
   standalone: true,
-  imports: [CommonModule, FormsModule, IonicModule],
+  imports: [CommonModule, FormsModule, IonicModule, SidebarComponent],
 })
 export class KategoriPage implements OnInit {
   isSidebarOpen = false;

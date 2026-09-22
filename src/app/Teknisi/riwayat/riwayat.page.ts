@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { IonicModule } from '@ionic/angular';
 import { TicketService, AssignedTicketApiRow } from '../../services/ticket.service'; // TODO: sesuaikan path
+import { SidebarComponent } from '../shared/component/sidebar/sidebar.component';
 
 export interface RiwayatTicket {
   idTicket: string;
@@ -19,7 +20,7 @@ export interface RiwayatTicket {
   templateUrl: './riwayat.page.html',
   styleUrls: ['./riwayat.page.scss'],
   standalone: true,
-  imports: [CommonModule, FormsModule, IonicModule],
+  imports: [CommonModule, FormsModule, IonicModule, SidebarComponent],
 })
 export class RiwayatTiketPage implements OnInit {
   isSidebarOpen = false;

@@ -5,6 +5,7 @@ import { Router } from '@angular/router';
 import { IonicModule, AlertController } from '@ionic/angular';
 import { TicketService } from '../../services/ticket.service';
 import { environment } from '../../../environments/environment';
+import { SidebarComponent } from '../shared/components/sidebar/sidebar.component';
 
 export interface ApprovalTicket {
   id_ticket: string;
@@ -35,7 +36,7 @@ export interface ReturnedTicket {
   templateUrl: './approval.page.html',
   styleUrls: ['./approval.page.scss'],
   standalone: true,
-  imports: [CommonModule, FormsModule, IonicModule],
+  imports: [CommonModule, FormsModule, IonicModule, SidebarComponent],
 })
 export class ApprovalTicketPage implements OnInit {
   isSidebarOpen = false;

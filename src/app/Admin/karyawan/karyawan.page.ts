@@ -8,6 +8,7 @@ import {
   IonTitle, IonButtons, IonInput, IonSelect, IonSelectOption
 } from '@ionic/angular/standalone';
 import { JabatanService } from '../../services/Jabatan.service';
+import { SidebarComponent } from '../shared/components/sidebar/sidebar.component';
 
 export interface Karyawan {
   id: number;
@@ -28,7 +29,8 @@ export interface Karyawan {
   imports: [
     CommonModule, FormsModule,
     IonContent, IonButton, IonIcon, IonModal, IonHeader, IonToolbar,
-    IonTitle, IonButtons, IonInput, IonSelect, IonSelectOption
+    IonTitle, IonButtons, IonInput, IonSelect, IonSelectOption,
+    SidebarComponent
   ],
 })
 export class KaryawanPage implements OnInit {

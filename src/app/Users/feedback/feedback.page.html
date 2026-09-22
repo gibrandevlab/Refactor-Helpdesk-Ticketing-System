@@ -1,13 +1,39 @@
-<ion-header [translucent]="true">
-  <ion-toolbar>
-    <ion-title>Feedback</ion-title>
-  </ion-toolbar>
-</ion-header>
+<ion-content class="feedback-content">
+  <div class="dashboard-container">
+    <!-- ===== SIDEBAR ===== -->
+    <app-users-sidebar [(isSidebarOpen)]="isSidebarOpen" [activeMenu]="activeMenu"></app-users-sidebar>
 
-<ion-content [fullscreen]="true">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">Feedback</ion-title>
-    </ion-toolbar>
-  </ion-header>
+    <!-- ===== MAIN CONTENT ===== -->
+    <div class="main-content">
+      <!-- HEADER -->
+      <div class="main-header">
+        <div class="header-left">
+          <ion-button class="menu-toggle" fill="clear" (click)="toggleSidebar()">
+            <ion-icon name="menu-outline"></ion-icon>
+          </ion-button>
+          <span class="page-title-inline">{{ getPageTitle() }}</span>
+        </div>
+        <div class="header-right">
+          <div class="header-avatar" (click)="goToProfile()">
+            <img [src]="'https://ui-avatars.com/api/?name=' + user.nama + '&background=2563eb&color=fff&size=64&bold=true'" alt="Avatar" />
+            <span class="header-avatar-name">{{ user.nama }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- CONTENT -->
+      <div class="content-area">
+        <div class="page-heading">
+          <h1 class="page-title">Laporan Feedback</h1>
+          <p class="page-subtitle">Ulasan dan masukan untuk pelayanan IT Helpdesk</p>
+        </div>
+
+        <div class="placeholder-card">
+          <ion-icon name="chatbox-ellipses-outline" class="placeholder-icon"></ion-icon>
+          <h3>Halaman Feedback</h3>
+          <p>Fitur pengiriman feedback akan segera tersedia.</p>
+        </div>
+      </div>
+    </div>
+  </div>
 </ion-content>
