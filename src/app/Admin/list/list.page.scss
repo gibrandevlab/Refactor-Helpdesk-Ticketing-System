@@ -19,7 +19,9 @@
   box-sizing: border-box;
 }
 
-*, *:before, *:after {
+*,
+*:before,
+*:after {
   box-sizing: inherit;
 }
 
@@ -28,23 +30,27 @@
 }
 
 .dashboard-container {
-  display: flex;
+  display: block;
   min-height: 100vh;
   width: 100%;
   max-width: 100vw;
-  overflow-x: hidden; /* Mencegah halaman utama bergeser ke samping */
+  overflow-x: hidden;
 }
 
 /* ===================== MAIN CONTENT ===================== */
 .main-content {
-  flex: 1;
-  margin-left: 250px;
+margin-left: var(--sidebar-width);
+  width: calc(100% - var(--sidebar-width));
+  max-width: calc(100% - var(--sidebar-width));
+  min-width: 0;
   display: flex;
   flex-direction: column;
-  min-width: 0; /* Penting agar flex item tidak memaksa overflow keluar layar */
+  box-sizing: border-box;
 
   @media (max-width: 992px) {
     margin-left: 0;
+    width: 100%;
+    max-width: 100%;
   }
 }
 
@@ -222,7 +228,9 @@
   cursor: pointer;
   transition: all 0.15s ease;
 
-  &:hover { background: var(--content-bg); }
+  &:hover {
+    background: var(--content-bg);
+  }
 
   .chip-count {
     background: var(--content-bg);
@@ -236,13 +244,31 @@
     border-color: var(--primary);
     color: #fff;
 
-    .chip-count { background: rgba(255, 255, 255, 0.25); color: #fff; }
+    .chip-count {
+      background: rgba(255, 255, 255, 0.25);
+      color: #fff;
+    }
   }
-  &.chip-approval.active      { background: var(--info); border-color: var(--info); }
-  &.chip-assigned.active      { background: var(--purple); border-color: var(--purple); }
-  &.chip-belum_proses.active  { background: var(--orange); border-color: var(--orange); }
-  &.chip-progress.active      { background: var(--warning); border-color: var(--warning); }
-  &.chip-selesai.active       { background: var(--success); border-color: var(--success); }
+  &.chip-approval.active {
+    background: var(--info);
+    border-color: var(--info);
+  }
+  &.chip-assigned.active {
+    background: var(--purple);
+    border-color: var(--purple);
+  }
+  &.chip-belum_proses.active {
+    background: var(--orange);
+    border-color: var(--orange);
+  }
+  &.chip-progress.active {
+    background: var(--warning);
+    border-color: var(--warning);
+  }
+  &.chip-selesai.active {
+    background: var(--success);
+    border-color: var(--success);
+  }
 }
 
 /* --- BAR CHART --- */
@@ -276,10 +302,19 @@
   height: 100%;
   cursor: pointer;
 
-  &:hover .bar-fill { filter: brightness(1.1); }
-  &.active .bar-fill { background: #1d4ed8; }
-  &.active .bar-label { color: var(--primary); font-weight: 700; }
-  &.empty { cursor: default; }
+  &:hover .bar-fill {
+    filter: brightness(1.1);
+  }
+  &.active .bar-fill {
+    background: #1d4ed8;
+  }
+  &.active .bar-label {
+    color: var(--primary);
+    font-weight: 700;
+  }
+  &.empty {
+    cursor: default;
+  }
 }
 
 .bar-track {
@@ -298,9 +333,13 @@
   background: #60a5fa;
   border-radius: 6px 6px 0 0;
   position: relative;
-  transition: height 0.25s ease, background 0.15s ease;
+  transition:
+    height 0.25s ease,
+    background 0.15s ease;
 
-  &.dept { background: #34d399; }
+  &.dept {
+    background: #34d399;
+  }
 }
 
 .bar-value {
@@ -400,11 +439,26 @@
   background: #f1f5f9;
   color: var(--text-muted);
 
-  &.status-proses   { background: #fff7ed; color: var(--warning); }
-  &.status-approval { background: #eff6ff; color: var(--info); }
-  &.status-assigned { background: #f5f3ff; color: var(--purple); }
-  &.status-closed   { background: #f0fdf4; color: var(--success); }
-  &.status-rejected { background: #fef2f2; color: var(--danger); }
+  &.status-proses {
+    background: #fff7ed;
+    color: var(--warning);
+  }
+  &.status-approval {
+    background: #eff6ff;
+    color: var(--info);
+  }
+  &.status-assigned {
+    background: #f5f3ff;
+    color: var(--purple);
+  }
+  &.status-closed {
+    background: #f0fdf4;
+    color: var(--success);
+  }
+  &.status-rejected {
+    background: #fef2f2;
+    color: var(--danger);
+  }
 }
 
 /* ===================== TOOLBAR ===================== */
@@ -415,6 +469,7 @@
   gap: 12px;
   margin-bottom: 16px;
   width: 100%;
+  max-width: 100%;
 }
 
 .search-box {
@@ -425,7 +480,7 @@
   border: 1px solid var(--border-color);
   border-radius: 8px;
   padding: 8px 14px;
-  flex: 1 1 220px;
+  flex: 1 1 200px;
   min-width: 0;
 
   input {
@@ -456,6 +511,7 @@
     color: var(--text-dark);
     background: var(--card-bg);
     max-width: 100%;
+    flex: 1 1 auto;
   }
 }
 
@@ -686,7 +742,9 @@
   color: var(--danger);
 }
 
-.form-input, .form-select, .form-textarea {
+.form-input,
+.form-select,
+.form-textarea {
   --background: #ffffff;
   --border-radius: 8px;
   --border-color: var(--border-color);

@@ -41,7 +41,10 @@
    supaya ion-modal dengan cssClass="detail-modal" (dipakai saat
    mode Edit di halaman Inventory) tampil lebih besar & center.
    ========================================================== */
-
+/* src/global.scss */
+:root {
+  --sidebar-width: 250px;
+}
 .detail-modal {
   --width: 720px;
   --height: 85%;

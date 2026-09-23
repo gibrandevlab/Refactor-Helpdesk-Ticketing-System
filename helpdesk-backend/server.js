@@ -3,6 +3,7 @@ const cors = require('cors');
 const path = require('path');
 require('dotenv').config();
 
+const { poolPromise, query } = require('./config/db');
 const app = express();
 
 app.use(cors());
@@ -50,22 +51,19 @@ app.use((err, req, res, next) => {
 });
 
 const PORT = process.env.PORT || 5000;
-const pool = require('./config/db');
 
 app.listen(PORT, async () => {
   console.log(`Server berjalan di http://localhost:${PORT}`);
   try {
-    const conn = await pool.getConnection();
-    await conn.query('SELECT 1');
-    conn.release();
-    console.log('✅ Berhasil terhubung ke database MySQL (XAMPP)');
+    await poolPromise;
+    await query('SELECT 1');
+    console.log('✅ Berhasil terhubung ke Microsoft SQL Server (Docker)');
 
-    // 🔥 JALANKAN CRON JOB SETELAH KONEKSI DATABASE BERHASIL
     require('./cron');
     console.log('🕒 Cron job schedule preventive diaktifkan');
 
   } catch (err) {
-    console.error('❌ GAGAL terhubung ke database:', err.message);
-    console.error('   Cek: XAMPP MySQL sudah Start? File .env sudah benar? Database sudah di-import?');
+    console.error('❌ GAGAL terhubung ke database SQL Server:', err.message);
+    console.error('   Cek: Container Docker dev_mssql sudah RUNNING? File .env sudah benar?');
   }
 });

@@ -26,7 +26,11 @@
 /* ===================== MAIN CONTENT ===================== */
 .main-content {
   flex: 1;
-  margin-left: 260px;
+  margin-left: var(--sidebar-width);
+  min-width: 0; /* 👈 TAMBAHKAN INI (WAJIB agar flexbox tidak meluap keluar layar) */
+  max-width: calc(
+    100% - var(--sidebar-width)
+  ); /* 👈 TAMBAHKAN INI (Memastikan lebar konten presisi dengan sisa layar) */
   display: flex;
   flex-direction: column;
   background: var(--content-bg);
@@ -34,6 +38,7 @@
 
   @media (max-width: 992px) {
     margin-left: 0;
+    max-width: 100%;
   }
 }
 
@@ -195,7 +200,8 @@
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
     transition: all 0.2s ease;
 
-    &:hover, &:focus {
+    &:hover,
+    &:focus {
       border-color: var(--primary);
       background: #fff;
     }
@@ -207,7 +213,9 @@
   background: var(--card-bg);
   border-radius: 16px;
   border: 1px solid var(--border-color);
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02), 0 2px 4px -2px rgba(0, 0, 0, 0.02);
+  box-shadow:
+    0 4px 6px -1px rgba(0, 0, 0, 0.02),
+    0 2px 4px -2px rgba(0, 0, 0, 0.02);
   overflow: hidden;
   margin-bottom: 24px;
 }
@@ -222,12 +230,12 @@
 .return-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 13.5px;
+  font-size: 13px;
   text-align: left;
 
   th,
   td {
-    padding: 14px 18px;
+    padding: 10px 12px;
     vertical-align: middle;
     white-space: nowrap;
   }
@@ -240,6 +248,7 @@
     letter-spacing: 0.5px;
     text-transform: uppercase;
     border-bottom: 1px solid var(--border-color);
+    white-space: nowrap;
   }
 
   tbody tr {
@@ -285,14 +294,14 @@
 
 /* ===== DESKRIPSI & ALASAN COLUMN ===== */
 .deskripsi-col {
-  min-width: 200px;
-  max-width: 300px;
+  min-width: 150px;
+  max-width: 220px;
   white-space: normal !important;
   word-wrap: break-word;
-  line-height: 1.5;
-  color: var(--text-dark);
 }
-
+.nowrap {
+  white-space: nowrap;
+}
 /* ===== STATUS BADGE ===== */
 .status-badge {
   display: inline-flex;

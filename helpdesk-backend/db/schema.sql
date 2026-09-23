@@ -196,7 +196,7 @@ CREATE TABLE list_ticket (
     deskripsi TEXT,
     lampiran VARCHAR(255) COMMENT 'path/nama file foto lampiran',
     tanggal_lapor DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    status ENUM('Menunggu Approval','On Process','Solved','Reject') NOT NULL DEFAULT 'Menunggu Approval',
+    status ENUM('Menunggu Approval','Menunggu Assignment','On Process','Solved','Reject') NOT NULL DEFAULT 'Menunggu Approval',
     FOREIGN KEY (nik_pelapor) REFERENCES karyawan(nik) ON UPDATE CASCADE,
     FOREIGN KEY (id_departemen) REFERENCES departemen(id_departemen) ON UPDATE CASCADE,
     FOREIGN KEY (id_kategori) REFERENCES kategori(id_kategori) ON UPDATE CASCADE,

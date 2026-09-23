@@ -27,6 +27,34 @@ SET time_zone = "+00:00";
 -- Struktur dari tabel `approval_ticket`
 --
 
+DROP TABLE IF EXISTS `approval_ticket`;
+DROP TABLE IF EXISTS `asset_department_history`;
+DROP TABLE IF EXISTS `asset_hardware`;
+DROP TABLE IF EXISTS `asset_hardware_detail`;
+DROP TABLE IF EXISTS `asset_history`;
+DROP TABLE IF EXISTS `asset_holder_history`;
+DROP TABLE IF EXISTS `asset_software`;
+DROP TABLE IF EXISTS `asset_software_detail`;
+DROP TABLE IF EXISTS `bagian_departemen`;
+DROP TABLE IF EXISTS `checklist_approval`;
+DROP TABLE IF EXISTS `checklist_template`;
+DROP TABLE IF EXISTS `departemen`;
+DROP TABLE IF EXISTS `inventory`;
+DROP TABLE IF EXISTS `jabatan`;
+DROP TABLE IF EXISTS `kategori_hardware`;
+DROP TABLE IF EXISTS `kategori_software`;
+DROP TABLE IF EXISTS `karyawan`;
+DROP TABLE IF EXISTS `kondisi_asset`;
+DROP TABLE IF EXISTS `lisensi_software`;
+DROP TABLE IF EXISTS `lokasi`;
+DROP TABLE IF EXISTS `merek_hardware`;
+DROP TABLE IF EXISTS `model_hardware`;
+DROP TABLE IF EXISTS `notifikasi`;
+DROP TABLE IF EXISTS `pemasok`;
+DROP TABLE IF EXISTS `penerima_notifikasi`;
+DROP TABLE IF EXISTS `progres_ticket`;
+DROP TABLE IF EXISTS `status_ticket`;
+DROP TABLE IF EXISTS `ticket`;
 CREATE TABLE `approval_ticket` (
   `id_approval` int(11) NOT NULL,
   `id_ticket` varchar(20) NOT NULL,
@@ -1883,7 +1911,7 @@ CREATE TABLE `list_ticket` (
   `deskripsi` text DEFAULT NULL,
   `lampiran` varchar(255) DEFAULT NULL COMMENT 'path/nama file foto lampiran',
   `tanggal_lapor` datetime NOT NULL DEFAULT current_timestamp(),
-  `status` enum('Menunggu Approval','On Process','Solved','Reject') NOT NULL DEFAULT 'Menunggu Approval',
+  `status` ENUM('Menunggu Approval','Menunggu Assignment','On Process','Solved','Reject')  NOT NULL DEFAULT 'Menunggu Approval',
   `prioritas` enum('Low','Normal','Urgent') DEFAULT 'Normal',
   `deadline` datetime DEFAULT NULL,
   `id_schedule` int(11) DEFAULT NULL

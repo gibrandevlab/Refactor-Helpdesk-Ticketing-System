@@ -70,6 +70,7 @@ exports.processApproval = async (req, res) => {
     );
 
     // Sinkronkan status di list_ticket sesuai keputusan approval
+    // 'Menunggu Assignment' = tiket sudah di-approve dan siap di-assign ke teknisi
     const statusTicketBaru = keputusan === 'Approve' ? 'Menunggu Assignment' : 'Reject';
     await conn.query('UPDATE list_ticket SET status = ? WHERE id_ticket = ?', [statusTicketBaru, id_ticket]);
 

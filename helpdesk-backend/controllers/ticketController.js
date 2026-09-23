@@ -96,7 +96,7 @@ exports.approveTicket = async (req, res) => {
       [status_approval, req.user.nik, catatan_approval || null, id_ticket]
     );
 
-    const newStatus = status_approval === 'Approve' ? 'Menunggu Assign' : 'Rejected';
+    const newStatus = status_approval === 'Approve' ? 'Menunggu Assignment' : 'Reject';
     await conn.query(
       `UPDATE list_ticket SET status = ? WHERE id_ticket = ?`,
       [newStatus, id_ticket]
@@ -229,7 +229,7 @@ exports.assignTicket = async (req, res) => {
     );
 
     await conn.query(
-      `UPDATE list_ticket SET deadline = ?, status = 'Belum Diproses Teknisi' WHERE id_ticket = ?`,
+      `UPDATE list_ticket SET deadline = ?, status = 'On Process' WHERE id_ticket = ?`,
       [deadline, id_ticket]
     );
 
@@ -567,7 +567,7 @@ exports.updateProgress = async (req, res) => {
         }
       }
     } else {
-      await conn.query('UPDATE list_ticket SET status = ? WHERE id_ticket = ?', ['Sedang Dikerjakan', id_ticket]);
+      await conn.query('UPDATE list_ticket SET status = ? WHERE id_ticket = ?', ['On Process', id_ticket]);
     }
 
     await conn.commit();
@@ -686,10 +686,10 @@ exports.reviewReturnTicket = async (req, res) => {
 
     if (action === 'Approve') {
       await conn.query('DELETE FROM assignment_ticket WHERE id_ticket = ?', [id_ticket]);
-      await conn.query(`UPDATE list_ticket SET status = 'Menunggu Assign', deadline = NULL WHERE id_ticket = ?`, [id_ticket]);
+      await conn.query(`UPDATE list_ticket SET status = 'Menunggu Assignment', deadline = NULL WHERE id_ticket = ?`, [id_ticket]);
     } else {
       await conn.query(`UPDATE assignment_ticket SET return_status = 'None', return_reason = NULL WHERE id_ticket = ?`, [id_ticket]);
-      await conn.query(`UPDATE list_ticket SET status = 'Sedang Dikerjakan' WHERE id_ticket = ?`, [id_ticket]);
+      await conn.query(`UPDATE list_ticket SET status = 'On Process' WHERE id_ticket = ?`, [id_ticket]);
     }
 
     await conn.commit();
