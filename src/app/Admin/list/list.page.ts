@@ -2,7 +2,27 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { IonicModule } from '@ionic/angular';
+import { IonicModule, ToastController } from '@ionic/angular';
+import { addIcons } from 'ionicons';
+import {
+  closeOutline,
+  cloudUploadOutline,
+  closeCircleOutline,
+  saveOutline,
+  eyeOutline,
+  createOutline,
+  trashOutline,
+  timerOutline,
+  menuOutline,
+  refreshOutline,
+  cubeOutline,
+  searchOutline,
+  addOutline,
+  chevronBackOutline,
+  chevronForwardOutline,
+  informationCircleOutline
+} from 'ionicons/icons';
+
 import { TicketService, TicketApiRow } from '../../services/ticket.service';
 import { InventoryService, InventoryItem } from '../../services/inventory.service';
 import { KategoriService } from '../../services/kategori.service';
@@ -24,7 +44,7 @@ export interface ListTicket {
   deskripsi?: string;
   prioritas?: 'Low' | 'Normal' | 'Urgent';
   deadline?: string | null;
-  statusPengerjaan?: string | null;   // status_pengerjaan dari assignment_ticket
+  statusPengerjaan?: string | null;
 }
 
 @Component({
@@ -78,7 +98,7 @@ export class ListTicketPage implements OnInit, OnDestroy {
   filterTahun: number | null = null;
   selectedBulan: number | null = null; // 0 = Januari
   selectedDeptChart: string = '';
-  filterStatusChart: string = ''; // '' | 'approval' | 'assigned' | 'belum_proses' | 'progress' | 'selesai'
+  filterStatusChart: string = '';
 
   readonly namaBulan = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
   readonly statusGroups = [
@@ -96,8 +116,28 @@ export class ListTicketPage implements OnInit, OnDestroy {
     private inventoryService: InventoryService,
     private kategoriService: KategoriService,
     private subKategoriService: SubKategoriService,
-    private departemenService: DepartemenService
-  ) {}
+    private departemenService: DepartemenService,
+    private toastCtrl: ToastController
+  ) {
+    addIcons({
+      closeOutline,
+      cloudUploadOutline,
+      closeCircleOutline,
+      saveOutline,
+      eyeOutline,
+      createOutline,
+      trashOutline,
+      timerOutline,
+      menuOutline,
+      refreshOutline,
+      cubeOutline,
+      searchOutline,
+      addOutline,
+      chevronBackOutline,
+      chevronForwardOutline,
+      informationCircleOutline
+    });
+  }
 
   ngOnInit() {
     this.loadTickets();
@@ -113,6 +153,31 @@ export class ListTicketPage implements OnInit, OnDestroy {
     if (this.countdownInterval) {
       clearInterval(this.countdownInterval);
     }
+  }
+
+  async showToast(message: string, color: 'success' | 'danger' | 'warning' = 'success') {
+    const toast = await this.toastCtrl.create({
+      message,
+      duration: 3000,
+      position: 'top',
+      color,
+      buttons: [{ text: 'OK', role: 'cancel' }]
+    });
+    await toast.present();
+  }
+
+  formatDate(rawDate: string | null | undefined): string {
+    if (!rawDate) return '-';
+    const d = this.parseTanggal(rawDate);
+    if (!d) return rawDate;
+
+    return d.toLocaleDateString('id-ID', {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    }).replace('.', ':');
   }
 
   startTimer() {
@@ -165,7 +230,7 @@ export class ListTicketPage implements OnInit, OnDestroy {
         console.error(err);
         this.isLoading = false;
         if (err.status === 403 || err.status === 401) {
-          alert('Akses ditolak. Pastikan Anda login sebagai Admin.');
+          this.showToast('Akses ditolak. Pastikan Anda login sebagai Admin.', 'danger');
         }
       }
     });
@@ -245,17 +310,12 @@ export class ListTicketPage implements OnInit, OnDestroy {
     this.kategoriOptions = [...new Set(this.tickets.map((t) => t.nama_kategori).filter(Boolean))];
   }
 
-  // ================= HELPER CHART =================
-
-  /** "2026-09-15 09:09:58" -> Date (aman lintas browser) */
   private parseTanggal(raw: string | null | undefined): Date | null {
     if (!raw) return null;
     const d = new Date(String(raw).trim().replace(' ', 'T'));
     return isNaN(d.getTime()) ? null : d;
   }
 
-  /** Kelompokkan status apa pun ke bucket besar berdasarkan teks status saja.
-   * Masih dipakai untuk badge chip di chart level-3 (asset breakdown). */
   getStatusGroup(status: string): string {
     const s = (status || '').toLowerCase();
     if (s.includes('solved') || s.includes('closed') || s.includes('selesai') || s.includes('resolved')) return 'selesai';
@@ -264,39 +324,29 @@ export class ListTicketPage implements OnInit, OnDestroy {
     return 'lainnya';
   }
 
-  /** 🔥 FUNNEL BERJENJANG — satu tiket cuma masuk SATU tahap,
-   * dipilih dari progres paling akhir/paling maju, supaya tidak
-   * tumpang tindih antara "Assignment Ticket" dan "Sedang Dikerjakan". */
   getFunnelStage(t: ListTicket): string {
     const statusLower = (t.status || '').toLowerCase();
     const pengerjaanLower = (t.statusPengerjaan || '').toLowerCase();
     const hasTeknisi = !!t.teknisi && t.teknisi.trim() !== '' && t.teknisi !== '-';
 
-    // 1. Selesai — paling final
     if (statusLower.includes('solved') || statusLower.includes('selesai') || pengerjaanLower === 'selesai') {
       return 'selesai';
     }
-    // 2. Ditolak — keluar dari funnel utama
     if (statusLower.includes('reject')) {
       return 'rejected';
     }
-    // 3. Sedang Dikerjakan — sudah ada teknisi DAN sudah mulai proses
     if (hasTeknisi && pengerjaanLower === 'proses') {
       return 'progress';
     }
-    // 4. Belum Diproses Teknisi — sudah ada teknisi, tapi belum mulai
     if (hasTeknisi) {
       return 'belum_proses';
     }
-    // 5. Assignment Ticket — sudah di-approve, tapi BELUM ada teknisi (perlu di-assign)
     if (statusLower.includes('assign') || statusLower.includes('approve')) {
       return 'assigned';
     }
-    // 6. Menunggu Approval — tahap paling awal
     return 'approval';
   }
 
-  /** dipakai chip, chart, dan filter tabel — satu sumber kebenaran */
   matchesStatusGroup(t: ListTicket, key: string): boolean {
     return this.getFunnelStage(t) === key;
   }
@@ -310,7 +360,6 @@ export class ListTicketPage implements OnInit, OnDestroy {
     return [...set].sort((a, b) => b - a);
   }
 
-  /** Basis semua chart: ticket yang sudah tersaring tahun + status group aktif */
   private get chartBaseTickets(): ListTicket[] {
     return this.tickets.filter(t => {
       const d = this.parseTanggal(t.tanggal);
@@ -321,7 +370,6 @@ export class ListTicketPage implements OnInit, OnDestroy {
     });
   }
 
-  /** LEVEL 1 — jumlah ticket per bulan (untuk tahun & status terpilih) */
   get chartBulan(): { bulan: number; label: string; jumlah: number }[] {
     const counts = new Array(12).fill(0);
     this.chartBaseTickets.forEach(t => {
@@ -335,7 +383,6 @@ export class ListTicketPage implements OnInit, OnDestroy {
     return Math.max(1, ...this.chartBulan.map(b => b.jumlah));
   }
 
-  /** LEVEL 2 — daftar departemen yang ticketing di bulan terpilih */
   get chartDepartemen(): { departemen: string; jumlah: number }[] {
     if (this.selectedBulan === null) return [];
     const map = new Map<string, number>();
@@ -354,7 +401,6 @@ export class ListTicketPage implements OnInit, OnDestroy {
     return Math.max(1, ...this.chartDepartemen.map(d => d.jumlah));
   }
 
-  /** LEVEL 3 — asset yang di-ticketing pada departemen + bulan terpilih */
   get chartAssets(): { aset: string; jumlah: number; tickets: ListTicket[] }[] {
     if (this.selectedBulan === null || !this.selectedDeptChart) return [];
     const map = new Map<string, ListTicket[]>();
@@ -386,7 +432,6 @@ export class ListTicketPage implements OnInit, OnDestroy {
     }).length;
   }
 
-  // ===== INTERAKSI CHART =====
   onTahunChange() {
     this.selectedBulan = null;
     this.selectedDeptChart = '';
@@ -420,8 +465,6 @@ export class ListTicketPage implements OnInit, OnDestroy {
     this.onFilterChange();
   }
 
-  // ================= FILTER & PAGINASI TABEL =================
-
   get filteredTickets(): ListTicket[] {
     const term = this.searchTerm.trim().toLowerCase();
     return this.tickets.filter((t) => {
@@ -430,7 +473,6 @@ export class ListTicketPage implements OnInit, OnDestroy {
       const matchDept = !this.filterDepartemen || t.dept === this.filterDepartemen;
       const matchKategori = !this.filterKategori || t.nama_kategori === this.filterKategori;
 
-      // --- filter yang berasal dari chart ---
       const d = this.parseTanggal(t.tanggal);
       const matchTahun = !this.filterTahun || (d ? d.getFullYear() === this.filterTahun : false);
       const matchBulan = this.selectedBulan === null || (d ? d.getMonth() === this.selectedBulan : false);
@@ -491,20 +533,20 @@ export class ListTicketPage implements OnInit, OnDestroy {
 
   simpanTicket() {
     if (!this.formData.id_departemen || !this.formData.id_kategori || !this.formData.deskripsi) {
-      alert('Departemen, Kategori, dan Deskripsi wajib diisi!');
+      this.showToast('Departemen, Kategori, dan Deskripsi wajib diisi!', 'warning');
       return;
     }
 
     this.ticketService.create(this.formData, this.selectedFile || undefined).subscribe({
       next: () => {
-        alert('Tiket berhasil ditambahkan!');
+        this.showToast('Tiket berhasil ditambahkan!', 'success');
         this.loadTickets();
         this.loadInventory();
         this.closeModal();
       },
       error: (err) => {
         console.error('Gagal menyimpan tiket:', err);
-        alert('Gagal menyimpan tiket: ' + (err.error?.message || err.message));
+        this.showToast('Gagal menyimpan tiket: ' + (err.error?.message || err.message), 'danger');
       }
     });
   }
@@ -513,19 +555,17 @@ export class ListTicketPage implements OnInit, OnDestroy {
     if (confirm(`Apakah Anda yakin ingin menghapus tiket "${ticket.id_ticket}"?`)) {
       this.ticketService.remove(ticket.id_ticket).subscribe({
         next: () => {
-          alert('Tiket berhasil dihapus.');
+          this.showToast('Tiket berhasil dihapus.', 'success');
           this.loadTickets();
         },
         error: (err) => {
           console.error('Gagal menghapus tiket:', err);
-          alert(err.error?.message || 'Gagal menghapus tiket.');
+          this.showToast(err.error?.message || 'Gagal menghapus tiket.', 'danger');
         }
       });
     }
   }
 
-  // Download PDF Check Sheet (cuma relevan untuk tiket yang punya aset/checklist preventive).
-  // Kalau Check Sheet-nya belum di-approve User, service ini otomatis nampilin alert error sendiri.
   downloadChecklistPdf(ticket: ListTicket) {
     this.ticketService.downloadChecklistPdf(ticket.id_ticket);
   }
@@ -541,7 +581,6 @@ export class ListTicketPage implements OnInit, OnDestroy {
     return 'status-default';
   }
 
-  // ===== NAVIGASI & SIDEBAR =====
   toggleSidebar() {
     this.isSidebarOpen = !this.isSidebarOpen;
   }
@@ -551,24 +590,7 @@ export class ListTicketPage implements OnInit, OnDestroy {
     if (window.innerWidth < 1024) this.isSidebarOpen = false;
   }
 
-  goToDashboard() { this.setActiveMenu('dashboard'); this.router.navigate(['/dashboard']); }
-  goToListTicket() { this.setActiveMenu('list-ticket'); this.router.navigate(['/list']); }
-  goToApprovalTicket() { this.setActiveMenu('approval-ticket'); this.router.navigate(['/approval']); }
-  goToAssignmentTicket() { this.setActiveMenu('assignment-ticket'); this.router.navigate(['/assignment']); }
-  goToKaryawan() { this.setActiveMenu('karyawan'); this.router.navigate(['/karyawan']); }
-  goToUser() { this.setActiveMenu('user'); this.router.navigate(['/users']); }
-  goToJabatan() { this.setActiveMenu('jabatan'); this.router.navigate(['/jabatan']); }
-  goToDepartemen() { this.setActiveMenu('departemen'); this.router.navigate(['/departemen']); }
-  goToBagianDepartemen() { this.setActiveMenu('bagian-departemen'); this.router.navigate(['/bagian-departemen']); }
-  goToKategori() { this.setActiveMenu('kategori'); this.router.navigate(['/kategori']); }
-  goToSubKategori() { this.setActiveMenu('sub-kategori'); this.router.navigate(['/sub-kategori']); }
-  goToTeknisi() { this.setActiveMenu('teknisi'); this.router.navigate(['/teknisi']); }
-  goToInventory() { this.setActiveMenu('inventory'); this.router.navigate(['/inventory']); }
-  goToSchedule() { this.setActiveMenu('schedule'); this.router.navigate(['/schedule']); }
-  goToLaporanFeedback() { this.setActiveMenu('laporan-feedback'); this.router.navigate(['/laporan-feedback']); }
-  goToStatistikTicket() { this.setActiveMenu('statistik-ticket'); this.router.navigate(['/statistik-ticket']); }
-  goToProfile() { this.setActiveMenu('profile'); this.router.navigate(['/profile']); }
-  goToNotifikasi() { this.setActiveMenu('notifikasi'); }
+
 
   logout() {
     localStorage.removeItem('token');

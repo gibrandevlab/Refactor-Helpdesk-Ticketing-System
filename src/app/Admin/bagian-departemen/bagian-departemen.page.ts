@@ -2,14 +2,20 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { IonicModule } from '@ionic/angular';
+import { IonicModule, ToastController, AlertController, IonicSafeString } from '@ionic/angular';
 import { HttpErrorResponse } from '@angular/common/http';
+import { addIcons } from 'ionicons';
+import {
+  menuOutline, addOutline, createOutline, trashOutline,
+  chevronBackOutline, chevronForwardOutline, closeOutline,
+  saveOutline, folderOpenOutline
+} from 'ionicons/icons';
+
 import { BagianDepartemenService } from '../../services/bagian-departemen.service';
 import { DepartemenService } from '../../services/departemen.services';
 import { BagianDepartemen } from '../../models/Bagian departemen.model ';
 import { SidebarComponent } from '../shared/components/sidebar/sidebar.component';
 
-// Bentuk sederhana untuk dropdown Departemen (id + nama saja)
 interface DepartemenOption {
   idDepartemen: number;
   namaDepartemen: string;
@@ -47,12 +53,33 @@ export class BagianDepartemenPage implements OnInit {
   constructor(
     private router: Router,
     private bagianDepartemenService: BagianDepartemenService,
-    private departemenService: DepartemenService
-  ) {}
+    private departemenService: DepartemenService,
+    private toastCtrl: ToastController,
+    private alertCtrl: AlertController
+  ) {
+    addIcons({
+      menuOutline, addOutline, createOutline, trashOutline,
+      chevronBackOutline, chevronForwardOutline, closeOutline,
+      saveOutline, folderOpenOutline
+    });
+  }
 
   ngOnInit() {
     this.loadBagianDepartemen();
     this.loadDepartemenIdMap();
+  }
+
+  /** Helper Toast Notification */
+  async showToast(message: string, color: 'success' | 'danger' | 'warning' = 'success') {
+    const toast = await this.toastCtrl.create({
+      message,
+      duration: 3000,
+      position: 'top',
+      color,
+      cssClass: `custom-toast toast-${color}`,
+      buttons: [{ text: 'OK', role: 'cancel' }]
+    });
+    await toast.present();
   }
 
   private loadBagianDepartemen() {
@@ -63,7 +90,7 @@ export class BagianDepartemenPage implements OnInit {
       },
       error: (err: HttpErrorResponse) => {
         console.error('Gagal mengambil data bagian departemen:', err);
-        alert('Gagal mengambil data Bagian Departemen dari server.');
+        this.showToast('Gagal mengambil data Bagian Departemen dari server.', 'danger');
       },
     });
   }
@@ -133,13 +160,13 @@ export class BagianDepartemenPage implements OnInit {
 
   simpanBagian() {
     if (!this.formData.departemen || !this.formData.bagian) {
-      alert('Departemen dan Bagian wajib diisi!');
+      this.showToast('Departemen dan Bagian wajib diisi!', 'warning');
       return;
     }
 
     const matched = this.departemenIdMap.find((d) => d.namaDepartemen === this.formData.departemen);
     if (!matched) {
-      alert('Departemen tidak ditemukan / data departemen belum termuat. Coba lagi sebentar.');
+      this.showToast('Departemen tidak ditemukan / data departemen belum termuat.', 'warning');
       return;
     }
 
@@ -153,11 +180,11 @@ export class BagianDepartemenPage implements OnInit {
         next: () => {
           this.loadBagianDepartemen();
           this.closeModal();
-          alert('Data berhasil diperbarui!');
+          this.showToast('Data berhasil diperbarui!', 'success');
         },
         error: (err: HttpErrorResponse) => {
           console.error('Gagal memperbarui bagian departemen:', err);
-          alert('Gagal memperbarui data. Cek console untuk detail error.');
+          this.showToast('Gagal memperbarui data bagian departemen.', 'danger');
         },
       });
     } else {
@@ -165,61 +192,56 @@ export class BagianDepartemenPage implements OnInit {
         next: () => {
           this.loadBagianDepartemen();
           this.closeModal();
-          alert('Bagian berhasil ditambahkan!');
+          this.showToast('Bagian berhasil ditambahkan!', 'success');
         },
         error: (err: HttpErrorResponse) => {
           console.error('Gagal menambah bagian departemen:', err);
-          alert('Gagal menambah data. Cek console untuk detail error.');
+          this.showToast('Gagal menambah data bagian departemen.', 'danger');
         },
       });
     }
   }
 
-  hapusBagian(item: BagianDepartemen) {
-    if (!confirm(`Apakah Anda yakin ingin menghapus bagian "${item.bagian}" dari departemen "${item.departemen}"?`)) {
-      return;
-    }
-    this.bagianDepartemenService.remove(item.idBagian).subscribe({
-      next: () => {
-        this.loadBagianDepartemen();
-        this.onFilterChange();
-      },
-      error: (err: HttpErrorResponse) => {
-        console.error('Gagal menghapus bagian departemen:', err);
-        alert('Gagal menghapus data (kemungkinan masih dipakai data lain).');
-      },
+  async hapusBagian(item: BagianDepartemen) {
+    const alertEl = await this.alertCtrl.create({
+      header: 'Hapus Bagian Departemen',
+      message: new IonicSafeString(`Apakah Anda yakin ingin menghapus bagian <strong>${item.bagian}</strong> dari departemen <strong>${item.departemen}</strong>?`),
+      cssClass: 'custom-alert-dialog',
+      buttons: [
+        { text: 'Batal', role: 'cancel', cssClass: 'alert-button-cancel' },
+        {
+          text: 'Hapus',
+          role: 'destructive',
+          handler: () => {
+            this.bagianDepartemenService.remove(item.idBagian).subscribe({
+              next: () => {
+                this.showToast('Bagian departemen berhasil dihapus!', 'success');
+                this.loadBagianDepartemen();
+                this.onFilterChange();
+              },
+              error: (err: HttpErrorResponse) => {
+                console.error('Gagal menghapus bagian departemen:', err);
+                this.showToast('Gagal menghapus data (kemungkinan masih dipakai data lain).', 'danger');
+              },
+            });
+          }
+        }
+      ]
     });
+
+    await alertEl.present();
   }
 
   // ===== SIDEBAR & NAVIGASI =====
   toggleSidebar() { this.isSidebarOpen = !this.isSidebarOpen; }
-  setActiveMenu(menu: string) { this.activeMenu = menu; }
-
-  goToDashboard() { this.setActiveMenu('dashboard'); this.router.navigate(['/dashboard']); }
-  goToListTicket() { this.setActiveMenu('list-ticket'); this.router.navigate(['/list']); }
-  goToApprovalTicket() { this.setActiveMenu('approval-ticket'); this.router.navigate(['/approval']); }
-  goToAssignmentTicket() { this.setActiveMenu('assignment-ticket'); this.router.navigate(['/assignment']); }
-  goToKaryawan() { this.setActiveMenu('karyawan'); this.router.navigate(['/karyawan']); }
-  goToUser() { this.setActiveMenu('user'); this.router.navigate(['/users']); }
-  goToJabatan() { this.setActiveMenu('jabatan'); this.router.navigate(['/jabatan']); }
-  goToDepartemen() { this.setActiveMenu('departemen'); this.router.navigate(['/departemen']); }
-  goToBagianDepartemen() { this.setActiveMenu('bagian-departemen'); this.router.navigate(['/bagian-departemen']); }
-  goToKategori() { this.setActiveMenu('kategori'); this.router.navigate(['/kategori']); }
-  goToSubKategori() { this.setActiveMenu('sub-kategori'); this.router.navigate(['/sub-kategori']); }
-  goToTeknisi() { this.setActiveMenu('teknisi'); this.router.navigate(['/teknisi']); }
-  goToInventory() { this.setActiveMenu('inventory'); this.router.navigate(['/inventory']); }
-
-  // ===== TAMBAHKAN INI =====
-  goToSchedule() {
-    this.setActiveMenu('schedule');
-    this.router.navigate(['/schedule']);
+  setActiveMenu(menu: string) {
+    this.activeMenu = menu;
+    if (window.innerWidth < 1024) this.isSidebarOpen = false;
   }
-  // ===== SELESAI TAMBAH =====
 
-  goToLaporanFeedback() {
-    this.setActiveMenu('laporan-feedback');
-    this.router.navigate(['/laporan-feedback']);
+  logout() {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    this.router.navigate(['/login']);
   }
-  goToStatistikTicket() { this.setActiveMenu('statistik-ticket'); }
-  goToProfile() { this.setActiveMenu('profile'); }
 }

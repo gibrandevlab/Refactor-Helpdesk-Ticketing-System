@@ -19,7 +19,7 @@ const testQueries = [
   },
   {
     name: 'DATE_FORMAT',
-    mysql: "SELECT DATE_FORMAT(tanggal_lapor, '%Y-%m') AS bulan, COUNT(*) AS jumlah FROM list_ticket GROUP BY bulan ORDER BY bulan ASC LIMIT 12",
+    mysql: "SELECT DATE_FORMAT(tanggal_lapor, '%Y-%m') AS bulan, COUNT(*) AS jumlah FROM list_ticket GROUP BY DATE_FORMAT(tanggal_lapor, '%Y-%m') ORDER BY bulan ASC LIMIT 12",
   },
   {
     name: 'DATE_ADD INTERVAL',

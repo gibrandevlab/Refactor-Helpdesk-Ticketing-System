@@ -23,7 +23,7 @@
     </div>
     <div class="sidebar-user-info">
       <h4 class="sidebar-username">{{ user.nama || 'User' }}</h4>
-      <p class="sidebar-userrole">👤 User</p>
+      <p class="sidebar-userrole"> User</p>
     </div>
   </div>
 
@@ -37,7 +37,7 @@
     <div class="menu-label">TICKET MANAGEMENT</div>
     <div class="menu-item" [class.active]="activeMenu === 'my-ticket'" (click)="navigateTo('users/my-ticket')">
       <div class="menu-icon-wrapper"><ion-icon name="list-outline" class="menu-icon"></ion-icon></div>
-      <span class="menu-text">My Ticket + New Ticket</span>
+      <span class="menu-text">My Ticket</span>
     </div>
 
     <div class="menu-label">ASSET</div>

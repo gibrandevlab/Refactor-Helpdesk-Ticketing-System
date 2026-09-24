@@ -4,9 +4,9 @@
   --sidebar-bg-hover: #1e2a4a;
   --content-bg: #f4f6fb;
   --card-bg: #ffffff;
-  --text-dark: #0f172a;      /* Teks utama gelap pekat agar tajam */
-  --text-muted: #475569;     /* Teks sekunder/label jelas dibaca */
-  --border-color: #cbd5e1;   /* Garis pembatas jelas */
+  --text-dark: #0f172a;
+  --text-muted: #475569;
+  --border-color: #cbd5e1;
   --danger: #ef4444;
 }
 
@@ -22,12 +22,15 @@
 /* ===================== MAIN CONTENT ===================== */
 .main-content {
   flex: 1;
-  margin-left: 250px;
+  margin-left: var(--sidebar-width, 250px);
+  min-width: 0;
+  max-width: calc(100% - var(--sidebar-width, 250px));
   display: flex;
   flex-direction: column;
 
   @media (max-width: 992px) {
     margin-left: 0;
+    max-width: 100%;
   }
 }
 
@@ -206,16 +209,6 @@
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
-
-  select {
-    border: 1px solid var(--border-color);
-    border-radius: 8px;
-    padding: 8px 12px;
-    font-size: 13px;
-    color: var(--text-dark);
-    background: var(--card-bg);
-    font-weight: 500;
-  }
 }
 
 .btn-new-karyawan {
@@ -369,10 +362,27 @@
 }
 
 /* ========================================== */
-/* 🔥 MODAL STYLING                           */
+/* 🔥 MODAL CONTAINER & HEIGHT STYLING        */
 /* ========================================== */
-.modal-content {
-  --background: #f9fafb;
+ion-modal.custom-karyawan-modal {
+  --width: 90%;
+  --max-width: 620px;
+  --height: 80vh; /* Tinggi pasti agar ion-content tidak ciut ke 0px */
+  --max-height: 650px;
+  --border-radius: 16px;
+  --box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.15);
+
+  ion-toolbar {
+    --background: #ffffff;
+    --color: #0f172a;
+    --border-color: #cbd5e1;
+    font-weight: 700;
+    padding: 4px 8px;
+  }
+
+  ion-content {
+    --background: #ffffff;
+  }
 }
 
 .modal-body {
@@ -383,8 +393,8 @@
 
 .form-row {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 16px;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
 }
 
 .form-group {
@@ -403,26 +413,54 @@
   color: var(--danger);
 }
 
-/* Memperjelas warna teks di dalam ion-input dan ion-select Ionic */
-ion-input, ion-select {
-  --color: #0f172a !important;
-  --placeholder-color: #64748b !important;
-  --placeholder-opacity: 1;
-  background: #ffffff !important;
-  border: 1px solid var(--border-color);
-  border-radius: 8px;
-  font-size: 14px;
-  font-weight: 500;
-  margin-top: 4px;
+/* 🔥 NATIVE DROPDOWN SELECT STYLING */
+.form-select-native {
+  width: 100% !important;
+  height: 42px !important;
+  padding: 8px 34px 8px 12px !important;
+  font-size: 13.5px !important;
+  font-weight: 600 !important;
+  color: #0f172a !important;
+  background-color: #ffffff !important;
+  border: 1px solid #cbd5e1 !important;
+  border-radius: 8px !important;
+  outline: none !important;
+  appearance: none !important;
+  -webkit-appearance: none !important;
+  -moz-appearance: none !important;
+
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%3c0f172a' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e") !important;
+  background-repeat: no-repeat !important;
+  background-position: right 12px center !important;
+  background-size: 15px !important;
+  cursor: pointer !important;
+
+  &:disabled {
+    background-color: #f1f5f9 !important;
+    color: #94a3b8 !important;
+    cursor: not-allowed !important;
+  }
+
+  option {
+    background-color: #ffffff !important;
+    color: #0f172a !important;
+    padding: 10px !important;
+  }
 }
 
-.form-input, .form-select, .form-textarea {
-  background: #ffffff !important;
+/* 🔥 ION INPUT STYLING */
+ion-input.form-input {
+  --color: #0f172a !important;
+  --placeholder-color: #64748b !important;
+  --placeholder-opacity: 1 !important;
+  --background: #ffffff !important;
+  --padding-start: 12px !important;
+  --padding-end: 12px !important;
+  border: 1px solid #cbd5e1 !important;
+  border-radius: 8px !important;
+  font-size: 13.5px !important;
+  font-weight: 500 !important;
   color: #0f172a !important;
-  border: 1px solid var(--border-color);
-  border-radius: 8px;
-  --padding-start: 14px;
-  --padding-end: 14px;
 }
 
 .modal-actions {

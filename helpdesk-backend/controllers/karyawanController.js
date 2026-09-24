@@ -78,13 +78,17 @@ exports.create = async (req, res) => {
       return res.status(400).json({ error: 'nama, jenisKelamin, departemen, jabatan wajib diisi' });
     }
 
-    const [lastRow] = await pool.query(
-      `SELECT MAX(CAST(SUBSTRING(nik, 2) AS UNSIGNED)) as max_num FROM karyawan`
-    );
-    let nextNumber = 1;
-    if (lastRow[0].max_num) {
-      nextNumber = lastRow[0].max_num + 1;
+    const [rows] = await pool.query(`SELECT nik FROM karyawan WHERE nik LIKE 'K%'`);
+    let maxNum = 0;
+    for (const r of rows) {
+      if (r.nik) {
+        const num = parseInt(r.nik.substring(1), 10);
+        if (!isNaN(num) && num > maxNum) {
+          maxNum = num;
+        }
+      }
     }
+    const nextNumber = maxNum + 1;
     const nik = 'K' + String(nextNumber).padStart(4, '0');
 
     const ids = await getMasterIds(departemen, bagian, jabatan);

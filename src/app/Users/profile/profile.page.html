@@ -26,7 +26,7 @@
         </div>
         <div class="sidebar-user-info">
           <h4 class="sidebar-username">{{ user.nama || 'User' }}</h4>
-          <p class="sidebar-userrole">👤 User</p>
+          <p class="sidebar-userrole"> User</p>
         </div>
       </div>
 
@@ -40,7 +40,7 @@
         <div class="menu-label">TICKET MANAGEMENT</div>
         <div class="menu-item" (click)="goToMyTicket()">
           <div class="menu-icon-wrapper"><ion-icon name="list-outline" class="menu-icon"></ion-icon></div>
-          <span class="menu-text">My Ticket + New Ticket</span>
+          <span class="menu-text">My Ticket</span>
         </div>
 
         <div class="menu-label">ASSET</div>
@@ -100,7 +100,7 @@
             <img [src]="'https://ui-avatars.com/api/?name=' + (user.nama || 'User') + '&background=2563eb&color=fff&size=128&bold=true'" alt="Avatar" class="profile-avatar" />
             <div>
               <h2 class="profile-name">{{ user.nama }}</h2>
-              <p class="profile-role">👤 {{ user.role }}</p>
+              <p class="profile-role"> {{ user.role }}</p>
             </div>
           </div>
 

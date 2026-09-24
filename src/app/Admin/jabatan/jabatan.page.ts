@@ -2,8 +2,14 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { IonicModule } from '@ionic/angular';
-import { JabatanService } from '../../services/Jabatan.service'; // sesuaikan path
+import { IonicModule, ToastController, AlertController, IonicSafeString } from '@ionic/angular';
+import { addIcons } from 'ionicons';
+import {
+  menuOutline, searchOutline, addOutline, createOutline, trashOutline,
+  chevronBackOutline, chevronForwardOutline, closeOutline, saveOutline
+} from 'ionicons/icons';
+
+import { JabatanService } from '../../services/Jabatan.service';
 import { SidebarComponent } from '../shared/components/sidebar/sidebar.component';
 
 export interface Jabatan {
@@ -42,11 +48,31 @@ export class JabatanPage implements OnInit {
 
   constructor(
     private router: Router,
-    private jabatanService: JabatanService
-  ) {}
+    private jabatanService: JabatanService,
+    private toastCtrl: ToastController,
+    private alertCtrl: AlertController
+  ) {
+    addIcons({
+      menuOutline, searchOutline, addOutline, createOutline, trashOutline,
+      chevronBackOutline, chevronForwardOutline, closeOutline, saveOutline
+    });
+  }
 
   ngOnInit() {
     this.loadJabatan();
+  }
+
+  /** Helper Toast Notification */
+  async showToast(message: string, color: 'success' | 'danger' | 'warning' = 'success') {
+    const toast = await this.toastCtrl.create({
+      message,
+      duration: 3000,
+      position: 'top',
+      color,
+      cssClass: `custom-toast toast-${color}`,
+      buttons: [{ text: 'OK', role: 'cancel' }]
+    });
+    await toast.present();
   }
 
   // ===== AMBIL DATA DARI API =====
@@ -117,7 +143,7 @@ export class JabatanPage implements OnInit {
   // ===== SIMPAN (CREATE / UPDATE) VIA API =====
   simpanJabatan() {
     if (!this.formData.nama) {
-      alert('Nama jabatan wajib diisi!');
+      this.showToast('Nama jabatan wajib diisi!', 'warning');
       return;
     }
 
@@ -128,59 +154,56 @@ export class JabatanPage implements OnInit {
     request$.subscribe({
       next: () => {
         this.closeModal();
-        alert(this.isEditing ? 'Data jabatan berhasil diperbarui!' : 'Jabatan berhasil ditambahkan!');
-        this.loadJabatan(); // refresh dari server
+        this.showToast(this.isEditing ? 'Data jabatan berhasil diperbarui!' : 'Jabatan berhasil ditambahkan!', 'success');
+        this.loadJabatan();
       },
       error: (err: any) => {
         console.error('Gagal menyimpan jabatan:', err);
-        alert(err?.error?.message || 'Gagal menyimpan data jabatan.');
+        this.showToast(err?.error?.message || 'Gagal menyimpan data jabatan.', 'danger');
       }
     });
   }
 
   // ===== HAPUS VIA API =====
-  hapusJabatan(j: Jabatan) {
-    if (!confirm(`Apakah Anda yakin ingin menghapus jabatan "${j.nama}"?`)) return;
-
-    this.jabatanService.delete(j.id).subscribe({
-      next: () => {
-        this.loadJabatan();
-      },
-      error: (err: any) => {
-        console.error('Gagal menghapus jabatan:', err);
-        alert(err?.error?.message || 'Gagal menghapus jabatan (kemungkinan masih dipakai data lain).');
-      }
+  async hapusJabatan(j: Jabatan) {
+    const alertEl = await this.alertCtrl.create({
+      header: 'Hapus Jabatan',
+      message: new IonicSafeString(`Apakah Anda yakin ingin menghapus jabatan <strong>${j.nama}</strong>?`),
+      cssClass: 'custom-alert-dialog',
+      buttons: [
+        { text: 'Batal', role: 'cancel', cssClass: 'alert-button-cancel' },
+        {
+          text: 'Hapus',
+          role: 'destructive',
+          handler: () => {
+            this.jabatanService.delete(j.id).subscribe({
+              next: () => {
+                this.showToast('Jabatan berhasil dihapus!', 'success');
+                this.loadJabatan();
+              },
+              error: (err: any) => {
+                console.error('Gagal menghapus jabatan:', err);
+                this.showToast(err?.error?.message || 'Gagal menghapus jabatan (kemungkinan masih dipakai data lain).', 'danger');
+              }
+            });
+          }
+        }
+      ]
     });
+
+    await alertEl.present();
   }
 
   // ===== NAVIGASI & SIDEBAR =====
-  toggleSidebar() { 
-    this.isSidebarOpen = !this.isSidebarOpen; 
+  toggleSidebar() {
+    this.isSidebarOpen = !this.isSidebarOpen;
   }
 
-  setActiveMenu(menu: string) { 
-    this.activeMenu = menu; 
+  setActiveMenu(menu: string) {
+    this.activeMenu = menu;
     if (window.innerWidth < 1024) this.isSidebarOpen = false;
   }
 
-  goToDashboard() { this.setActiveMenu('dashboard'); this.router.navigate(['/dashboard']); }
-  goToListTicket() { this.setActiveMenu('list-ticket'); this.router.navigate(['/list']); }
-  goToApprovalTicket() { this.setActiveMenu('approval-ticket'); this.router.navigate(['/approval']); }
-  goToAssignmentTicket() { this.setActiveMenu('assignment-ticket'); this.router.navigate(['/assignment']); }
-  goToKaryawan() { this.setActiveMenu('karyawan'); this.router.navigate(['/karyawan']); }
-  goToUser() { this.setActiveMenu('user'); this.router.navigate(['/users']); }
-  goToJabatan() { this.setActiveMenu('jabatan'); this.router.navigate(['/jabatan']); }
-  goToDepartemen() { this.setActiveMenu('departemen'); this.router.navigate(['/departemen']); }
-  goToBagianDepartemen() { this.setActiveMenu('bagian-departemen'); this.router.navigate(['/bagian-departemen']); }
-  goToKategori() { this.setActiveMenu('kategori'); this.router.navigate(['/kategori']); }
-  goToSubKategori() { this.setActiveMenu('sub-kategori'); this.router.navigate(['/sub-kategori']); }
-  goToTeknisi() { this.setActiveMenu('teknisi'); this.router.navigate(['/teknisi']); }
-  goToInventory() { this.setActiveMenu('inventory'); this.router.navigate(['/inventory']); }
-  goToSchedule() { this.setActiveMenu('schedule'); this.router.navigate(['/schedule']); } // 🛠️ Ditambahkan untuk mengatasi error TS2339
-  goToLaporanFeedback() { this.setActiveMenu('laporan-feedback'); this.router.navigate(['/laporan-feedback']); }
-  goToStatistikTicket() { this.setActiveMenu('statistik-ticket'); this.router.navigate(['/statistik-ticket']); }
-  goToProfile() { this.setActiveMenu('profile'); this.router.navigate(['/profile']); }
-  goToNotifikasi() { this.setActiveMenu('notifikasi'); }
 
   logout() {
     localStorage.removeItem('token');

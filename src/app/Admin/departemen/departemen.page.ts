@@ -2,7 +2,13 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
-import { IonicModule } from '@ionic/angular';
+import { IonicModule, ToastController, AlertController, IonicSafeString } from '@ionic/angular';
+import { addIcons } from 'ionicons';
+import {
+  menuOutline, businessOutline, addOutline, createOutline, trashOutline,
+  chevronBackOutline, chevronForwardOutline, closeOutline, saveOutline
+} from 'ionicons/icons';
+
 import { DepartemenService } from '../../services/departemen.services';
 import { SidebarComponent } from '../shared/components/sidebar/sidebar.component';
 
@@ -20,6 +26,7 @@ export interface Departemen {
 })
 export class DepartemenPage implements OnInit {
   isSidebarOpen = false;
+  activeMenu = 'departemen';
 
   // ===== DATA DEPARTEMEN (dari API) =====
   departemenList: Departemen[] = [];
@@ -46,11 +53,31 @@ export class DepartemenPage implements OnInit {
 
   constructor(
     private router: Router,
-    private departemenService: DepartemenService
-  ) {}
+    private departemenService: DepartemenService,
+    private toastCtrl: ToastController,
+    private alertCtrl: AlertController
+  ) {
+    addIcons({
+      menuOutline, businessOutline, addOutline, createOutline, trashOutline,
+      chevronBackOutline, chevronForwardOutline, closeOutline, saveOutline
+    });
+  }
 
   ngOnInit() {
     this.loadDepartemen();
+  }
+
+  /** Helper Toast Notification */
+  async showToast(message: string, color: 'success' | 'danger' | 'warning' = 'success') {
+    const toast = await this.toastCtrl.create({
+      message,
+      duration: 3000,
+      position: 'top',
+      color,
+      cssClass: `custom-toast toast-${color}`,
+      buttons: [{ text: 'OK', role: 'cancel' }]
+    });
+    await toast.present();
   }
 
   // ===== AMBIL DATA DARI API =====
@@ -121,7 +148,7 @@ export class DepartemenPage implements OnInit {
   // ===== SIMPAN (CREATE / UPDATE) VIA API =====
   simpanDepartemen() {
     if (!this.formData.nama) {
-      alert('Nama departemen wajib diisi!');
+      this.showToast('Nama departemen wajib diisi!', 'warning');
       return;
     }
 
@@ -132,34 +159,59 @@ export class DepartemenPage implements OnInit {
     request$.subscribe({
       next: () => {
         this.closeModal();
-        alert(this.isEditing ? 'Data departemen berhasil diperbarui!' : 'Departemen berhasil ditambahkan!');
-        this.loadDepartemen(); // refresh dari server
+        this.showToast(this.isEditing ? 'Data departemen berhasil diperbarui!' : 'Departemen berhasil ditambahkan!', 'success');
+        this.loadDepartemen();
       },
       error: (err: any) => {
         console.error('Gagal menyimpan departemen:', err);
-        alert(err?.error?.message || 'Gagal menyimpan data departemen.');
+        this.showToast(err?.error?.message || 'Gagal menyimpan data departemen.', 'danger');
       }
     });
   }
 
   // ===== HAPUS VIA API =====
-  hapusDepartemen(d: Departemen) {
-    if (!confirm(`Apakah Anda yakin ingin menghapus departemen "${d.nama}"?`)) return;
-
-    this.departemenService.delete(d.id).subscribe({
-      next: () => {
-        this.loadDepartemen();
-      },
-      error: (err: any) => {
-        console.error('Gagal menghapus departemen:', err);
-        alert(err?.error?.message || 'Gagal menghapus departemen (kemungkinan masih dipakai data lain).');
-      }
+  async hapusDepartemen(d: Departemen) {
+    const alertEl = await this.alertCtrl.create({
+      header: 'Hapus Departemen',
+      message: new IonicSafeString(`Apakah Anda yakin ingin menghapus departemen <strong>${d.nama}</strong>?`),
+      cssClass: 'custom-alert-dialog',
+      buttons: [
+        { text: 'Batal', role: 'cancel', cssClass: 'alert-button-cancel' },
+        {
+          text: 'Hapus',
+          role: 'destructive',
+          handler: () => {
+            this.departemenService.delete(d.id).subscribe({
+              next: () => {
+                this.showToast('Departemen berhasil dihapus!', 'success');
+                this.loadDepartemen();
+              },
+              error: (err: any) => {
+                console.error('Gagal menghapus departemen:', err);
+                this.showToast(err?.error?.message || 'Gagal menghapus departemen (kemungkinan masih dipakai data lain).', 'danger');
+              }
+            });
+          }
+        }
+      ]
     });
+
+    await alertEl.present();
   }
 
-  // ===== NAVIGasi & SIDEBAR =====
+  // ===== NAVIGASI & SIDEBAR =====
   toggleSidebar() {
     this.isSidebarOpen = !this.isSidebarOpen;
   }
 
+  setActiveMenu(menu: string) {
+    this.activeMenu = menu;
+    if (window.innerWidth < 1024) this.isSidebarOpen = false;
+  }
+
+  logout() {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    this.router.navigate(['/login']);
+  }
 }

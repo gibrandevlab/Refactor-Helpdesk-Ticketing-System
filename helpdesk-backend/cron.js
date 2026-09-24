@@ -49,7 +49,7 @@ async function getTeknisiId(identifier) {
 // ============================================================
 async function isTeknisiBusy(idTeknisi) {
     const [rows] = await db.query(`
-        SELECT COUNT(*) AS count FROM assignment_ticket 
+        SELECT COUNT(*) AS count FROM assignment_ticket
         WHERE id_teknisi = ? AND status_pengerjaan != 'Selesai'
     `, [idTeknisi]);
     return rows[0].count > 0;
@@ -64,11 +64,11 @@ async function processSchedules() {
         console.log(`📅 Waktu server: ${new Date().toISOString()}`);
 
         const adminNik = await getAdminNik();
-        console.log(`👤 Admin NIK: ${adminNik}`);
+        console.log(` Admin NIK: ${adminNik}`);
 
         // Ambil semua schedule aktif + aset
         const [schedules] = await db.query(`
-            SELECT 
+            SELECT
                 s.id_schedule,
                 s.nama_schedule,
                 s.id_departemen,
@@ -191,7 +191,7 @@ async function processSchedules() {
 
                     // 🔥 INSERT KE LIST_TICKET
                     await db.query(`
-                        INSERT INTO list_ticket 
+                        INSERT INTO list_ticket
                         (id_ticket, nik_pelapor, id_departemen, id_kategori, id_sub_kategori, kode_asset, deskripsi, lampiran, tanggal_lapor, status)
                         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                     `, [
@@ -224,7 +224,7 @@ async function processSchedules() {
                     const nextMaintenanceStr = nextMaintenanceDate.toISOString().split('T')[0];
 
                     await db.query(`
-                        UPDATE inventory 
+                        UPDATE inventory
                         SET last_maintenance = ?, next_maintenance = ?
                         WHERE kode_asset = ?
                     `, [now.toISOString().split('T')[0], nextMaintenanceStr, kodeAsset]);

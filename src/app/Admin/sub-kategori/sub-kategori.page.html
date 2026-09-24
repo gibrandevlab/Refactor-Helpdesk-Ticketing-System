@@ -17,7 +17,7 @@
           <span class="page-title-inline">Sub Kategori</span>
         </div>
         <div class="header-right">
-          <div class="header-avatar" routerLink="/admin/profile">
+          <div class="header-avatar" routerLink="/profile">
             <img [src]="'https://ui-avatars.com/api/?name=Admin&background=2563eb&color=fff&size=64&bold=true'" alt="Avatar" />
             <span class="header-avatar-name">Admin</span>
           </div>
@@ -35,7 +35,7 @@
           </div>
           <div class="header-right">
             <ion-button class="tambah-btn" fill="solid" (click)="openTambahModal()">
-              <ion-icon name="add-outline"></ion-icon>
+              <ion-icon name="add-outline" slot="start"></ion-icon>
               Tambah Sub Kategori
             </ion-button>
           </div>
@@ -74,10 +74,10 @@
                   <td>
                     <div class="action-buttons">
                       <ion-button fill="clear" size="small" class="edit-btn" (click)="openEditModal(item)">
-                        <ion-icon name="create-outline"></ion-icon>
+                        <ion-icon name="create-outline" slot="icon-only"></ion-icon>
                       </ion-button>
                       <ion-button fill="clear" size="small" class="hapus-btn" (click)="hapusSubKategori(item)">
-                        <ion-icon name="trash-outline"></ion-icon>
+                        <ion-icon name="trash-outline" slot="icon-only"></ion-icon>
                       </ion-button>
                     </div>
                   </td>
@@ -93,9 +93,13 @@
           <div class="table-footer" *ngIf="totalPages > 1">
             <span class="table-info">Menampilkan {{ pagedSubKategori.length }} dari {{ filteredSubKategori.length }} data</span>
             <div class="pagination">
-              <ion-button fill="clear" size="small" [disabled]="currentPage === 1" (click)="prevPage()"><ion-icon name="chevron-back-outline"></ion-icon></ion-button>
+              <ion-button fill="clear" size="small" [disabled]="currentPage === 1" (click)="prevPage()">
+                <ion-icon name="chevron-back-outline" slot="icon-only"></ion-icon>
+              </ion-button>
               <span class="page-number" *ngFor="let p of totalPagesArray" [class.active]="p === currentPage" (click)="goToPage(p)">{{ p }}</span>
-              <ion-button fill="clear" size="small" [disabled]="currentPage === totalPages" (click)="nextPage()"><ion-icon name="chevron-forward-outline"></ion-icon></ion-button>
+              <ion-button fill="clear" size="small" [disabled]="currentPage === totalPages" (click)="nextPage()">
+                <ion-icon name="chevron-forward-outline" slot="icon-only"></ion-icon>
+              </ion-button>
             </div>
           </div>
         </div>
@@ -114,14 +118,14 @@
 <!-- ========================================== -->
 <!-- MODAL TAMBAH/EDIT SUB KATEGORI            -->
 <!-- ========================================== -->
-<ion-modal [isOpen]="isModalOpen" (didDismiss)="closeModal()">
+<ion-modal [isOpen]="isModalOpen" (didDismiss)="closeModal()" class="custom-subkategori-modal">
   <ng-template>
     <ion-header>
       <ion-toolbar>
         <ion-title>{{ isEditing ? 'Edit Sub Kategori' : 'Tambah Sub Kategori' }}</ion-title>
         <ion-buttons slot="end">
           <ion-button (click)="closeModal()">
-            <ion-icon name="close-outline"></ion-icon>
+            <ion-icon name="close-outline" slot="icon-only"></ion-icon>
           </ion-button>
         </ion-buttons>
       </ion-toolbar>
@@ -129,16 +133,15 @@
     <ion-content class="modal-content">
       <div class="modal-body">
 
-        <!-- Kategori (DROPDOWN IONIC) -->
+        <!-- Kategori Dropdown -->
         <div class="form-group">
           <label class="form-label">Kategori <span class="required">*</span></label>
-          <ion-select
+          <select
             [(ngModel)]="formData.idKategori"
-            interface="popover"
-            placeholder="Pilih kategori..."
-            class="form-select">
-            <ion-select-option *ngFor="let k of kategoriOptions" [value]="k.id">{{ k.nama }}</ion-select-option>
-          </ion-select>
+            class="form-select-native">
+            <option [ngValue]="null" disabled selected hidden>Pilih Kategori...</option>
+            <option *ngFor="let k of kategoriOptions" [value]="k.id">{{ k.nama }}</option>
+          </select>
         </div>
 
         <!-- Nama Sub Kategori -->
@@ -149,10 +152,10 @@
 
         <!-- Tombol -->
         <div class="modal-actions">
-          <ion-button class="cancel-modal-btn" fill="outline" color="medium" (click)="closeModal()">
+          <ion-button class="cancel-modal-btn" fill="outline" (click)="closeModal()">
             Batal
           </ion-button>
-          <ion-button class="submit-modal-btn" (click)="simpanSubKategori()" [disabled]="!formData.idKategori || !formData.namaSubKategori">
+          <ion-button class="submit-modal-btn" fill="solid" (click)="simpanSubKategori()" [disabled]="!formData.idKategori || !formData.namaSubKategori || isSaving">
             <ion-icon name="save-outline" slot="start"></ion-icon>
             {{ isEditing ? 'Update' : 'Simpan' }}
           </ion-button>

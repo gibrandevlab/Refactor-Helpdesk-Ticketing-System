@@ -2,8 +2,15 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { IonicModule } from '@ionic/angular';
+import { IonicModule, ToastController, AlertController, IonicSafeString } from '@ionic/angular';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { addIcons } from 'ionicons';
+import {
+  menuOutline, peopleOutline, shieldCheckmarkOutline, constructOutline,
+  personOutline, addOutline, createOutline, trashOutline, chevronBackOutline,
+  chevronForwardOutline, closeOutline, saveOutline
+} from 'ionicons/icons';
+
 import { KaryawanService, AvailableKaryawan } from '../../services/karyawan.service';
 import { SidebarComponent } from '../shared/components/sidebar/sidebar.component';
 
@@ -32,7 +39,7 @@ export class UsersPage implements OnInit {
 
   userList: User[] = [];
   departemenMasterList: any[] = [];
-  availableKaryawan: AvailableKaryawan[] = []; // Data dropdown
+  availableKaryawan: AvailableKaryawan[] = [];
 
   get totalUsers() { return this.userList.length; }
   get totalAdmin() { return this.userList.filter(u => u.level && u.level.toLowerCase() === 'admin').length; }
@@ -43,7 +50,7 @@ export class UsersPage implements OnInit {
   filterLevel = '';
   filterDepartemen = '';
   levelOptions: string[] = ['Admin', 'Teknisi', 'Users'];
-  
+
   get departemenOptions(): string[] {
     const fromMaster = this.departemenMasterList.map(d => d.nama_departemen);
     const fromUsers = this.userList.map(u => u.departemen);
@@ -68,12 +75,33 @@ export class UsersPage implements OnInit {
   constructor(
     private router: Router,
     private http: HttpClient,
-    private karyawanService: KaryawanService // Inject
-  ) {}
+    private karyawanService: KaryawanService,
+    private toastCtrl: ToastController,
+    private alertCtrl: AlertController
+  ) {
+    addIcons({
+      menuOutline, peopleOutline, shieldCheckmarkOutline, constructOutline,
+      personOutline, addOutline, createOutline, trashOutline, chevronBackOutline,
+      chevronForwardOutline, closeOutline, saveOutline
+    });
+  }
 
   ngOnInit() {
     this.loadUsers();
     this.loadDepartemenMaster();
+  }
+
+  /** Helper Toast Notification */
+  async showToast(message: string, color: 'success' | 'danger' | 'warning' = 'success') {
+    const toast = await this.toastCtrl.create({
+      message,
+      duration: 3000,
+      position: 'top',
+      color,
+      cssClass: `custom-toast toast-${color}`,
+      buttons: [{ text: 'OK', role: 'cancel' }]
+    });
+    await toast.present();
   }
 
   loadUsers() {
@@ -93,7 +121,7 @@ export class UsersPage implements OnInit {
       error: (err) => {
         console.error('Gagal memuat data user:', err);
         if (err.status === 403 || err.status === 401) {
-          alert('Akses ditolak. Pastikan Anda login sebagai Admin!');
+          this.showToast('Akses ditolak. Pastikan Anda login sebagai Admin!', 'danger');
         }
       }
     });
@@ -111,7 +139,6 @@ export class UsersPage implements OnInit {
     });
   }
 
-  // Load data karyawan yang tersedia untuk dropdown
   loadAvailableKaryawan() {
     this.karyawanService.getAvailable().subscribe({
       next: (data) => {
@@ -121,16 +148,12 @@ export class UsersPage implements OnInit {
     });
   }
 
-  // Saat NIK dipilih, isi otomatis Nama, Departemen, dan Username
-  // 🔥 BARU: username otomatis dibuat sama persis dengan NIK karyawan
-  // yang dipilih (contoh: NIK "K0038" -> username "K0038"), admin tidak
-  // perlu input manual lagi.
   onNikChange() {
     const selected = this.availableKaryawan.find(k => k.nik === this.formData.nik);
     if (selected) {
       this.formData.nama = selected.nama;
       this.formData.departemen = selected.departemen;
-      this.formData.username = selected.nik; // 🔥 auto-fill username = NIK
+      this.formData.username = selected.nik;
     } else {
       this.formData.nama = '';
       this.formData.departemen = '';
@@ -151,8 +174,8 @@ export class UsersPage implements OnInit {
   get totalPages(): number {
     return Math.max(1, Math.ceil(this.filteredUsers.length / this.pageSize));
   }
-  get totalPagesArray(): number[] { 
-    return Array.from({ length: this.totalPages }, (_, i) => i + 1); 
+  get totalPagesArray(): number[] {
+    return Array.from({ length: this.totalPages }, (_, i) => i + 1);
   }
   get pagedUsers(): User[] {
     const start = (this.currentPage - 1) * this.pageSize;
@@ -167,23 +190,23 @@ export class UsersPage implements OnInit {
   openTambahModal() {
     this.isEditing = false;
     this.selectedId = null;
-    this.formData = { 
-      nik: '', 
-      username: '', 
-      nama: '', 
-      departemen: '', 
-      level: 'Users', 
-      password: '' 
+    this.formData = {
+      nik: '',
+      username: '',
+      nama: '',
+      departemen: '',
+      level: 'Users',
+      password: ''
     };
     this.loadDepartemenMaster();
-    this.loadAvailableKaryawan(); // Ambil data dropdown
+    this.loadAvailableKaryawan();
     this.isModalOpen = true;
   }
 
   openEditModal(u: User) {
     this.isEditing = true;
     this.selectedId = u.id_user || u.id || null;
-    this.formData = { ...u, password: '' }; 
+    this.formData = { ...u, password: '' };
     this.loadDepartemenMaster();
     this.isModalOpen = true;
   }
@@ -199,43 +222,56 @@ export class UsersPage implements OnInit {
     if (this.isEditing && this.selectedId !== null) {
       this.http.put(`http://localhost:5000/api/users/${this.selectedId}`, this.formData, { headers }).subscribe({
         next: () => {
-          alert('Data user berhasil diperbarui!');
+          this.showToast('Data user berhasil diperbarui!', 'success');
           this.closeModal();
           this.loadUsers();
         },
-        error: (err) => alert('Gagal memperbarui: ' + (err.error?.message || err.message))
+        error: (err) => this.showToast('Gagal memperbarui: ' + (err.error?.message || err.message), 'danger')
       });
     } else {
-      // Saat tambah, pastikan formData.nik sudah terisi dari dropdown
       if (!this.formData.nik) {
-        alert('Silakan pilih NIK Karyawan terlebih dahulu!');
+        this.showToast('Silakan pilih NIK Karyawan terlebih dahulu!', 'warning');
         return;
       }
       this.http.post('http://localhost:5000/api/users', this.formData, { headers }).subscribe({
         next: () => {
-          alert('User berhasil ditambahkan!');
+          this.showToast('User berhasil ditambahkan!', 'success');
           this.closeModal();
           this.loadUsers();
         },
-        error: (err) => alert('Gagal menambah user: ' + (err.error?.message || err.message))
+        error: (err) => this.showToast('Gagal menambah user: ' + (err.error?.message || err.message), 'danger')
       });
     }
   }
 
-  hapusUser(u: User) {
+  async hapusUser(u: User) {
     const targetId = u.id_user || u.id;
-    if (confirm(`Apakah Anda yakin ingin menghapus user ${u.username}?`)) {
-      const token = localStorage.getItem('token');
-      const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
+    const alertEl = await this.alertCtrl.create({
+      header: 'Hapus User',
+      message: new IonicSafeString(`Apakah Anda yakin ingin menghapus user <strong>${u.username}</strong>?`),
+      cssClass: 'custom-alert-dialog',
+      buttons: [
+        { text: 'Batal', role: 'cancel', cssClass: 'alert-button-cancel' },
+        {
+          text: 'Hapus',
+          role: 'destructive',
+          handler: () => {
+            const token = localStorage.getItem('token');
+            const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
 
-      this.http.delete(`http://localhost:5000/api/users/${targetId}`, { headers }).subscribe({
-        next: () => {
-          alert('User berhasil dihapus!');
-          this.loadUsers();
-        },
-        error: (err) => alert('Gagal menghapus: ' + (err.error?.message || err.message))
-      });
-    }
+            this.http.delete(`http://localhost:5000/api/users/${targetId}`, { headers }).subscribe({
+              next: () => {
+                this.showToast('User berhasil dihapus!', 'success');
+                this.loadUsers();
+              },
+              error: (err) => this.showToast('Gagal menghapus: ' + (err.error?.message || err.message), 'danger')
+            });
+          }
+        }
+      ]
+    });
+
+    await alertEl.present();
   }
 
   getLevelClass(level: string): string {
@@ -246,34 +282,14 @@ export class UsersPage implements OnInit {
     return 'level-users';
   }
 
-  // ===== NAVIGASI & SIDEBAR =====
-  toggleSidebar() { 
-    this.isSidebarOpen = !this.isSidebarOpen; 
+  toggleSidebar() {
+    this.isSidebarOpen = !this.isSidebarOpen;
   }
 
-  setActiveMenu(menu: string) { 
-    this.activeMenu = menu; 
+  setActiveMenu(menu: string) {
+    this.activeMenu = menu;
     if (window.innerWidth < 1024) this.isSidebarOpen = false;
   }
-
-  goToDashboard() { this.setActiveMenu('dashboard'); this.router.navigate(['/dashboard']); }
-  goToListTicket() { this.setActiveMenu('list-ticket'); this.router.navigate(['/list']); }
-  goToApprovalTicket() { this.setActiveMenu('approval-ticket'); this.router.navigate(['/approval']); }
-  goToAssignmentTicket() { this.setActiveMenu('assignment-ticket'); this.router.navigate(['/assignment']); }
-  goToKaryawan() { this.setActiveMenu('karyawan'); this.router.navigate(['/karyawan']); }
-  goToUser() { this.setActiveMenu('user'); this.router.navigate(['/users']); }
-  goToJabatan() { this.setActiveMenu('jabatan'); this.router.navigate(['/jabatan']); }
-  goToDepartemen() { this.setActiveMenu('departemen'); this.router.navigate(['/departemen']); }
-  goToBagianDepartemen() { this.setActiveMenu('bagian-departemen'); this.router.navigate(['/bagian-departemen']); }
-  goToKategori() { this.setActiveMenu('kategori'); this.router.navigate(['/kategori']); }
-  goToSubKategori() { this.setActiveMenu('sub-kategori'); this.router.navigate(['/sub-kategori']); }
-  goToTeknisi() { this.setActiveMenu('teknisi'); this.router.navigate(['/teknisi']); }
-  goToInventory() { this.setActiveMenu('inventory'); this.router.navigate(['/inventory']); }
-  goToSchedule() { this.setActiveMenu('schedule'); this.router.navigate(['/schedule']); } // 🛠️ Ditambahkan untuk mengatasi error TS2339
-  goToLaporanFeedback() { this.setActiveMenu('laporan-feedback'); this.router.navigate(['/laporan-feedback']); }
-  goToStatistikTicket() { this.setActiveMenu('statistik-ticket'); this.router.navigate(['/statistik-ticket']); }
-  goToProfile() { this.setActiveMenu('profile'); this.router.navigate(['/profile']); }
-  goToNotifikasi() { this.setActiveMenu('notifikasi'); }
 
   logout() {
     localStorage.removeItem('token');

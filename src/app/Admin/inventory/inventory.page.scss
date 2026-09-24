@@ -4,10 +4,11 @@
   --sidebar-bg-hover: #1e2a4a;
   --content-bg: #f4f6fb;
   --card-bg: #ffffff;
-  --text-dark: #0f172a;      /* Teks utama gelap pekat agar tajam */
-  --text-muted: #475569;     /* Teks sekunder/label jelas dibaca */
-  --border-color: #cbd5e1;   /* Garis pembatas lebih jelas */
+  --text-dark: #0f172a;
+  --text-muted: #475569;
+  --border-color: #cbd5e1;
   --danger: #ef4444;
+  --success: #22c55e;
 
   box-sizing: border-box;
 }
@@ -22,9 +23,8 @@
   --background: var(--content-bg);
 }
 
-/* ===================== CONTAINER & MAIN CONTENT ===================== */
 .dashboard-container {
-  display: block; /* UBAH DARI 'flex' MENJADI 'block' UNTUK MENCEGAH SIDEBAR FIXED DARI OVERFLOW */
+  display: block;
   min-height: 100vh;
   width: 100%;
   max-width: 100vw;
@@ -32,10 +32,10 @@
 }
 
 .main-content {
-  margin-left: 250px;
-  width: calc(100% - 250px);     /* Kunci lebar persis sisa layar */
-  max-width: calc(100% - 250px); /* Mencegah elemen di dalam memaksa melebar */
-  min-width: 0;                  /* Izinkan child flex element menyusut */
+  margin-left: var(--sidebar-width, 250px);
+  width: calc(100% - var(--sidebar-width, 250px));
+  max-width: calc(100% - var(--sidebar-width, 250px));
+  min-width: 0;
   display: flex;
   flex-direction: column;
   box-sizing: border-box;
@@ -147,8 +147,10 @@
 }
 
 .tambah-btn {
+  --background: var(--primary);
   --border-radius: 8px;
   font-weight: 600;
+  font-size: 13px;
 }
 
 .export-btn {
@@ -156,6 +158,7 @@
   font-weight: 600;
   --color: var(--primary);
   --border-color: var(--primary);
+  font-size: 13px;
 }
 
 /* ===================== DASHBOARD CHART CARD ===================== */
@@ -190,11 +193,6 @@
 
 .stats-filter {
   max-width: 200px;
-  border: 1px solid var(--border-color);
-  border-radius: 8px;
-  padding: 2px 10px;
-  background: var(--card-bg);
-  --color: var(--text-dark);
 }
 
 .bar-chart {
@@ -317,13 +315,14 @@
 
 .filter-group {
   flex: 1 1 200px;
-  min-width: 0; /* WAJIB UNTUK MEMAKSA ION-SELECT MENYUSUT SAAT TERBATAS */
+  min-width: 0;
   max-width: 100%;
 }
 
 .filter-input {
   width: 100%;
-  padding: 9px 14px;
+  height: 42px;
+  padding: 8px 14px;
   border: 1px solid var(--border-color);
   border-radius: 8px;
   background: var(--card-bg);
@@ -335,25 +334,51 @@
   &::placeholder {
     color: #94a3b8;
   }
+
+  &:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+  }
 }
 
-.filter-input:focus {
-  border-color: var(--primary);
-}
+/* 🔥 NATIVE DROPDOWN SELECT STYLING */
+.form-select-native {
+  width: 100% !important;
+  height: 42px !important;
+  padding: 8px 34px 8px 12px !important;
+  font-size: 13.5px !important;
+  font-weight: 600 !important;
+  color: #0f172a !important;
+  background-color: #ffffff !important;
+  border: 1px solid #cbd5e1 !important;
+  border-radius: 8px !important;
+  outline: none !important;
+  appearance: none !important;
+  -webkit-appearance: none !important;
+  -moz-appearance: none !important;
 
-.filter-group ion-select {
-  width: 100%;
-  max-width: 100%;
-  background: var(--card-bg);
-  border: 1px solid var(--border-color);
-  border-radius: 8px;
-  padding: 4px 12px;
-  --color: var(--text-dark);
-  font-size: 13px;
-  min-height: 38px;
-  display: flex;
-  align-items: center;
-  box-sizing: border-box;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%3c0f172a' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e") !important;
+  background-repeat: no-repeat !important;
+  background-position: right 12px center !important;
+  background-size: 15px !important;
+  cursor: pointer !important;
+
+  &:focus {
+    border-color: var(--primary) !important;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1) !important;
+  }
+
+  &:disabled {
+    background-color: #f1f5f9 !important;
+    color: #94a3b8 !important;
+    cursor: not-allowed !important;
+  }
+
+  option {
+    background-color: #ffffff !important;
+    color: #0f172a !important;
+    padding: 10px !important;
+  }
 }
 
 /* ===================== TABLE CARD ===================== */
@@ -439,6 +464,34 @@
   display: inline-block;
 }
 
+.status-badge {
+  display: inline-block;
+  font-size: 11.5px;
+  font-weight: 700;
+  padding: 4px 12px;
+  border-radius: 20px;
+
+  &.status-aktif, &.status-success {
+    background: #dcfce7;
+    color: #15803d;
+  }
+
+  &.status-nonaktif, &.status-danger {
+    background: #fee2e2;
+    color: #b91c1c;
+  }
+
+  &.status-warning {
+    background: #fef3c7;
+    color: #b45309;
+  }
+
+  &.status-medium, &.status-default {
+    background: #f1f5f9;
+    color: var(--text-muted);
+  }
+}
+
 .action-buttons {
   display: flex;
   align-items: center;
@@ -470,7 +523,6 @@
   align-items: center;
   flex-wrap: wrap;
   gap: 12px;
-  margin-top: 0;
   padding: 14px 18px;
   border-top: 1px solid var(--border-color);
   background: #f8fafc;
@@ -500,50 +552,69 @@
   font-weight: 600;
   cursor: pointer;
   border: 1px solid var(--border-color);
-}
 
-.page-number:hover {
-  background: #e2e8f0;
-}
+  &:hover {
+    background: #e2e8f0;
+  }
 
-.page-number.active {
-  background: var(--primary);
-  color: #fff;
-  border-color: var(--primary);
-  font-weight: 700;
+  &.active {
+    background: var(--primary);
+    color: #fff;
+    border-color: var(--primary);
+    font-weight: 700;
+  }
 }
 
 .empty-state {
   text-align: center;
   padding: 40px 20px;
   color: var(--text-muted);
-}
 
-.empty-state ion-icon {
-  font-size: 48px;
-  color: #cbd5e1;
-  margin-bottom: 12px;
-}
+  ion-icon {
+    font-size: 48px;
+    color: #cbd5e1;
+    margin-bottom: 12px;
+  }
 
-.empty-state h3 {
-  color: var(--text-dark);
-  margin: 0 0 4px;
+  h3 {
+    color: var(--text-dark);
+    margin: 0 0 4px;
+  }
 }
 
 /* ========================================== */
-/* MODAL STYLING                              */
+/* 🔥 MODAL CONTAINER & STYLING               */
 /* ========================================== */
-.modal-content {
-  --background: #f9fafb;
+ion-modal.custom-inventory-modal {
+  --width: 90%;
+  --max-width: 550px;
+  --border-radius: 16px;
+  --box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.15);
+
+  &.wide {
+    --max-width: 720px;
+  }
+
+  ion-toolbar {
+    --background: #ffffff;
+    --color: #0f172a;
+    --border-color: #cbd5e1;
+    font-weight: 700;
+    padding: 4px 8px;
+  }
+
+  ion-content {
+    --background: #ffffff;
+  }
 }
 
 .modal-body {
-  padding: 24px;
-  max-width: 500px;
+  padding: 20px 24px;
+  max-width: 550px;
   margin: 0 auto;
 
   &.wide {
-    max-width: 640px;
+    max-width: 700px;
   }
 }
 
@@ -569,26 +640,19 @@
   color: var(--danger);
 }
 
-/* Memperjelas warna teks di dalam ion-input dan ion-select */
-ion-input, ion-select {
+/* 🔥 ION INPUT STYLING */
+ion-input.form-input {
   --color: #0f172a !important;
   --placeholder-color: #64748b !important;
-  --placeholder-opacity: 1;
-  background: #ffffff !important;
-  border: 1px solid var(--border-color);
-  border-radius: 8px;
-  font-size: 14px;
-  font-weight: 500;
-  margin-top: 4px;
-}
-
-.form-input, .form-select {
-  background: #ffffff !important;
+  --placeholder-opacity: 1 !important;
+  --background: #ffffff !important;
+  --padding-start: 12px !important;
+  --padding-end: 12px !important;
+  border: 1px solid #cbd5e1 !important;
+  border-radius: 8px !important;
+  font-size: 13.5px !important;
+  font-weight: 500 !important;
   color: #0f172a !important;
-  border: 1px solid var(--border-color);
-  border-radius: 8px;
-  --padding-start: 14px;
-  --padding-end: 14px;
 }
 
 .modal-actions {
@@ -667,7 +731,6 @@ ion-input, ion-select {
   color: #fff;
 }
 
-/* DETAIL LOADING */
 .detail-loading {
   display: flex;
   flex-direction: column;
@@ -678,7 +741,6 @@ ion-input, ion-select {
   font-size: 13px;
 }
 
-/* FORM CARD PER TAB */
 .detail-form-card {
   background: var(--card-bg);
   border: 1px solid var(--border-color);
@@ -698,10 +760,9 @@ ion-input, ion-select {
   display: flex;
   justify-content: flex-end;
   gap: 8px;
-  margin-top: 8px;
+  margin-top: 12px;
 }
 
-/* LIST ITEM */
 .detail-list {
   display: flex;
   flex-direction: column;
@@ -746,32 +807,6 @@ ion-input, ion-select {
 .detail-date {
   font-size: 11.5px;
   color: var(--text-muted);
-}
-
-.badge-pill {
-  display: inline-block;
-  background: var(--content-bg);
-  padding: 1px 8px;
-  border-radius: 10px;
-  font-size: 11px;
-  width: fit-content;
-}
-
-.detail-list-actions {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  flex-shrink: 0;
-
-  ion-icon {
-    font-size: 17px;
-    color: var(--text-muted);
-    cursor: pointer;
-    transition: color 0.15s;
-
-    &:hover { color: var(--primary); }
-    &:last-child:hover { color: var(--danger); }
-  }
 }
 
 .detail-list-empty {
@@ -825,11 +860,6 @@ ion-input, ion-select {
   align-items: center;
   gap: 8px;
   flex-wrap: wrap;
-
-  ion-badge {
-    font-size: 10.5px;
-    text-transform: capitalize;
-  }
 }
 
 .ticket-id-text {
@@ -853,28 +883,11 @@ ion-input, ion-select {
   color: var(--text-muted);
 }
 
-/* RESPONSIVE */
-@media (max-width: 640px) {
-  .form-row {
-    grid-template-columns: 1fr;
-  }
-  .modal-body.wide {
-    max-width: 100%;
-  }
-  .detail-tabs {
-    padding: 0 8px;
-  }
-  .tab-btn {
-    padding: 10px 10px;
-    font-size: 12px;
-  }
-}
-
 .history-subtabs {
   display: flex;
   gap: 8px;
   margin-bottom: 16px;
-  border-bottom: 1px solid #e2e8f0;
+  border-bottom: 1px solid #cbd5e1;
 }
 
 .history-subtab-btn {
@@ -885,19 +898,19 @@ ion-input, ion-select {
   border: none;
   background: transparent;
   color: #64748b;
-  font-size: 14px;
+  font-size: 13.5px;
   cursor: pointer;
   border-bottom: 2px solid transparent;
-}
 
-.history-subtab-btn.active {
-  color: #2563eb;
-  border-bottom-color: #2563eb;
-  font-weight: 600;
+  &.active {
+    color: var(--primary);
+    border-bottom-color: var(--primary);
+    font-weight: 700;
+  }
 }
 
 .holder-group {
-  border: 1px solid #e2e8f0;
+  border: 1px solid #cbd5e1;
   border-radius: 8px;
   margin-bottom: 12px;
   overflow: hidden;
@@ -928,4 +941,21 @@ ion-input, ion-select {
 
 .holder-group-period {
   white-space: nowrap;
+}
+
+/* RESPONSIVE */
+@media (max-width: 640px) {
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+  .modal-body.wide {
+    max-width: 100%;
+  }
+  .detail-tabs {
+    padding: 0 8px;
+  }
+  .tab-btn {
+    padding: 10px 10px;
+    font-size: 12px;
+  }
 }

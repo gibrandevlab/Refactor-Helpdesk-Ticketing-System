@@ -2,7 +2,18 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { IonicModule, AlertController } from '@ionic/angular';
+import { IonicModule, AlertController, ToastController } from '@ionic/angular';
+import { addIcons } from 'ionicons';
+import {
+  menuOutline,
+  searchOutline,
+  imageOutline,
+  checkmarkOutline,
+  closeOutline,
+  chevronBackOutline,
+  chevronForwardOutline
+} from 'ionicons/icons';
+
 import { TicketService } from '../../services/ticket.service';
 import { environment } from '../../../environments/environment';
 import { SidebarComponent } from '../shared/components/sidebar/sidebar.component';
@@ -65,12 +76,51 @@ export class ApprovalTicketPage implements OnInit {
   constructor(
     private router: Router,
     private ticketService: TicketService,
-    private alertCtrl: AlertController
-  ) {}
+    private alertCtrl: AlertController,
+    private toastCtrl: ToastController
+  ) {
+    // 🔥 Registrasi icon agar muncul di Angular Standalone Component
+    addIcons({
+      menuOutline,
+      searchOutline,
+      imageOutline,
+      checkmarkOutline,
+      closeOutline,
+      chevronBackOutline,
+      chevronForwardOutline
+    });
+  }
 
   ngOnInit() {
     this.loadApprovalTickets();
     this.loadReturnedTickets();
+  }
+
+  /** Helper Toast Notification */
+  async showToast(message: string, color: 'success' | 'danger' | 'warning' = 'success') {
+    const toast = await this.toastCtrl.create({
+      message,
+      duration: 3000,
+      position: 'top',
+      color,
+      buttons: [{ text: 'OK', role: 'cancel' }]
+    });
+    await toast.present();
+  }
+
+  /** Format Tanggal Ramah Pengguna */
+  formatDate(rawDate: string | null | undefined): string {
+    if (!rawDate) return '-';
+    const d = new Date(String(rawDate).trim().replace(' ', 'T'));
+    if (isNaN(d.getTime())) return rawDate;
+
+    return d.toLocaleDateString('id-ID', {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    }).replace('.', ':');
   }
 
   loadApprovalTickets() {
@@ -123,27 +173,39 @@ export class ApprovalTicketPage implements OnInit {
     });
   }
 
-  approveTicket(ticket: ApprovalTicket) {
+  /** Confirm & Approve Ticket dengan AlertController */
+  async approveTicket(ticket: ApprovalTicket) {
     if (!ticket?.id_ticket) {
-      alert('ID Tiket tidak valid.');
+      this.showToast('ID Tiket tidak valid.', 'warning');
       return;
     }
-    if (!confirm(`Setujui tiket ${ticket.id_ticket}?`)) return;
-    this.ticketService.approve(ticket.id_ticket, 'Approve').subscribe({
-      next: () => {
-        this.loadApprovalTickets();
-        alert('Tiket berhasil disetujui.');
-      },
-      error: (err: any) => alert('Gagal approve: ' + (err.error?.message || err.message))
+
+    const alertEl = await this.alertCtrl.create({
+      header: 'Konfirmasi Approval',
+      message: `Apakah Anda yakin ingin menyetujui tiket <strong>${ticket.id_ticket}</strong>?`,
+      buttons: [
+        { text: 'Batal', role: 'cancel' },
+        {
+          text: 'Setujui',
+          handler: () => {
+            this.ticketService.approve(ticket.id_ticket, 'Approve').subscribe({
+              next: () => {
+                this.loadApprovalTickets();
+                this.showToast('Tiket berhasil disetujui!', 'success');
+              },
+              error: (err: any) => this.showToast('Gagal approve: ' + (err.error?.message || err.message), 'danger')
+            });
+          }
+        }
+      ]
     });
+    await alertEl.present();
   }
 
-  // =========================================================
-  // 🔥 REJECT TICKET — sekarang wajib isi alasan lewat AlertController
-  // =========================================================
+  /** Reject Ticket dengan Input Alasan Wajib */
   async rejectTicket(ticket: ApprovalTicket) {
     if (!ticket?.id_ticket) {
-      alert('ID Tiket tidak valid.');
+      this.showToast('ID Tiket tidak valid.', 'warning');
       return;
     }
 
@@ -166,7 +228,7 @@ export class ApprovalTicketPage implements OnInit {
           handler: (data) => {
             const alasan = (data?.alasan || '').trim();
             if (!alasan) {
-              // return false -> alert tidak ditutup, alasan wajib diisi dulu
+              this.showToast('Alasan penolakan wajib diisi!', 'warning');
               return false;
             }
             this.doRejectTicket(ticket, alasan);
@@ -183,48 +245,77 @@ export class ApprovalTicketPage implements OnInit {
     this.ticketService.approve(ticket.id_ticket, 'Reject', alasan).subscribe({
       next: () => {
         this.loadApprovalTickets();
-        alert('Tiket ditolak.');
+        this.showToast('Tiket berhasil ditolak.', 'success');
       },
-      error: (err: any) => alert('Gagal reject: ' + (err.error?.message || err.message)),
+      error: (err: any) => this.showToast('Gagal reject: ' + (err.error?.message || err.message), 'danger'),
     });
   }
 
-  approveReturn(ticket: ReturnedTicket) {
+  /** Confirm & Approve Return Ticket */
+  async approveReturn(ticket: ReturnedTicket) {
     if (!ticket?.id_ticket) {
-      alert('ID Tiket tidak valid atau kosong.');
+      this.showToast('ID Tiket tidak valid.', 'warning');
       return;
     }
-    if (!confirm(`Setujui pengembalian tiket ${ticket.id_ticket}? Tiket akan kembali ke status Menunggu Approval.`)) return;
-    this.ticketService.reviewReturn(ticket.id_ticket, 'Approve').subscribe({
-      next: () => {
-        this.loadReturnedTickets();
-        this.loadApprovalTickets();
-        alert('Pengembalian disetujui.');
-      },
-      error: (err: any) => alert('Gagal approve return: ' + (err.error?.message || err.message))
+
+    const alertEl = await this.alertCtrl.create({
+      header: 'Setujui Pengembalian',
+      message: `Setujui pengembalian tiket <strong>${ticket.id_ticket}</strong>? Tiket akan siap di-assign ulang.`,
+      buttons: [
+        { text: 'Batal', role: 'cancel' },
+        {
+          text: 'Setujui',
+          handler: () => {
+            this.ticketService.reviewReturn(ticket.id_ticket, 'Approve').subscribe({
+              next: () => {
+                this.loadReturnedTickets();
+                this.loadApprovalTickets();
+                this.showToast('Pengembalian tiket berhasil disetujui.', 'success');
+              },
+              error: (err: any) => this.showToast('Gagal approve return: ' + (err.error?.message || err.message), 'danger')
+            });
+          }
+        }
+      ]
     });
+    await alertEl.present();
   }
 
-  rejectReturn(ticket: ReturnedTicket) {
+  /** Confirm & Reject Return Ticket */
+  async rejectReturn(ticket: ReturnedTicket) {
     if (!ticket?.id_ticket) {
-      alert('ID Tiket tidak valid atau kosong.');
+      this.showToast('ID Tiket tidak valid.', 'warning');
       return;
     }
-    if (!confirm(`Tolak pengembalian tiket ${ticket.id_ticket}? Tiket akan kembali ke teknisi.`)) return;
-    this.ticketService.reviewReturn(ticket.id_ticket, 'Reject').subscribe({
-      next: () => {
-        this.loadReturnedTickets();
-        alert('Pengembalian ditolak.');
-      },
-      error: (err: any) => alert('Gagal reject return: ' + (err.error?.message || err.message))
+
+    const alertEl = await this.alertCtrl.create({
+      header: 'Tolak Pengembalian',
+      message: `Tolak pengembalian tiket <strong>${ticket.id_ticket}</strong>? Tiket akan dikembalikan ke teknisi.`,
+      buttons: [
+        { text: 'Batal', role: 'cancel' },
+        {
+          text: 'Tolak',
+          role: 'destructive',
+          handler: () => {
+            this.ticketService.reviewReturn(ticket.id_ticket, 'Reject').subscribe({
+              next: () => {
+                this.loadReturnedTickets();
+                this.showToast('Pengembalian tiket ditolak.', 'success');
+              },
+              error: (err: any) => this.showToast('Gagal reject return: ' + (err.error?.message || err.message), 'danger')
+            });
+          }
+        }
+      ]
     });
+    await alertEl.present();
   }
 
   get filteredApprovalTickets(): ApprovalTicket[] {
     const term = this.searchTerm.trim().toLowerCase();
     return this.approvalTickets.filter((t) => {
-      const matchSearch = !term || 
-        t.id_ticket.toLowerCase().includes(term) || 
+      const matchSearch = !term ||
+        t.id_ticket.toLowerCase().includes(term) ||
         t.reported.toLowerCase().includes(term);
       const matchStatus = !this.filterStatus || t.status_approval === this.filterStatus;
       const matchDept = !this.filterDepartemen || t.dept === this.filterDepartemen;
@@ -261,24 +352,7 @@ export class ApprovalTicketPage implements OnInit {
   }
 
   // ===== NAVIGASI MENU =====
-  goToDashboard() { this.setActiveMenu('dashboard'); this.router.navigate(['/dashboard']); }
-  goToListTicket() { this.setActiveMenu('list-ticket'); this.router.navigate(['/list']); }
-  goToApprovalTicket() { this.setActiveMenu('approval-ticket'); this.router.navigate(['/approval']); }
-  goToAssignmentTicket() { this.setActiveMenu('assignment-ticket'); this.router.navigate(['/assignment']); }
-  goToKaryawan() { this.setActiveMenu('karyawan'); this.router.navigate(['/karyawan']); }
-  goToUser() { this.setActiveMenu('user'); this.router.navigate(['/users']); }
-  goToJabatan() { this.setActiveMenu('jabatan'); this.router.navigate(['/jabatan']); }
-  goToDepartemen() { this.setActiveMenu('departemen'); this.router.navigate(['/departemen']); }
-  goToBagianDepartemen() { this.setActiveMenu('bagian-departemen'); this.router.navigate(['/bagian-departemen']); }
-  goToKategori() { this.setActiveMenu('kategori'); this.router.navigate(['/kategori']); }
-  goToSubKategori() { this.setActiveMenu('sub-kategori'); this.router.navigate(['/sub-kategori']); }
-  goToTeknisi() { this.setActiveMenu('teknisi'); this.router.navigate(['/teknisi']); }
-  goToInventory() { this.setActiveMenu('inventory'); this.router.navigate(['/inventory']); }
-  goToSchedule() { this.setActiveMenu('schedule'); this.router.navigate(['/schedule']); }
-  goToLaporanFeedback() { this.setActiveMenu('laporan-feedback'); this.router.navigate(['/laporan-feedback']); }
-  goToStatistikTicket() { this.setActiveMenu('statistik-ticket'); this.router.navigate(['/statistik-ticket']); }
-  goToProfile() { this.setActiveMenu('profile'); this.router.navigate(['/profile']); }
-  goToNotifikasi() { this.setActiveMenu('notifikasi'); }
+
 
   logout() {
     localStorage.removeItem('token');

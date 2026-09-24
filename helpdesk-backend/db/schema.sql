@@ -292,11 +292,27 @@ SELECT
     (SELECT COUNT(*) FROM list_ticket) AS total_tiket,
     (SELECT COUNT(*) FROM karyawan) AS total_karyawan,
     (SELECT COUNT(*) FROM user WHERE status = 'Aktif') AS total_user_aktif,
+    (SELECT COUNT(*) FROM user WHERE status = 'Aktif') AS total_user,
     (SELECT COUNT(*) FROM teknisi WHERE status = 'Aktif') AS total_teknisi_aktif,
+    (SELECT COUNT(*) FROM teknisi WHERE status = 'Aktif') AS total_teknisi,
     (SELECT COUNT(*) FROM inventory) AS total_asset,
     (SELECT COUNT(*) FROM list_ticket WHERE status = 'Solved') AS tiket_solved,
+    (SELECT COUNT(*) FROM list_ticket WHERE status = 'Solved') AS solved,
     (SELECT COUNT(*) FROM list_ticket WHERE status = 'On Process') AS tiket_on_process,
+    (SELECT COUNT(*) FROM list_ticket WHERE status = 'On Process') AS on_progress,
     (SELECT COUNT(*) FROM list_ticket WHERE status = 'Menunggu Approval') AS tiket_menunggu_approval,
+    (SELECT COUNT(*) FROM list_ticket WHERE status = 'Menunggu Approval') AS waiting_approval,
     (SELECT COUNT(*) FROM list_ticket WHERE status = 'Reject') AS tiket_reject,
     (SELECT COUNT(*) FROM laporan_feedback WHERE feedback = 'Positif') AS feedback_positif,
     (SELECT COUNT(*) FROM laporan_feedback WHERE feedback = 'Negatif') AS feedback_negatif;
+
+CREATE TABLE tb_feedback (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  id_ticket VARCHAR(50) NOT NULL,
+  id_user INT NOT NULL,
+  id_teknisi INT NULL,
+  rating TINYINT NOT NULL CHECK (rating BETWEEN 1 AND 5),
+  komentar TEXT NULL,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (id_ticket) REFERENCES tb_ticket(id_ticket) ON DELETE CASCADE
+);

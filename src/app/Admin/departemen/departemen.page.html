@@ -22,7 +22,7 @@
           <span class="page-title-inline">Departemen</span>
         </div>
         <div class="header-right">
-          <div class="header-avatar" routerLink="/admin/profile">
+          <div class="header-avatar" routerLink="/profile">
             <img
               [src]="'https://ui-avatars.com/api/?name=Admin&background=2563eb&color=fff&size=64&bold=true'"
               alt="Avatar"
@@ -37,7 +37,7 @@
         <div class="page-header">
           <div class="header-left">
             <div>
-              <h1 class="page-title">📂 Data Departemen</h1>
+              <h1 class="page-title">Data Departemen</h1>
               <p class="page-subtitle">Kelola data departemen perusahaan</p>
             </div>
           </div>
@@ -47,7 +47,7 @@
               fill="solid"
               (click)="openTambahModal()"
             >
-              <ion-icon name="add-outline"></ion-icon>
+              <ion-icon name="add-outline" slot="start"></ion-icon>
               Tambah Departemen
             </ion-button>
           </div>
@@ -173,7 +173,7 @@
 <!-- ========================================== -->
 <!-- 🔥 MODAL TAMBAH/EDIT DEPARTEMEN            -->
 <!-- ========================================== -->
-<ion-modal [isOpen]="isModalOpen" (didDismiss)="closeModal()">
+<ion-modal [isOpen]="isModalOpen" (didDismiss)="closeModal()" class="custom-departemen-modal">
   <ng-template>
     <ion-header>
       <ion-toolbar>
@@ -207,7 +207,6 @@
           <ion-button
             class="cancel-modal-btn"
             fill="outline"
-            color="medium"
             (click)="closeModal()"
           >
             Batal

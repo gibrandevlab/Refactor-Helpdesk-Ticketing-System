@@ -100,11 +100,11 @@ export class DashboardPage implements OnInit, AfterViewInit {
         // 1. Mapping Data Statistik
         const summary = data.summary || {};
         this.totalTicket = summary.total_tiket || 0;
-        this.waitingApproval = summary.waiting_approval || 0;
-        this.onProgress = summary.on_progress || 0;
-        this.closedTicket = summary.solved || 0;
-        this.totalUser = summary.total_user || 0;
-        this.totalTeknisi = summary.total_teknisi || 0;
+        this.waitingApproval = summary.waiting_approval ?? summary.tiket_menunggu_approval ?? 0;
+        this.onProgress = summary.on_progress ?? summary.tiket_on_process ?? 0;
+        this.closedTicket = summary.solved ?? summary.tiket_solved ?? 0;
+        this.totalUser = summary.total_user ?? summary.total_user_aktif ?? summary.total_karyawan ?? 0;
+        this.totalTeknisi = summary.total_teknisi ?? summary.total_teknisi_aktif ?? 0;
         this.totalAsset = summary.total_asset || 0;
         this.pendingCount = this.waitingApproval;
 
@@ -151,7 +151,8 @@ export class DashboardPage implements OnInit, AfterViewInit {
       error: (err: any) => {
         console.error('Gagal memuat dashboard', err);
         this.isLoading = false;
-        alert('Gagal mengambil data dashboard. Pastikan tabel v_dashboard_summary ada di database.');
+        const msg = err?.error?.message || 'Gagal mengambil data dashboard. Pastikan view v_dashboard_summary ada di database.';
+        alert(msg);
       }
     });
   }
@@ -253,6 +254,6 @@ export class DashboardPage implements OnInit, AfterViewInit {
   }
 
   getPageSubtitle(): string {
-    return `Selamat datang kembali, ${this.user.nama} 👋`;
+    return `Selamat datang kembali, ${this.user.nama} `;
   }
 }

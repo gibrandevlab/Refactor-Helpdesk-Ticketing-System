@@ -2,9 +2,20 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { IonContent, IonButton, IonIcon, IonSelect, IonSelectOption } from '@ionic/angular/standalone';
-import { AssignmentService } from '../../services/assignment.service ';
-import { TicketService } from '../../services/ticket.service'; // 🔥 Tambahkan TicketService
+import { IonicModule, ToastController, AlertController, IonicSafeString } from '@ionic/angular';
+import { addIcons } from 'ionicons';
+import {
+  menuOutline,
+  searchOutline,
+  checkmarkOutline,
+  closeOutline,
+  chevronBackOutline,
+  chevronForwardOutline
+} from 'ionicons/icons';
+
+import { HttpClientModule } from '@angular/common/http';
+import { AssignmentService } from '../../services/assignment.service';
+import { TicketService } from '../../services/ticket.service';
 import { TeknisiOption } from '../../services/teknisi.service';
 import { SidebarComponent } from '../shared/components/sidebar/sidebar.component';
 
@@ -29,16 +40,14 @@ export interface AssignmentTicket {
   templateUrl: './assignment.page.html',
   styleUrls: ['./assignment.page.scss'],
   standalone: true,
-  imports: [CommonModule, FormsModule, IonContent, IonButton, IonIcon, IonSelect, IonSelectOption, SidebarComponent],
+  imports: [CommonModule, FormsModule, HttpClientModule, IonicModule, SidebarComponent],
+  providers: [AssignmentService]
 })
 export class AssignmentTicketPage implements OnInit {
   isSidebarOpen = false;
   activeMenu = 'assignment-ticket';
 
-  // ===== TIKET BARU (Assignable) =====
   tickets: AssignmentTicket[] = [];
-  
-  // 🔥 TIKET KEMBALI (Returned)
   returnedTickets: any[] = [];
 
   isLoading = false;
@@ -46,8 +55,6 @@ export class AssignmentTicketPage implements OnInit {
 
   searchTerm = '';
   filterKategori = '';
-  
-  // 🔥 Filter Status
   filterStatus: 'assignable' | 'returned' = 'assignable';
 
   kategoriOptions: string[] = [];
@@ -58,12 +65,51 @@ export class AssignmentTicketPage implements OnInit {
   constructor(
     private router: Router,
     private assignmentService: AssignmentService,
-    private ticketService: TicketService // 🔥 Inject TicketService
-  ) {}
+    private ticketService: TicketService,
+    private toastCtrl: ToastController,
+    private alertCtrl: AlertController
+  ) {
+    addIcons({
+      menuOutline,
+      searchOutline,
+      checkmarkOutline,
+      closeOutline,
+      chevronBackOutline,
+      chevronForwardOutline
+    });
+  }
 
   ngOnInit() {
     this.loadAssignableTickets();
     this.loadReturnedTickets();
+  }
+
+  /** Helper Toast Notification */
+  async showToast(message: string, color: 'success' | 'danger' | 'warning' = 'success') {
+    const toast = await this.toastCtrl.create({
+      message,
+      duration: 3000,
+      position: 'top',
+      color,
+      cssClass: `custom-toast toast-${color}`,
+      buttons: [{ text: 'OK', role: 'cancel' }]
+    });
+    await toast.present();
+  }
+
+  /** Format Tanggal Ramah Pengguna */
+  formatDate(rawDate: string | null | undefined): string {
+    if (!rawDate) return '-';
+    const d = new Date(String(rawDate).trim().replace(' ', 'T'));
+    if (isNaN(d.getTime())) return rawDate;
+
+    return d.toLocaleDateString('id-ID', {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    }).replace('.', ':');
   }
 
   loadAssignableTickets() {
@@ -88,7 +134,7 @@ export class AssignmentTicketPage implements OnInit {
           prioritas: row.prioritas || row.priority || 'Normal',
           deadline: row.deadline || null,
         }));
-        
+
         this.buildFilterOptions();
         this.isLoading = false;
 
@@ -102,7 +148,6 @@ export class AssignmentTicketPage implements OnInit {
     });
   }
 
-  // 🔥 Load tiket yang dikembalikan
   loadReturnedTickets() {
     this.ticketService.getReturnedTickets().subscribe({
       next: (res) => {
@@ -132,10 +177,9 @@ export class AssignmentTicketPage implements OnInit {
     this.kategoriOptions = [...new Set(this.tickets.map((t) => t.kategori))];
   }
 
-  // 🔥 Logic filter utama
   get filteredTickets(): any[] {
+    const term = this.searchTerm.trim().toLowerCase();
     if (this.filterStatus === 'assignable') {
-      const term = this.searchTerm.trim().toLowerCase();
       return this.tickets.filter((t) => {
         const matchSearch =
           !term ||
@@ -145,7 +189,6 @@ export class AssignmentTicketPage implements OnInit {
         return matchSearch && matchKategori;
       });
     } else {
-      const term = this.searchTerm.trim().toLowerCase();
       return this.returnedTickets.filter((t: any) => {
         const matchSearch =
           !term ||
@@ -185,7 +228,6 @@ export class AssignmentTicketPage implements OnInit {
     if (this.currentPage < this.totalPages) this.currentPage++;
   }
 
-  // 🔥 Helper untuk badge CSS prioritas
   getPrioritasClass(prioritas: string): string {
     const p = prioritas?.toLowerCase() || 'normal';
     if (p === 'low') return 'prioritas-low';
@@ -193,36 +235,71 @@ export class AssignmentTicketPage implements OnInit {
     return 'prioritas-normal';
   }
 
-  // 🔥 Admin: Assign biasa
-  onAssign(ticket: AssignmentTicket) {
+  /** Assign Tiket Ke Teknisi */
+  async onAssign(ticket: AssignmentTicket) {
     if (!ticket.teknisiTerpilih) {
-      alert(`Silakan pilih teknisi terlebih dahulu untuk ticket ${ticket.idTicket}!`);
+      this.showToast(`Silakan pilih teknisi terlebih dahulu untuk tiket ${ticket.idTicket}!`, 'warning');
       return;
     }
 
-    this.assignmentService.assignTicket(ticket.idTicket, ticket.teknisiTerpilih, ticket.prioritas).subscribe({
-      next: () => {
-        alert(`Tiket ${ticket.idTicket} berhasil di-assign dengan prioritas ${ticket.prioritas}!`);
-        this.loadAssignableTickets();
-      },
-      error: (err: any) => {
-        console.error('Gagal assign tiket:', err);
-        alert(err?.error?.message || 'Gagal assign tiket.');
-      }
+    const alertEl = await this.alertCtrl.create({
+      header: 'Konfirmasi Assignment',
+      message: new IonicSafeString(`Assign tiket <strong>${ticket.idTicket}</strong> dengan prioritas <strong>${ticket.prioritas}</strong>?`),
+      cssClass: 'custom-alert-dialog',
+      buttons: [
+        { text: 'Batal', role: 'cancel', cssClass: 'alert-button-cancel' },
+        {
+          text: 'Assign',
+          handler: () => {
+            this.assignmentService.assignTicket(ticket.idTicket, ticket.teknisiTerpilih!, ticket.prioritas).subscribe({
+              next: () => {
+                this.showToast(`Tiket ${ticket.idTicket} berhasil di-assign!`, 'success');
+                this.loadAssignableTickets();
+              },
+              error: (err: any) => {
+                console.error('Gagal assign tiket:', err);
+                this.showToast(err?.error?.message || 'Gagal assign tiket.', 'danger');
+              }
+            });
+          }
+        }
+      ]
     });
+
+    await alertEl.present();
   }
 
-  // 🔥 Admin: Review pengembalian (Approve / Reject)
-  reviewReturn(ticket: any, action: 'Approve' | 'Reject') {
-    if (!confirm(`${action === 'Approve' ? 'Setujui' : 'Tolak'} pengembalian tiket ${ticket.id_ticket}?`)) return;
-
-    this.ticketService.reviewReturn(ticket.id_ticket, action).subscribe({
-      next: () => {
-        alert(`Pengembalian ${action === 'Approve' ? 'disetujui' : 'ditolak'}.`);
-        this.loadReturnedTickets(); // refresh
-      },
-      error: (err) => alert(err?.error?.message || 'Gagal memproses review.')
+  /** Review Pengembalian Tiket */
+  async reviewReturn(ticket: any, action: 'Approve' | 'Reject') {
+    const isApprove = action === 'Approve';
+    const alertEl = await this.alertCtrl.create({
+      header: isApprove ? 'Setujui Pengembalian' : 'Tolak Pengembalian',
+      message: new IonicSafeString(
+        isApprove
+          ? `Setujui pengembalian tiket <strong>${ticket.id_ticket}</strong>? Tiket akan siap di-assign ulang.`
+          : `Tolak pengembalian tiket <strong>${ticket.id_ticket}</strong>? Tiket akan dikembalikan ke teknisi.`
+      ),
+      cssClass: 'custom-alert-dialog',
+      buttons: [
+        { text: 'Batal', role: 'cancel', cssClass: 'alert-button-cancel' },
+        {
+          text: isApprove ? 'Setujui' : 'Tolak',
+          role: isApprove ? undefined : 'destructive',
+          handler: () => {
+            this.ticketService.reviewReturn(ticket.id_ticket, action).subscribe({
+              next: () => {
+                this.showToast(`Pengembalian tiket ${isApprove ? 'disetujui' : 'ditolak'}.`, 'success');
+                this.loadReturnedTickets();
+                this.loadAssignableTickets();
+              },
+              error: (err) => this.showToast(err?.error?.message || 'Gagal memproses review.', 'danger')
+            });
+          }
+        }
+      ]
     });
+
+    await alertEl.present();
   }
 
   toggleSidebar() {
@@ -233,26 +310,6 @@ export class AssignmentTicketPage implements OnInit {
     this.activeMenu = menu;
     if (window.innerWidth < 1024) this.isSidebarOpen = false;
   }
-
-  // ===== NAVIGASI MENU =====
-  goToDashboard() { this.setActiveMenu('dashboard'); this.router.navigate(['/dashboard']); }
-  goToListTicket() { this.setActiveMenu('list-ticket'); this.router.navigate(['/list']); }
-  goToApprovalTicket() { this.setActiveMenu('approval-ticket'); this.router.navigate(['/approval']); }
-  goToAssignmentTicket() { this.setActiveMenu('assignment-ticket'); this.router.navigate(['/assignment']); }
-  goToKaryawan() { this.setActiveMenu('karyawan'); this.router.navigate(['/karyawan']); }
-  goToUser() { this.setActiveMenu('user'); this.router.navigate(['/users']); }
-  goToJabatan() { this.setActiveMenu('jabatan'); this.router.navigate(['/jabatan']); }
-  goToDepartemen() { this.setActiveMenu('departemen'); this.router.navigate(['/departemen']); }
-  goToBagianDepartemen() { this.setActiveMenu('bagian-departemen'); this.router.navigate(['/bagian-departemen']); }
-  goToKategori() { this.setActiveMenu('kategori'); this.router.navigate(['/kategori']); }
-  goToSubKategori() { this.setActiveMenu('sub-kategori'); this.router.navigate(['/sub-kategori']); }
-  goToTeknisi() { this.setActiveMenu('teknisi'); this.router.navigate(['/teknisi']); }
-  goToInventory() { this.setActiveMenu('inventory'); this.router.navigate(['/inventory']); }
-  goToSchedule() { this.setActiveMenu('schedule'); this.router.navigate(['/schedule']); } // 🛠️ Ditambahkan untuk mengatasi error TS2339
-  goToLaporanFeedback() { this.setActiveMenu('laporan-feedback'); this.router.navigate(['/laporan-feedback']); }
-  goToStatistikTicket() { this.setActiveMenu('statistik-ticket'); this.router.navigate(['/statistik-ticket']); }
-  goToProfile() { this.setActiveMenu('profile'); this.router.navigate(['/profile']); }
-  goToNotifikasi() { this.setActiveMenu('notifikasi'); }
 
   logout() {
     localStorage.removeItem('token');

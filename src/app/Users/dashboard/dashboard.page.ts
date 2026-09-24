@@ -12,7 +12,7 @@ import { SidebarComponent } from '../shared/components/sidebar/sidebar.component
   imports: [CommonModule, IonContent, IonButton, IonIcon, IonSpinner, SidebarComponent],
 })
 export class UsersDashboardPage implements OnInit {
-  
+
   isSidebarOpen = false;
   isLoading = false;
   activeMenu = 'dashboard-user';
@@ -129,7 +129,7 @@ export class UsersDashboardPage implements OnInit {
   }
 
   getPageSubtitle(): string {
-    return `Selamat datang, ${this.user.nama} 👋`;
+    return `Selamat datang, ${this.user.nama} `;
   }
 
   getStatusClass(status: string): string {

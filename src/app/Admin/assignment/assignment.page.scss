@@ -8,6 +8,8 @@
   --text-muted: #64748b;
   --border-color: #e2e8f0;
   --success: #22c55e;
+  --danger: #ef4444;
+  --warning: #f59e0b;
 }
 
 .assignment-ticket-content {
@@ -22,12 +24,15 @@
 /* ===================== MAIN CONTENT ===================== */
 .main-content {
   flex: 1;
-  margin-left: 250px;
+  margin-left: var(--sidebar-width, 250px);
+  min-width: 0;
+  max-width: calc(100% - var(--sidebar-width, 250px));
   display: flex;
   flex-direction: column;
 
   @media (max-width: 992px) {
     margin-left: 0;
+    max-width: 100%;
   }
 }
 
@@ -112,6 +117,16 @@
   color: var(--text-muted);
 }
 
+.error-banner {
+  background: #fef2f2;
+  color: #dc2626;
+  border: 1px solid #fecaca;
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 13px;
+  margin-bottom: 16px;
+}
+
 /* ===================== TOOLBAR ===================== */
 .list-toolbar {
   display: flex;
@@ -138,6 +153,7 @@
     font-size: 13px;
     width: 100%;
     background: transparent;
+    color: var(--text-dark);
   }
 
   .search-icon {
@@ -149,14 +165,48 @@
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
+}
 
-  select {
-    border: 1px solid var(--border-color);
-    border-radius: 8px;
-    padding: 8px 10px;
-    font-size: 13px;
+/* 🔥 NATIVE SELECT STYLING */
+.form-select-native {
+  height: 38px;
+  padding: 6px 32px 6px 12px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-dark);
+  background-color: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  outline: none;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%3c1e293b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  background-size: 14px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+
+  &:hover,
+  &:focus {
+    border-color: var(--primary);
+  }
+
+  &.table-select {
+    height: 34px;
+    padding: 4px 28px 4px 10px;
+    font-size: 12.5px;
+    min-width: 130px;
+    max-width: 180px;
+    background-color: #fafbfe;
+  }
+
+  option {
     color: var(--text-dark);
-    background: var(--card-bg);
+    background: #ffffff;
+    padding: 6px;
   }
 }
 
@@ -170,6 +220,7 @@
 
 .table-wrapper {
   overflow-x: auto;
+  width: 100%;
 }
 
 .ticket-table {
@@ -182,6 +233,7 @@
     padding: 12px 14px;
     text-align: left;
     white-space: nowrap;
+    vertical-align: middle;
   }
 
   thead th {
@@ -209,8 +261,6 @@
   td {
     color: var(--text-dark);
     white-space: normal;
-    position: relative;
-    overflow: visible !important; /* Mencegah elemen popover ion-select terpotong */
   }
 
   .nowrap {
@@ -223,22 +273,38 @@
   color: var(--primary);
 }
 
-/* ===== ION-SELECT (Dropdown Teknisi) ===== */
-.teknisi-select {
-  --padding-start: 10px;
-  --padding-end: 10px;
-  border: 1px solid var(--border-color);
-  border-radius: 8px;
-  background: #fafbfe;
-  min-width: 150px;
-  max-width: 180px;
-  font-size: 13px;
-  height: 36px;
-  cursor: pointer;
-  pointer-events: auto !important;
+.return-reason {
+  background: #f1f5f9;
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 12.5px;
+  max-width: 220px;
+  word-break: break-word;
+}
 
-  ::slotted(*) {
-    pointer-events: auto !important;
+/* BADGES PRIORITAS */
+.prioritas-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11.5px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 20px;
+
+  &.prioritas-low {
+    background: #f0fdf4;
+    color: var(--success);
+  }
+
+  &.prioritas-normal {
+    background: #eff6ff;
+    color: var(--primary);
+  }
+
+  &.prioritas-urgent {
+    background: #fef2f2;
+    color: var(--danger);
   }
 }
 
@@ -246,10 +312,12 @@
 .action-buttons {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 6px;
 }
 
-.btn-assign {
+.btn-assign,
+.btn-approve,
+.btn-reject {
   --border-radius: 6px;
   --box-shadow: none;
   font-size: 12px;
@@ -307,17 +375,139 @@
     font-weight: 600;
   }
 }
+.custom-alert-dialog {
+  --background: #ffffff;
+  --max-width: 400px;
+
+  .alert-wrapper {
+    border-radius: 16px !important;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1) !important;
+    border: 1px solid #e2e8f0;
+    padding: 6px;
+  }
+
+  .alert-head {
+    padding: 18px 20px 8px;
+    text-align: left;
+
+    .alert-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: #0f172a;
+      letter-spacing: -0.01em;
+    }
+
+    .alert-sub-title {
+      font-size: 13px;
+      color: #64748b;
+      margin-top: 4px;
+    }
+  }
+
+  .alert-message {
+    padding: 0 20px 16px;
+    font-size: 14px;
+    color: #334155;
+    line-height: 1.5;
+    text-align: left;
+
+    strong {
+      color: #2563eb;
+      font-weight: 600;
+    }
+  }
+
+  /* Styling Input Textarea di Alert (Penolakan Tiket) */
+  .alert-input-group {
+    padding: 0 20px 16px;
+
+    textarea, input {
+      border: 1px solid #cbd5e1 !important;
+      border-radius: 10px !important;
+      padding: 10px 12px !important;
+      font-size: 13.5px !important;
+      color: #0f172a !important;
+      background: #f8fafc !important;
+      outline: none !important;
+
+      &:focus {
+        border-color: #2563eb !important;
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1) !important;
+      }
+    }
+  }
+
+  /* Styling Tombol Aksi */
+  .alert-button-group {
+    padding: 12px 16px;
+    gap: 8px;
+    justify-content: flex-end;
+
+    button {
+      border-radius: 8px !important;
+      font-size: 13px !important;
+      font-weight: 600 !important;
+      padding: 10px 16px !important;
+      height: 38px !important;
+      margin: 0 !important;
+      text-transform: none !important;
+
+      /* Tombol Batal */
+      &.alert-button-cancel {
+        color: #64748b !important;
+        background: #f1f5f9 !important;
+
+        &:hover {
+          background: #e2e8f0 !important;
+        }
+      }
+
+      /* Tombol Konfirmasi Utama (Assign / Approve) */
+      &:not(.alert-button-cancel) {
+        background: #2563eb !important;
+        color: #ffffff !important;
+
+        &:hover {
+          background: #1d4ed8 !important;
+        }
+      }
+
+      /* Tombol Bahaya (Reject / Tolak) */
+      &.alert-button-role-destructive {
+        background: #ef4444 !important;
+        color: #ffffff !important;
+
+        &:hover {
+          background: #dc2626 !important;
+        }
+      }
+    }
+  }
+}
 
 /* ========================================== */
-/* 🔥 STYLING DROPDOWN PRIORITAS              */
+/* 🔥 STYLING KUSTOM TOAST NOTIFICATION       */
 /* ========================================== */
-.prioritas-select {
-  --padding-start: 8px;
-  --padding-end: 8px;
-  min-width: 90px;
-  height: 32px;
-  border: 1px solid var(--border-color);
-  border-radius: 6px;
-  background: #fafbfe;
-  font-size: 13px;
+.custom-toast {
+  --border-radius: 12px;
+  --box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+  --padding-start: 16px;
+  --padding-end: 16px;
+  font-weight: 500;
+  font-size: 13.5px;
+
+  &.toast-success {
+    --background: #10b981;
+    --color: #ffffff;
+  }
+
+  &.toast-danger {
+    --background: #ef4444;
+    --color: #ffffff;
+  }
+
+  &.toast-warning {
+    --background: #f59e0b;
+    --color: #ffffff;
+  }
 }

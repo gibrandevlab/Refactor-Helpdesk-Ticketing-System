@@ -17,7 +17,7 @@
           <span class="page-title-inline">Inventory</span>
         </div>
         <div class="header-right">
-          <div class="header-avatar" routerLink="/admin/profile">
+          <div class="header-avatar" routerLink="/profile">
             <img [src]="'https://ui-avatars.com/api/?name=Admin&background=2563eb&color=fff&size=64&bold=true'" alt="Avatar" />
             <span class="header-avatar-name">Admin</span>
           </div>
@@ -34,12 +34,12 @@
             </div>
           </div>
           <div class="header-right">
-            <ion-button class="export-btn" fill="outline" (click)="exportToExcel()">
+            <ion-button class="export-btn" fill="outline" (click)="exportToExcel()" [disabled]="isExporting">
               <ion-icon name="download-outline" slot="start"></ion-icon>
-              Export Excel
+              {{ isExporting ? 'Exporting...' : 'Export Excel' }}
             </ion-button>
             <ion-button class="tambah-btn" fill="solid" (click)="openTambahModal()">
-              <ion-icon name="add-outline"></ion-icon>
+              <ion-icon name="add-outline" slot="start"></ion-icon>
               Tambah Asset
             </ion-button>
           </div>
@@ -51,15 +51,14 @@
         <div class="stats-card">
           <div class="stats-header">
             <h3>Jumlah Asset per Departemen</h3>
-            <ion-select
+            <select
               [(ngModel)]="filterJenisStats"
-              (ionChange)="loadStats(); onFilterChange()"
-              interface="popover"
-              placeholder="Semua Jenis"
-              class="stats-filter">
-              <ion-select-option value="">Semua Jenis</ion-select-option>
-              <ion-select-option *ngFor="let j of jenisOptions" [value]="j">{{ j }}</ion-select-option>
-            </ion-select>
+              (change)="loadStats(); onFilterChange()"
+              class="form-select-native stats-filter"
+            >
+              <option value="">Semua Jenis</option>
+              <option *ngFor="let j of jenisOptions" [value]="j">{{ j }}</option>
+            </select>
           </div>
 
           <div class="bar-chart" *ngIf="statsData.length > 0">
@@ -87,19 +86,33 @@
         <!-- FILTER -->
         <div class="filter-section">
           <div class="filter-group">
-            <input type="text" placeholder="Cari Kode Asset / Nama Barang..." [(ngModel)]="searchTerm" (ngModelChange)="onFilterChange()" class="filter-input" />
+            <input
+              type="text"
+              placeholder="Cari Kode Asset / Nama Barang..."
+              [(ngModel)]="searchTerm"
+              (ngModelChange)="onFilterChange()"
+              class="filter-input"
+            />
           </div>
           <div class="filter-group">
-            <ion-select [(ngModel)]="filterDept" interface="popover" (ionChange)="onFilterChange()" placeholder="Filter Departemen">
-              <ion-select-option value="">Semua Departemen</ion-select-option>
-              <ion-select-option *ngFor="let d of deptOptions" [value]="d">{{ d }}</ion-select-option>
-            </ion-select>
+            <select
+              [(ngModel)]="filterDept"
+              (change)="onFilterChange()"
+              class="form-select-native"
+            >
+              <option value="">Semua Departemen</option>
+              <option *ngFor="let d of deptOptions" [value]="d">{{ d }}</option>
+            </select>
           </div>
           <div class="filter-group">
-            <ion-select [(ngModel)]="filterKategori" interface="popover" (ionChange)="onFilterChange()" placeholder="Filter Kategori">
-              <ion-select-option value="">Semua Kategori</ion-select-option>
-              <ion-select-option *ngFor="let k of kategoriOptions" [value]="k">{{ k }}</ion-select-option>
-            </ion-select>
+            <select
+              [(ngModel)]="filterKategori"
+              (change)="onFilterChange()"
+              class="form-select-native"
+            >
+              <option value="">Semua Kategori</option>
+              <option *ngFor="let k of kategoriOptions" [value]="k">{{ k }}</option>
+            </select>
           </div>
         </div>
 
@@ -130,9 +143,9 @@
                   <td><span class="kategori-badge">{{ item.kategori }}</span></td>
                   <td>{{ item.pemegang || '-' }}</td>
                   <td>
-                    <ion-badge [color]="item.statusAset === 'Aktif' ? 'success' : 'medium'">
+                    <span class="status-badge" [ngClass]="item.statusAset === 'Aktif' ? 'status-aktif' : 'status-nonaktif'">
                       {{ item.statusAset || 'Aktif' }}
-                    </ion-badge>
+                    </span>
                   </td>
                   <td>
                     <div class="action-buttons">
@@ -156,9 +169,13 @@
           <div class="table-footer" *ngIf="totalPages > 1">
             <span class="table-info">Menampilkan {{ pagedInventory.length }} dari {{ filteredInventory.length }} data</span>
             <div class="pagination">
-              <ion-button fill="clear" size="small" [disabled]="currentPage === 1" (click)="prevPage()"><ion-icon name="chevron-back-outline"></ion-icon></ion-button>
+              <ion-button fill="clear" size="small" [disabled]="currentPage === 1" (click)="prevPage()">
+                <ion-icon name="chevron-back-outline"></ion-icon>
+              </ion-button>
               <span class="page-number" *ngFor="let p of totalPagesArray" [class.active]="p === currentPage" (click)="goToPage(p)">{{ p }}</span>
-              <ion-button fill="clear" size="small" [disabled]="currentPage === totalPages" (click)="nextPage()"><ion-icon name="chevron-forward-outline"></ion-icon></ion-button>
+              <ion-button fill="clear" size="small" [disabled]="currentPage === totalPages" (click)="nextPage()">
+                <ion-icon name="chevron-forward-outline"></ion-icon>
+              </ion-button>
             </div>
           </div>
         </div>
@@ -175,9 +192,9 @@
 </ion-content>
 
 <!-- ========================================== -->
-<!-- MODAL TAMBAH/EDIT INVENTORY (BERTAB)       -->
+<!-- 🔥 MODAL TAMBAH/EDIT INVENTORY (BERTAB)     -->
 <!-- ========================================== -->
-<ion-modal [isOpen]="isModalOpen" (didDismiss)="closeModal()" [cssClass]="isEditing ? 'detail-modal' : ''">
+<ion-modal [isOpen]="isModalOpen" (didDismiss)="closeModal()" [cssClass]="isEditing ? 'custom-inventory-modal wide' : 'custom-inventory-modal'">
   <ng-template>
     <ion-header>
       <ion-toolbar>
@@ -250,17 +267,14 @@
 
             <div class="form-group">
               <label class="form-label">Pemegang Asset</label>
-              <ion-select
+              <select
                 [(ngModel)]="formData.nik_pemegang"
-                (ionChange)="onPemegangChange()"
-                interface="popover"
-                class="form-select"
-                placeholder="Pilih Karyawan / Pemegang">
-                <ion-select-option [value]="null">Tidak ada pemegang</ion-select-option>
-                <ion-select-option *ngFor="let k of karyawanList" [value]="k.nik">{{ k.namaKaryawan }}</ion-select-option>
-              </ion-select>
-              <p class="form-hint" *ngIf="isEditing">
-              </p>
+                (change)="onPemegangChange()"
+                class="form-select-native"
+              >
+                <option [ngValue]="null">Tidak ada pemegang</option>
+                <option *ngFor="let k of karyawanList" [value]="k.nik">{{ k.namaKaryawan }}</option>
+              </select>
             </div>
 
             <div class="form-group" *ngIf="isEditing">
@@ -270,34 +284,41 @@
 
             <div class="form-group">
               <label class="form-label">Departemen <span class="required">*</span></label>
-              <ion-select
+              <select
                 [(ngModel)]="formData.id_departemen"
-                (ionChange)="onDepartemenChange()"
-                interface="popover"
-                class="form-select"
-                placeholder="Pilih Departemen">
-                <ion-select-option *ngFor="let d of departemenList" [value]="d.idDepartemen">{{ d.namaDepartemen }}</ion-select-option>
-              </ion-select>
+                (change)="onDepartemenChange()"
+                class="form-select-native"
+              >
+                <option [ngValue]="null" disabled selected hidden>Pilih Departemen</option>
+                <option *ngFor="let d of departemenList" [value]="d.idDepartemen">{{ d.namaDepartemen }}</option>
+              </select>
             </div>
 
             <div class="form-group" *ngIf="isEditing">
               <label class="form-label">Keterangan Perpindahan Departemen</label>
-              <ion-input type="text" placeholder="Contoh: Asset dialihkan ke Finance & Accounting" [(ngModel)]="formData.keterangan_pindah_departemen" class="form-input"></ion-input>
+              <ion-input type="text" placeholder="Contoh: Dialihkan ke Finance & Accounting" [(ngModel)]="formData.keterangan_pindah_departemen" class="form-input"></ion-input>
             </div>
 
             <div class="form-group">
               <label class="form-label">Kategori <span class="required">*</span></label>
-              <ion-select [(ngModel)]="formData.id_kategori" interface="popover" class="form-select" placeholder="Pilih Kategori">
-                <ion-select-option *ngFor="let kat of kategoriList" [value]="kat.idKategori">{{ kat.namaKategori }}</ion-select-option>
-              </ion-select>
+              <select
+                [(ngModel)]="formData.id_kategori"
+                class="form-select-native"
+              >
+                <option [ngValue]="null" disabled selected hidden>Pilih Kategori</option>
+                <option *ngFor="let kat of kategoriList" [value]="kat.idKategori">{{ kat.namaKategori }}</option>
+              </select>
             </div>
 
             <div class="form-group">
               <label class="form-label">Status Asset</label>
-              <ion-select [(ngModel)]="formData.status_aset" interface="popover" class="form-select" placeholder="Pilih Status">
-                <ion-select-option value="Aktif">Aktif</ion-select-option>
-                <ion-select-option value="Tidak Aktif">Tidak Aktif</ion-select-option>
-              </ion-select>
+              <select
+                [(ngModel)]="formData.status_aset"
+                class="form-select-native"
+              >
+                <option value="Aktif">Aktif</option>
+                <option value="Tidak Aktif">Tidak Aktif</option>
+              </select>
             </div>
 
             <div class="form-row">
@@ -345,7 +366,7 @@
             </div>
 
             <div class="modal-actions">
-              <ion-button class="cancel-modal-btn" fill="outline" color="medium" (click)="closeModal()">
+              <ion-button class="cancel-modal-btn" fill="outline" (click)="closeModal()">
                 Batal
               </ion-button>
               <ion-button class="submit-modal-btn" (click)="simpanInventory()" [disabled]="!formData.nama_barang || !formData.id_departemen || !formData.id_kategori">
@@ -416,7 +437,7 @@
               </div>
 
               <div class="detail-form-actions">
-                <ion-button size="small" (click)="submitHardwareDetail()">
+                <ion-button size="small" class="submit-modal-btn" (click)="submitHardwareDetail()">
                   <ion-icon name="save-outline" slot="start"></ion-icon>
                   Simpan Hardware
                 </ion-button>
@@ -432,9 +453,13 @@
               <div class="form-row">
                 <div class="form-group">
                   <label class="form-label">Operating System</label>
-                  <ion-select [(ngModel)]="softwareDetail.operating_system" interface="popover" class="form-select" placeholder="Pilih Operating System">
-                    <ion-select-option *ngFor="let os of osOptions" [value]="os">{{ os }}</ion-select-option>
-                  </ion-select>
+                  <select
+                    [(ngModel)]="softwareDetail.operating_system"
+                    class="form-select-native"
+                  >
+                    <option value="" disabled selected hidden>Pilih Operating System</option>
+                    <option *ngFor="let os of osOptions" [value]="os">{{ os }}</option>
+                  </select>
                 </div>
                 <div class="form-group">
                   <label class="form-label">Serial No OS</label>
@@ -445,9 +470,13 @@
               <div class="form-row">
                 <div class="form-group">
                   <label class="form-label">MS Office</label>
-                  <ion-select [(ngModel)]="softwareDetail.ms_office" interface="popover" class="form-select" placeholder="Pilih MS Office">
-                    <ion-select-option *ngFor="let ms of msOfficeOptions" [value]="ms">{{ ms }}</ion-select-option>
-                  </ion-select>
+                  <select
+                    [(ngModel)]="softwareDetail.ms_office"
+                    class="form-select-native"
+                  >
+                    <option value="" disabled selected hidden>Pilih MS Office</option>
+                    <option *ngFor="let ms of msOfficeOptions" [value]="ms">{{ ms }}</option>
+                  </select>
                 </div>
                 <div class="form-group">
                   <label class="form-label">MS Office SN</label>
@@ -458,83 +487,83 @@
               <div class="form-row">
                 <div class="form-group">
                   <label class="form-label">ERP</label>
-                  <ion-select [(ngModel)]="softwareDetail.erp" interface="popover" class="form-select">
-                    <ion-select-option value="TIDAK">TIDAK</ion-select-option>
-                    <ion-select-option value="ADA">ADA</ion-select-option>
-                  </ion-select>
+                  <select [(ngModel)]="softwareDetail.erp" class="form-select-native">
+                    <option value="TIDAK">TIDAK</option>
+                    <option value="ADA">ADA</option>
+                  </select>
                 </div>
                 <div class="form-group">
                   <label class="form-label">WMS</label>
-                  <ion-select [(ngModel)]="softwareDetail.wms" interface="popover" class="form-select">
-                    <ion-select-option value="TIDAK">TIDAK</ion-select-option>
-                    <ion-select-option value="ADA">ADA</ion-select-option>
-                  </ion-select>
+                  <select [(ngModel)]="softwareDetail.wms" class="form-select-native">
+                    <option value="TIDAK">TIDAK</option>
+                    <option value="ADA">ADA</option>
+                  </select>
                 </div>
               </div>
 
               <div class="form-row">
                 <div class="form-group">
                   <label class="form-label">ERIS</label>
-                  <ion-select [(ngModel)]="softwareDetail.eris" interface="popover" class="form-select">
-                    <ion-select-option value="TIDAK">TIDAK</ion-select-option>
-                    <ion-select-option value="ADA">ADA</ion-select-option>
-                  </ion-select>
+                  <select [(ngModel)]="softwareDetail.eris" class="form-select-native">
+                    <option value="TIDAK">TIDAK</option>
+                    <option value="ADA">ADA</option>
+                  </select>
                 </div>
                 <div class="form-group">
                   <label class="form-label">CMMS</label>
-                  <ion-select [(ngModel)]="softwareDetail.cmms" interface="popover" class="form-select">
-                    <ion-select-option value="TIDAK">TIDAK</ion-select-option>
-                    <ion-select-option value="ADA">ADA</ion-select-option>
-                  </ion-select>
+                  <select [(ngModel)]="softwareDetail.cmms" class="form-select-native">
+                    <option value="TIDAK">TIDAK</option>
+                    <option value="ADA">ADA</option>
+                  </select>
                 </div>
               </div>
 
               <div class="form-row">
                 <div class="form-group">
                   <label class="form-label">Visio</label>
-                  <ion-select [(ngModel)]="softwareDetail.visio" interface="popover" class="form-select">
-                    <ion-select-option value="TIDAK">TIDAK</ion-select-option>
-                    <ion-select-option value="ADA">ADA</ion-select-option>
-                  </ion-select>
+                  <select [(ngModel)]="softwareDetail.visio" class="form-select-native">
+                    <option value="TIDAK">TIDAK</option>
+                    <option value="ADA">ADA</option>
+                  </select>
                 </div>
                 <div class="form-group">
                   <label class="form-label">AutoCAD</label>
-                  <ion-select [(ngModel)]="softwareDetail.autocad" interface="popover" class="form-select">
-                    <ion-select-option value="TIDAK">TIDAK</ion-select-option>
-                    <ion-select-option value="ADA">ADA</ion-select-option>
-                  </ion-select>
+                  <select [(ngModel)]="softwareDetail.autocad" class="form-select-native">
+                    <option value="TIDAK">TIDAK</option>
+                    <option value="ADA">ADA</option>
+                  </select>
                 </div>
               </div>
 
               <div class="form-row">
                 <div class="form-group">
                   <label class="form-label">Kaspersky</label>
-                  <ion-select [(ngModel)]="softwareDetail.kaspersky" interface="popover" class="form-select">
-                    <ion-select-option value="TIDAK">TIDAK</ion-select-option>
-                    <ion-select-option value="ADA">ADA</ion-select-option>
-                  </ion-select>
+                  <select [(ngModel)]="softwareDetail.kaspersky" class="form-select-native">
+                    <option value="TIDAK">TIDAK</option>
+                    <option value="ADA">ADA</option>
+                  </select>
                 </div>
                 <div class="form-group">
                   <label class="form-label">Ms Project</label>
-                  <ion-select [(ngModel)]="softwareDetail.ms_project" interface="popover" class="form-select">
-                    <ion-select-option value="TIDAK">TIDAK</ion-select-option>
-                    <ion-select-option value="ADA">ADA</ion-select-option>
-                  </ion-select>
+                  <select [(ngModel)]="softwareDetail.ms_project" class="form-select-native">
+                    <option value="TIDAK">TIDAK</option>
+                    <option value="ADA">ADA</option>
+                  </select>
                 </div>
               </div>
 
               <div class="form-row">
                 <div class="form-group">
                   <label class="form-label">Acrobat</label>
-                  <ion-select [(ngModel)]="softwareDetail.acrobat" interface="popover" class="form-select">
-                    <ion-select-option value="TIDAK">TIDAK</ion-select-option>
-                    <ion-select-option value="ADA">ADA</ion-select-option>
-                  </ion-select>
+                  <select [(ngModel)]="softwareDetail.acrobat" class="form-select-native">
+                    <option value="TIDAK">TIDAK</option>
+                    <option value="ADA">ADA</option>
+                  </select>
                 </div>
               </div>
 
               <div class="detail-form-actions">
-                <ion-button size="small" (click)="submitSoftwareDetail()">
+                <ion-button size="small" class="submit-modal-btn" (click)="submitSoftwareDetail()">
                   <ion-icon name="save-outline" slot="start"></ion-icon>
                   Simpan Software
                 </ion-button>
@@ -551,7 +580,7 @@
                 <ion-input type="text" placeholder="Contoh: 192.168.1.25" [(ngModel)]="formData.ip_address" class="form-input"></ion-input>
               </div>
               <div class="detail-form-actions">
-                <ion-button size="small" (click)="simpanInventory()">
+                <ion-button size="small" class="submit-modal-btn" (click)="simpanInventory()">
                   <ion-icon name="save-outline" slot="start"></ion-icon>
                   Simpan IP Address
                 </ion-button>
@@ -597,7 +626,7 @@
                   <div class="holder-group-title">
                     <ion-icon name="person-circle-outline"></ion-icon>
                     <strong>{{ group.nama_pemegang }}</strong>
-                    <ion-badge color="light" *ngIf="!group.periode_selesai && group.periode_mulai">Pemegang saat ini</ion-badge>
+                    <span class="status-badge status-aktif" *ngIf="!group.periode_selesai && group.periode_mulai">Pemegang saat ini</span>
                   </div>
                   <div class="holder-group-meta">
                     <span class="holder-group-period" *ngIf="group.periode_mulai">
@@ -605,7 +634,7 @@
                       -
                       {{ group.periode_selesai ? (group.periode_selesai | date:'dd/MM/yyyy') : 'Sekarang' }}
                     </span>
-                    <ion-badge color="primary">{{ group.tickets.length }} tiket</ion-badge>
+                    <span class="dept-badge">{{ group.tickets.length }} tiket</span>
                     <ion-icon [name]="expandedHolderIndex === gi ? 'chevron-up-outline' : 'chevron-down-outline'"></ion-icon>
                   </div>
                 </div>
@@ -615,7 +644,7 @@
                     <div class="detail-list-info">
                       <div class="history-header">
                         <span class="ticket-id-text">{{ h.id_ticket }}</span>
-                        <ion-badge [color]="getTicketStatusColor(h.status)">{{ h.status }}</ion-badge>
+                        <span class="status-badge" [ngClass]="'status-' + getTicketStatusColor(h.status)">{{ h.status }}</span>
                         <span class="detail-date">{{ h.tanggal | date:'dd/MM/yyyy HH:mm' }}</span>
                       </div>
                       <span class="history-kategori" *ngIf="h.kategori">

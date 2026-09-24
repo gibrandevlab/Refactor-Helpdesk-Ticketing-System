@@ -19,7 +19,7 @@ exports.getAssignableTickets = async (req, res) => {
     `);
     return ok(res, rows);
   } catch (err) {
-    return fail(res, 'Gagal mengambil tiket yang bisa di-assign: ' + err.message, 500);
+    return fail(res, 'Gagal mengambil daftar tiket assignment: ' + err.message, 500);
   }
 };
 
@@ -50,29 +50,29 @@ exports.assignTicket = async (req, res) => {
     const { id_ticket } = req.params;
     const { id_teknisi, prioritas } = req.body;
 
-    if (!id_teknisi) return fail(res, 'id_teknisi wajib diisi');
+    if (!id_teknisi) return fail(res, 'Teknisi wajib dipilih.', 400);
 
     const [approval] = await conn.query('SELECT status_approval FROM approval_ticket WHERE id_ticket = ?', [id_ticket]);
     if (approval.length === 0 || approval[0].status_approval !== 'Approve') {
-      return fail(res, 'Tiket ini belum di-approve, tidak bisa di-assign');
+      return fail(res, 'Tiket ini belum disetujui, tidak dapat di-assign.', 400);
     }
 
     const [existing] = await conn.query('SELECT id_assignment FROM assignment_ticket WHERE id_ticket = ?', [id_ticket]);
-    if (existing.length > 0) return fail(res, 'Tiket ini sudah pernah di-assign ke teknisi');
+    if (existing.length > 0) return fail(res, 'Tiket ini sudah pernah di-assign sebelumnya.', 400);
 
     const [busyCheck] = await conn.query(
       `SELECT id_assignment FROM assignment_ticket WHERE id_teknisi = ? AND status_pengerjaan != 'Selesai'`,
       [id_teknisi]
     );
     if (busyCheck.length > 0) {
-      return fail(res, 'Teknisi ini sedang menangani tiket lain yang belum selesai');
+      return fail(res, 'Teknisi ini sedang menangani tiket lain yang belum selesai.', 400);
     }
 
-    // Logic Hitung Deadline
+    // Logic Hitung Deadline SLA
     let hoursToAdd = 6;
     if (prioritas === 'Low') hoursToAdd = 12;
     else if (prioritas === 'Urgent') hoursToAdd = 4;
-    
+
     const deadline = new Date(Date.now() + hoursToAdd * 60 * 60 * 1000);
 
     await conn.beginTransaction();
@@ -91,7 +91,7 @@ exports.assignTicket = async (req, res) => {
     await conn.query('UPDATE teknisi SET jumlah_tiket_ditangani = jumlah_tiket_ditangani + 1 WHERE id_teknisi = ?', [id_teknisi]);
 
     await conn.commit();
-    return ok(res, { id_ticket, id_teknisi, prioritas, deadline }, 'Tiket berhasil di-assign ke teknisi');
+    return ok(res, { id_ticket, id_teknisi, prioritas, deadline }, 'Tiket berhasil di-assign ke teknisi.');
   } catch (err) {
     await conn.rollback();
     return fail(res, 'Gagal assign tiket: ' + err.message, 500);
@@ -100,11 +100,11 @@ exports.assignTicket = async (req, res) => {
   }
 };
 
-// 4. GET Tugas Teknisi (Dashboard Teknisi) - 🔥 FIXED
+// 4. GET Tugas Teknisi (Dashboard Teknisi)
 exports.getMyAssignments = async (req, res) => {
   try {
     const [teknisiRow] = await pool.query('SELECT id_teknisi FROM teknisi WHERE nik = ?', [req.user.nik]);
-    if (teknisiRow.length === 0) return fail(res, 'Data teknisi tidak ditemukan', 404);
+    if (teknisiRow.length === 0) return fail(res, 'Anda tidak terdaftar sebagai teknisi.', 403);
 
     const [rows] = await pool.query(`
       SELECT asg.id_assignment, lt.id_ticket, k.nama AS nama_pelapor, ka.nama_kategori AS nama_kategori,
@@ -123,15 +123,15 @@ exports.getMyAssignments = async (req, res) => {
 
     return ok(res, rows);
   } catch (err) {
-    return fail(res, 'Gagal mengambil tiket assignment: ' + err.message, 500);
+    return fail(res, 'Gagal mengambil tugas tiket.', 500);
   }
 };
 
-// 5. GET Riwayat Teknisi - 🔥 FIXED
+// 5. GET Riwayat Teknisi
 exports.getRiwayatTeknisi = async (req, res) => {
   try {
     const [teknisiRow] = await pool.query('SELECT id_teknisi FROM teknisi WHERE nik = ?', [req.user.nik]);
-    if (teknisiRow.length === 0) return fail(res, 'Data teknisi tidak ditemukan', 404);
+    if (teknisiRow.length === 0) return fail(res, 'Anda tidak terdaftar sebagai teknisi.', 403);
 
     const [rows] = await pool.query(`
       SELECT lt.id_ticket, k.nama AS reported, ka.nama_kategori AS kategori,
@@ -147,11 +147,11 @@ exports.getRiwayatTeknisi = async (req, res) => {
 
     return ok(res, rows);
   } catch (err) {
-    return fail(res, 'Gagal mengambil riwayat tiket: ' + err.message, 500);
+    return fail(res, 'Gagal mengambil riwayat tiket.', 500);
   }
 };
 
-// 6. Update Progress
+// 6. Update Progress Tiket
 exports.updateProgress = async (req, res) => {
   const conn = await pool.getConnection();
   try {
@@ -159,9 +159,11 @@ exports.updateProgress = async (req, res) => {
     const { progress, catatan_penyelesaian, status_pengerjaan } = req.body;
 
     const [teknisiRow] = await conn.query('SELECT id_teknisi FROM teknisi WHERE nik = ?', [req.user.nik]);
+    if (teknisiRow.length === 0) return fail(res, 'Anda tidak terdaftar sebagai teknisi.', 403);
+
     const [asgRow] = await conn.query('SELECT * FROM assignment_ticket WHERE id_ticket = ?', [id_ticket]);
-    if (asgRow.length === 0) return fail(res, 'Assignment tidak ditemukan', 404);
-    if (asgRow[0].id_teknisi !== teknisiRow[0].id_teknisi) return fail(res, 'Ini bukan tiket yang ditugaskan ke Anda', 403);
+    if (asgRow.length === 0) return fail(res, 'Assignment tiket tidak ditemukan.', 404);
+    if (asgRow[0].id_teknisi !== teknisiRow[0].id_teknisi) return fail(res, 'Tiket ini bukan tugas Anda.', 403);
 
     await conn.beginTransaction();
 
@@ -179,10 +181,10 @@ exports.updateProgress = async (req, res) => {
     }
 
     await conn.commit();
-    return ok(res, null, 'Progress tiket berhasil diperbarui');
+    return ok(res, null, 'Progress tiket berhasil diperbarui.');
   } catch (err) {
     await conn.rollback();
-    return fail(res, 'Gagal update progress: ' + err.message, 500);
+    return fail(res, 'Gagal memperbarui progress tiket.', 500);
   } finally {
     conn.release();
   }

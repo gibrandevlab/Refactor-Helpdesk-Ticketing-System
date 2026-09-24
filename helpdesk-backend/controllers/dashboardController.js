@@ -10,7 +10,7 @@ exports.getAdminDashboard = async (req, res) => {
     const [tiketBulanan] = await pool.query(`
       SELECT DATE_FORMAT(tanggal_lapor, '%Y-%m') AS bulan, COUNT(*) AS jumlah
       FROM list_ticket
-      GROUP BY bulan ORDER BY bulan ASC
+      GROUP BY DATE_FORMAT(tanggal_lapor, '%Y-%m') ORDER BY bulan ASC
       LIMIT 12
     `);
 

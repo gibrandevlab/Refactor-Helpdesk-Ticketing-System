@@ -17,7 +17,7 @@
           <span class="page-title-inline">Approval Ticket</span>
         </div>
         <div class="header-right">
-          <div class="header-avatar" routerLink="/admin/profile">
+          <div class="header-avatar" routerLink="/profile">
             <img [src]="'https://ui-avatars.com/api/?name=Admin&background=2563eb&color=fff&size=64&bold=true'" alt="Avatar" />
             <span class="header-avatar-name">Admin</span>
           </div>
@@ -26,7 +26,7 @@
 
       <!-- CONTENT -->
       <div class="content-area">
-        <!-- BAGIAN 1: APPROVAL BIASA -->
+        <!-- BAGIAN 1: APPROVAL TIKET MASUK -->
         <div class="page-heading">
           <h1 class="page-title">Approval Ticket</h1>
           <p class="page-subtitle">Validasi dan proses persetujuan keluhan dari seluruh departemen</p>
@@ -40,17 +40,17 @@
           </div>
 
           <div class="toolbar-filters">
-            <select [(ngModel)]="filterStatus" (change)="onFilterChange()">
+            <select class="form-select-native" [(ngModel)]="filterStatus" (change)="onFilterChange()">
               <option value="">Semua Status</option>
               <option *ngFor="let s of statusOptions" [value]="s">{{ s }}</option>
             </select>
 
-            <select [(ngModel)]="filterDepartemen" (change)="onFilterChange()">
+            <select class="form-select-native" [(ngModel)]="filterDepartemen" (change)="onFilterChange()">
               <option value="">Semua Departemen</option>
               <option *ngFor="let d of departemenOptions" [value]="d">{{ d }}</option>
             </select>
 
-            <select [(ngModel)]="filterKategori" (change)="onFilterChange()">
+            <select class="form-select-native" [(ngModel)]="filterKategori" (change)="onFilterChange()">
               <option value="">Semua Kategori</option>
               <option *ngFor="let k of kategoriOptions" [value]="k">{{ k }}</option>
             </select>
@@ -86,15 +86,15 @@
                   <td>{{ t.nama_kategori }}</td>
                   <td>{{ t.nama_sub_kategori }}</td>
                   <td>
-                    <span class="priority-badge" [ngClass]="{
-                      'priority-urgent': t.prioritas === 'Urgent',
-                      'priority-normal': t.prioritas === 'Normal',
-                      'priority-low': t.prioritas === 'Low'
+                    <span class="prioritas-badge" [ngClass]="{
+                      'prioritas-urgent': t.prioritas === 'Urgent',
+                      'prioritas-normal': t.prioritas === 'Normal',
+                      'prioritas-low': t.prioritas === 'Low'
                     }">
                       {{ t.prioritas }}
                     </span>
                   </td>
-                  <td class="nowrap">{{ t.tanggal }}</td>
+                  <td class="nowrap">{{ formatDate(t.tanggal) }}</td>
                   <td class="deskripsi-col">{{ t.deskripsi }}</td>
                   <td>
                     <a *ngIf="t.lampiran" [href]="getLampiranUrl(t.lampiran)" target="_blank" rel="noopener noreferrer" class="lampiran-badge">
@@ -107,11 +107,11 @@
                   </td>
                   <td>
                     <div class="action-buttons">
-                      <ion-button fill="solid" color="success" size="small" (click)="approveTicket(t)">
+                      <ion-button fill="solid" color="success" size="small" class="btn-approve" (click)="approveTicket(t)">
                         <ion-icon name="checkmark-outline" slot="start"></ion-icon>
                         Approve
                       </ion-button>
-                      <ion-button fill="solid" color="danger" size="small" (click)="rejectTicket(t)">
+                      <ion-button fill="solid" color="danger" size="small" class="btn-reject" (click)="rejectTicket(t)">
                         <ion-icon name="close-outline" slot="start"></ion-icon>
                         Reject
                       </ion-button>
@@ -138,7 +138,7 @@
 
         <!-- BAGIAN 2: TIKET DIKEMBALIKAN TEKNISI -->
         <div class="page-heading" style="margin-top: 32px;">
-          <h2 class="page-title">↩️ Tiket Dikembalikan Teknisi</h2>
+          <h2 class="page-title">Tiket Dikembalikan Teknisi</h2>
           <p class="page-subtitle">Review alasan pengembalian dan putuskan tindakan</p>
         </div>
 
@@ -169,14 +169,16 @@
                     {{ t.return_reason || '-' }}
                   </td>
                   <td>
-                    <ion-button fill="solid" color="success" size="small" (click)="approveReturn(t)">
-                      <ion-icon name="checkmark-outline" slot="start"></ion-icon>
-                      Setujui
-                    </ion-button>
-                    <ion-button fill="solid" color="danger" size="small" (click)="rejectReturn(t)">
-                      <ion-icon name="close-outline" slot="start"></ion-icon>
-                      Tolak
-                    </ion-button>
+                    <div class="action-buttons">
+                      <ion-button fill="solid" color="success" size="small" class="btn-approve" (click)="approveReturn(t)">
+                        <ion-icon name="checkmark-outline" slot="start"></ion-icon>
+                        Setujui
+                      </ion-button>
+                      <ion-button fill="solid" color="danger" size="small" class="btn-reject" (click)="rejectReturn(t)">
+                        <ion-icon name="close-outline" slot="start"></ion-icon>
+                        Tolak
+                      </ion-button>
+                    </div>
                   </td>
                 </tr>
                 <tr *ngIf="returnedTickets.length === 0">

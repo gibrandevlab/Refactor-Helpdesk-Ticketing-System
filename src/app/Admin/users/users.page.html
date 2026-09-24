@@ -37,7 +37,7 @@
         <div class="page-header">
           <div class="header-left">
             <div>
-              <h1 class="page-title">👥 Manajemen User</h1>
+              <h1 class="page-title">Manajemen User</h1>
               <p class="page-subtitle">
                 Kelola akun login user, teknisi, dan admin
               </p>
@@ -49,7 +49,7 @@
               fill="solid"
               (click)="openTambahModal()"
             >
-              <ion-icon name="add-outline"></ion-icon>
+              <ion-icon name="add-outline" slot="start"></ion-icon>
               Tambah User
             </ion-button>
           </div>
@@ -107,32 +107,24 @@
             />
           </div>
           <div class="filter-group">
-            <ion-select
+            <select
               [(ngModel)]="filterLevel"
-              interface="popover"
-              (ionChange)="onFilterChange()"
-              placeholder="Level"
-              class="custom-select"
+              (change)="onFilterChange()"
+              class="form-select-native"
             >
-              <ion-select-option value="">Semua Level</ion-select-option>
-              <ion-select-option *ngFor="let l of levelOptions" [value]="l"
-                >{{ l }}</ion-select-option
-              >
-            </ion-select>
+              <option value="">Semua Level</option>
+              <option *ngFor="let l of levelOptions" [value]="l">{{ l }}</option>
+            </select>
           </div>
           <div class="filter-group">
-            <ion-select
+            <select
               [(ngModel)]="filterDepartemen"
-              interface="popover"
-              (ionChange)="onFilterChange()"
-              placeholder="Departemen"
-              class="custom-select"
+              (change)="onFilterChange()"
+              class="form-select-native"
             >
-              <ion-select-option value="">Semua Departemen</ion-select-option>
-              <ion-select-option *ngFor="let d of departemenOptions" [value]="d"
-                >{{ d }}</ion-select-option
-              >
-            </ion-select>
+              <option value="">Semua Departemen</option>
+              <option *ngFor="let d of departemenOptions" [value]="d">{{ d }}</option>
+            </select>
           </div>
         </div>
 
@@ -194,8 +186,7 @@
 
           <div class="table-footer" *ngIf="totalPages > 1">
             <span class="table-info"
-              >Menampilkan {{ pagedUsers.length }} dari {{ filteredUsers.length
-              }} data</span
+              >Menampilkan {{ pagedUsers.length }} dari {{ filteredUsers.length }} data</span
             >
             <div class="pagination">
               <ion-button
@@ -223,17 +214,12 @@
           </div>
         </div>
       </div>
-      <!-- 👈 Penutup content-area -->
     </div>
-    <!-- 👈 Penutup main-content -->
   </div>
-  <!-- 👈 Penutup dashboard-container -->
 </ion-content>
 
-<!-- ========================================== -->
-<!-- MODAL TAMBAH/EDIT USER                     -->
-<!-- ========================================== -->
-<ion-modal [isOpen]="isModalOpen" (didDismiss)="closeModal()">
+<!-- MODAL TAMBAH/EDIT USER -->
+<ion-modal [isOpen]="isModalOpen" (didDismiss)="closeModal()" class="custom-user-modal">
   <ng-template>
     <ion-header>
       <ion-toolbar>
@@ -252,20 +238,19 @@
           <label class="form-label"
             >NIK Karyawan <span class="required">*</span></label
           >
-          <ion-select
+          <select
             [(ngModel)]="formData.nik"
-            (ionChange)="onNikChange()"
-            interface="action-sheet"
-            class="form-select"
-            placeholder="Pilih NIK Karyawan"
+            (change)="onNikChange()"
+            class="form-select-native"
           >
-            <ion-select-option
+            <option value="" disabled selected hidden>Pilih NIK Karyawan</option>
+            <option
               *ngFor="let k of availableKaryawan"
               [value]="k.nik"
             >
               {{ k.nik }} - {{ k.nama }}
-            </ion-select-option>
-          </ion-select>
+            </option>
+          </select>
         </div>
 
         <!-- Nama Karyawan (Readonly) -->
@@ -318,15 +303,14 @@
           <label class="form-label"
             >Level <span class="required">*</span></label
           >
-          <ion-select
+          <select
             [(ngModel)]="formData.level"
-            interface="action-sheet"
-            class="form-select"
+            class="form-select-native"
           >
-            <ion-select-option value="Users">Users</ion-select-option>
-            <ion-select-option value="Teknisi">Teknisi</ion-select-option>
-            <ion-select-option value="Admin">Admin</ion-select-option>
-          </ion-select>
+            <option value="Users">Users</option>
+            <option value="Teknisi">Teknisi</option>
+            <option value="Admin">Admin</option>
+          </select>
         </div>
 
         <!-- Password -->
@@ -335,8 +319,7 @@
           *ngIf="!isEditing || (isEditing && formData.password)"
         >
           <label class="form-label">
-            {{ isEditing ? 'Password Baru (kosongkan jika tidak diubah)' :
-            'Password' }}
+            {{ isEditing ? 'Password Baru (kosongkan jika tidak diubah)' : 'Password' }}
             <span class="required" *ngIf="!isEditing">*</span>
           </label>
           <ion-input
@@ -352,7 +335,6 @@
           <ion-button
             class="cancel-modal-btn"
             fill="outline"
-            color="medium"
             (click)="closeModal()"
           >
             Batal

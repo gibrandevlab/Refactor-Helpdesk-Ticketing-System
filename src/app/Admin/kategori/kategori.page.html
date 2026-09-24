@@ -47,7 +47,7 @@
               fill="solid"
               (click)="openTambahModal()"
             >
-              <ion-icon name="add-outline"></ion-icon>
+              <ion-icon name="add-outline" slot="start"></ion-icon>
               Tambah Kategori
             </ion-button>
           </div>
@@ -89,7 +89,7 @@
                         class="edit-btn"
                         (click)="openEditModal(k)"
                       >
-                        <ion-icon name="create-outline"></ion-icon>
+                        <ion-icon name="create-outline" slot="icon-only"></ion-icon>
                       </ion-button>
                       <ion-button
                         fill="clear"
@@ -97,7 +97,7 @@
                         class="hapus-btn"
                         (click)="hapusKategori(k)"
                       >
-                        <ion-icon name="trash-outline"></ion-icon>
+                        <ion-icon name="trash-outline" slot="icon-only"></ion-icon>
                       </ion-button>
                     </div>
                   </td>
@@ -123,7 +123,7 @@
                 size="small"
                 [disabled]="currentPage === 1"
                 (click)="prevPage()"
-                ><ion-icon name="chevron-back-outline"></ion-icon
+                ><ion-icon name="chevron-back-outline" slot="icon-only"></ion-icon
               ></ion-button>
               <span
                 class="page-number"
@@ -137,7 +137,7 @@
                 size="small"
                 [disabled]="currentPage === totalPages"
                 (click)="nextPage()"
-                ><ion-icon name="chevron-forward-outline"></ion-icon
+                ><ion-icon name="chevron-forward-outline" slot="icon-only"></ion-icon
               ></ion-button>
             </div>
           </div>
@@ -160,7 +160,7 @@
 <!-- ========================================== -->
 <!-- MODAL TAMBAH/EDIT KATEGORI                 -->
 <!-- ========================================== -->
-<ion-modal [isOpen]="isModalOpen" (didDismiss)="closeModal()">
+<ion-modal [isOpen]="isModalOpen" (didDismiss)="closeModal()" class="custom-kategori-modal">
   <ng-template>
     <ion-header>
       <ion-toolbar>
@@ -169,7 +169,7 @@
         >
         <ion-buttons slot="end">
           <ion-button (click)="closeModal()">
-            <ion-icon name="close-outline"></ion-icon>
+            <ion-icon name="close-outline" slot="icon-only"></ion-icon>
           </ion-button>
         </ion-buttons>
       </ion-toolbar>
@@ -194,13 +194,13 @@
           <ion-button
             class="cancel-modal-btn"
             fill="outline"
-            color="medium"
             (click)="closeModal()"
           >
             Batal
           </ion-button>
           <ion-button
             class="submit-modal-btn"
+            fill="solid"
             (click)="simpanKategori()"
             [disabled]="!formData.nama_kategori"
           >

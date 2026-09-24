@@ -12,7 +12,7 @@ import { SidebarComponent } from '../shared/component/sidebar/sidebar.component'
   imports: [CommonModule, IonContent, IonButton, IonIcon, IonSpinner, SidebarComponent],
 })
 export class TeknisiDashboardPage implements OnInit {
-  
+
   isSidebarOpen = false;
   isLoading = false;
   activeMenu = 'dashboard-teknisi';
@@ -136,7 +136,7 @@ export class TeknisiDashboardPage implements OnInit {
   }
 
   getPageSubtitle(): string {
-    return `Selamat datang, Teknisi ${this.user.nama} 👋`;
+    return `Selamat datang, Teknisi ${this.user.nama} `;
   }
 
   getStatusClass(status: string): string {

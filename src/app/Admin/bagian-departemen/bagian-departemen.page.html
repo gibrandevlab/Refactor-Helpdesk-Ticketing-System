@@ -17,7 +17,7 @@
           <span class="page-title-inline">Bagian Departemen</span>
         </div>
         <div class="header-right">
-          <div class="header-avatar" routerLink="/admin/profile">
+          <div class="header-avatar" routerLink="/profile">
             <img [src]="'https://ui-avatars.com/api/?name=Admin&background=2563eb&color=fff&size=64&bold=true'" alt="Avatar" />
             <span class="header-avatar-name">Admin</span>
           </div>
@@ -35,7 +35,7 @@
           </div>
           <div class="header-right">
             <ion-button class="tambah-btn" fill="solid" (click)="openTambahModal()">
-              <ion-icon name="add-outline"></ion-icon>
+              <ion-icon name="add-outline" slot="start"></ion-icon>
               Tambah Bagian
             </ion-button>
           </div>
@@ -44,13 +44,23 @@
         <!-- FILTER -->
         <div class="filter-section">
           <div class="filter-group">
-            <input type="text" placeholder="Cari departemen / bagian..." [(ngModel)]="searchTerm" (ngModelChange)="onFilterChange()" class="filter-input" />
+            <input
+              type="text"
+              placeholder="Cari departemen / bagian..."
+              [(ngModel)]="searchTerm"
+              (ngModelChange)="onFilterChange()"
+              class="filter-input"
+            />
           </div>
           <div class="filter-group">
-            <ion-select [(ngModel)]="filterDepartemen" interface="action-sheet" (ionChange)="onFilterChange()" placeholder="Filter Departemen">
-              <ion-select-option value="">Semua Departemen</ion-select-option>
-              <ion-select-option *ngFor="let d of departemenOptions" [value]="d">{{ d }}</ion-select-option>
-            </ion-select>
+            <select
+              [(ngModel)]="filterDepartemen"
+              (change)="onFilterChange()"
+              class="form-select-native"
+            >
+              <option value="">Semua Departemen</option>
+              <option *ngFor="let d of departemenOptions" [value]="d">{{ d }}</option>
+            </select>
           </div>
         </div>
 
@@ -93,9 +103,13 @@
           <div class="table-footer" *ngIf="totalPages > 1">
             <span class="table-info">Menampilkan {{ pagedBagian.length }} dari {{ filteredBagian.length }} data</span>
             <div class="pagination">
-              <ion-button fill="clear" size="small" [disabled]="currentPage === 1" (click)="prevPage()"><ion-icon name="chevron-back-outline"></ion-icon></ion-button>
+              <ion-button fill="clear" size="small" [disabled]="currentPage === 1" (click)="prevPage()">
+                <ion-icon name="chevron-back-outline"></ion-icon>
+              </ion-button>
               <span class="page-number" *ngFor="let p of totalPagesArray" [class.active]="p === currentPage" (click)="goToPage(p)">{{ p }}</span>
-              <ion-button fill="clear" size="small" [disabled]="currentPage === totalPages" (click)="nextPage()"><ion-icon name="chevron-forward-outline"></ion-icon></ion-button>
+              <ion-button fill="clear" size="small" [disabled]="currentPage === totalPages" (click)="nextPage()">
+                <ion-icon name="chevron-forward-outline"></ion-icon>
+              </ion-button>
             </div>
           </div>
         </div>
@@ -114,7 +128,7 @@
 <!-- ========================================== -->
 <!-- 🔥 MODAL TAMBAH/EDIT BAGIAN DEPARTEMEN     -->
 <!-- ========================================== -->
-<ion-modal [isOpen]="isModalOpen" (didDismiss)="closeModal()">
+<ion-modal [isOpen]="isModalOpen" (didDismiss)="closeModal()" class="custom-bagian-modal">
   <ng-template>
     <ion-header>
       <ion-toolbar>
@@ -132,20 +146,29 @@
         <!-- Departemen -->
         <div class="form-group">
           <label class="form-label">Departemen <span class="required">*</span></label>
-          <ion-select [(ngModel)]="formData.departemen" interface="action-sheet" class="form-select" placeholder="Pilih Departemen">
-            <ion-select-option *ngFor="let d of departemenOptions" [value]="d">{{ d }}</ion-select-option>
-          </ion-select>
+          <select
+            [(ngModel)]="formData.departemen"
+            class="form-select-native"
+          >
+            <option value="" disabled selected hidden>Pilih Departemen</option>
+            <option *ngFor="let d of departemenOptions" [value]="d">{{ d }}</option>
+          </select>
         </div>
 
         <!-- Bagian -->
         <div class="form-group">
           <label class="form-label">Nama Bagian <span class="required">*</span></label>
-          <ion-input type="text" placeholder="Contoh: Software, Lab..." [(ngModel)]="formData.bagian" class="form-input"></ion-input>
+          <ion-input
+            type="text"
+            placeholder="Contoh: Software, Lab..."
+            [(ngModel)]="formData.bagian"
+            class="form-input"
+          ></ion-input>
         </div>
 
         <!-- Tombol -->
         <div class="modal-actions">
-          <ion-button class="cancel-modal-btn" fill="outline" color="medium" (click)="closeModal()">
+          <ion-button class="cancel-modal-btn" fill="outline" (click)="closeModal()">
             Batal
           </ion-button>
           <ion-button class="submit-modal-btn" (click)="simpanBagian()" [disabled]="!formData.departemen || !formData.bagian">

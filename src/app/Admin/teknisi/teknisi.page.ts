@@ -2,8 +2,15 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { IonicModule } from '@ionic/angular';
+import { IonicModule, ToastController, AlertController, IonicSafeString } from '@ionic/angular';
 import { HttpErrorResponse } from '@angular/common/http';
+import { addIcons } from 'ionicons';
+import {
+  menuOutline, addOutline, createOutline, trashOutline,
+  chevronBackOutline, chevronForwardOutline, closeOutline,
+  saveOutline, constructOutline
+} from 'ionicons/icons';
+
 import { TeknisiService } from 'src/app/services/teknisi.service';
 import { UserService } from 'src/app/services/user.service';
 import { Kategori, KategoriService } from 'src/app/services/kategori.service';
@@ -54,13 +61,34 @@ export class TeknisiPage implements OnInit {
     private router: Router,
     private teknisiService: TeknisiService,
     private userService: UserService,
-    private kategoriService: KategoriService
-  ) {}
+    private kategoriService: KategoriService,
+    private toastCtrl: ToastController,
+    private alertCtrl: AlertController
+  ) {
+    addIcons({
+      menuOutline, addOutline, createOutline, trashOutline,
+      chevronBackOutline, chevronForwardOutline, closeOutline,
+      saveOutline, constructOutline
+    });
+  }
 
   ngOnInit() {
     this.loadTeknisi();
     this.loadUsers();
     this.loadKategori();
+  }
+
+  /** Helper Toast Notification */
+  async showToast(message: string, color: 'success' | 'danger' | 'warning' = 'success') {
+    const toast = await this.toastCtrl.create({
+      message,
+      duration: 3000,
+      position: 'top',
+      color,
+      cssClass: `custom-toast toast-${color}`,
+      buttons: [{ text: 'OK', role: 'cancel' }]
+    });
+    await toast.present();
   }
 
   private loadTeknisi() {
@@ -85,7 +113,12 @@ export class TeknisiPage implements OnInit {
   private loadKategori() {
     this.kategoriService.getAll().subscribe({
       next: (res: any) => {
-        this.kategoriList = res?.data ?? res ?? [];
+        const rows = res?.data ?? res ?? [];
+        // Normalisasi objek ke interface Kategori { id, nama }
+        this.kategoriList = rows.map((k: any): Kategori => ({
+          id: k.id ?? k.id_kategori,
+          nama: k.nama ?? k.nama_kategori ?? ''
+        }));
       },
       error: (err: HttpErrorResponse) => console.error('Gagal mengambil data kategori:', err),
     });
@@ -133,11 +166,11 @@ export class TeknisiPage implements OnInit {
     this.selectedId = t.idTeknisi;
     this.editingNamaDisplay = t.nama;
 
-    const matched = this.kategoriList.find((k: any) => k.nama === t.kategoriSpesialis || k.nama_kategori === t.kategoriSpesialis);
+    const matched = this.kategoriList.find((k) => k.nama === t.kategoriSpesialis);
 
     this.formData = {
       nik: '',
-      idKategori: matched ? (matched.id ?? (matched as any).id_kategori) : null,
+      idKategori: matched ? matched.id : null,
       status: t.status,
     };
     this.isModalOpen = true;
@@ -148,23 +181,23 @@ export class TeknisiPage implements OnInit {
   simpanTeknisi() {
     if (this.isEditing && this.selectedId !== null) {
       if (!this.formData.idKategori) {
-        alert('Kategori Spesialis wajib diisi!');
+        this.showToast('Kategori Spesialis wajib diisi!', 'warning');
         return;
       }
       this.teknisiService.update(this.selectedId, { idKategori: this.formData.idKategori, status: this.formData.status }).subscribe({
         next: () => {
           this.loadTeknisi();
           this.closeModal();
-          alert('Data teknisi berhasil diperbarui!');
+          this.showToast('Data teknisi berhasil diperbarui!', 'success');
         },
         error: (err: HttpErrorResponse) => {
           console.error('Gagal memperbarui teknisi:', err);
-          alert(err.error?.message || 'Gagal memperbarui data.');
+          this.showToast(err.error?.message || 'Gagal memperbarui data.', 'danger');
         },
       });
     } else {
       if (!this.formData.nik || !this.formData.idKategori) {
-        alert('User dan Kategori Spesialis wajib diisi!');
+        this.showToast('User dan Kategori Spesialis wajib diisi!', 'warning');
         return;
       }
 
@@ -172,27 +205,43 @@ export class TeknisiPage implements OnInit {
         next: () => {
           this.loadTeknisi();
           this.closeModal();
-          alert('Teknisi berhasil ditambahkan!');
+          this.showToast('Teknisi berhasil ditambahkan!', 'success');
         },
         error: (err: HttpErrorResponse) => {
           console.error('Gagal menambah teknisi:', err);
-          alert(err.error?.message || 'Gagal menambah data.');
+          this.showToast(err.error?.message || 'Gagal menambah data.', 'danger');
         },
       });
     }
   }
 
-  hapusTeknisi(t: Teknisi) {
-    if (!confirm(`Apakah Anda yakin ingin menghapus teknisi "${t.nama}"?`)) return;
-    this.teknisiService.remove(t.idTeknisi).subscribe({
-      next: () => {
-        this.loadTeknisi();
-      },
-      error: (err: HttpErrorResponse) => {
-        console.error('Gagal menghapus teknisi:', err);
-        alert(err.error?.message || 'Gagal menghapus data.');
-      },
+  async hapusTeknisi(t: Teknisi) {
+    const alertEl = await this.alertCtrl.create({
+      header: 'Hapus Teknisi',
+      message: new IonicSafeString(`Apakah Anda yakin ingin menghapus teknisi <strong>${t.nama}</strong>?`),
+      cssClass: 'custom-alert-dialog',
+      buttons: [
+        { text: 'Batal', role: 'cancel', cssClass: 'alert-button-cancel' },
+        {
+          text: 'Hapus',
+          role: 'destructive',
+          handler: () => {
+            this.teknisiService.remove(t.idTeknisi).subscribe({
+              next: () => {
+                this.showToast('Teknisi berhasil dihapus!', 'success');
+                this.loadTeknisi();
+              },
+              error: (err: HttpErrorResponse) => {
+                console.error('Gagal menghapus teknisi:', err);
+                this.showToast(err.error?.message || 'Gagal menghapus data.', 'danger');
+              },
+            });
+          }
+        }
+      ]
     });
+
+    await alertEl.present();
   }
 
   getStatusClass(status: string): string {
@@ -200,33 +249,14 @@ export class TeknisiPage implements OnInit {
   }
 
   // ===== NAVIGASI & SIDEBAR =====
-  toggleSidebar() { 
-    this.isSidebarOpen = !this.isSidebarOpen; 
+  toggleSidebar() {
+    this.isSidebarOpen = !this.isSidebarOpen;
   }
 
-  setActiveMenu(menu: string) { 
-    this.activeMenu = menu; 
+  setActiveMenu(menu: string) {
+    this.activeMenu = menu;
     if (window.innerWidth < 1024) this.isSidebarOpen = false;
   }
-
-  goToDashboard() { this.setActiveMenu('dashboard'); this.router.navigate(['/dashboard']); }
-  goToListTicket() { this.setActiveMenu('list-ticket'); this.router.navigate(['/list']); }
-  goToApprovalTicket() { this.setActiveMenu('approval-ticket'); this.router.navigate(['/approval']); }
-  goToAssignmentTicket() { this.setActiveMenu('assignment-ticket'); this.router.navigate(['/assignment']); }
-  goToKaryawan() { this.setActiveMenu('karyawan'); this.router.navigate(['/karyawan']); }
-  goToUser() { this.setActiveMenu('user'); this.router.navigate(['/users']); }
-  goToJabatan() { this.setActiveMenu('jabatan'); this.router.navigate(['/jabatan']); }
-  goToDepartemen() { this.setActiveMenu('departemen'); this.router.navigate(['/departemen']); }
-  goToBagianDepartemen() { this.setActiveMenu('bagian-departemen'); this.router.navigate(['/bagian-departemen']); }
-  goToKategori() { this.setActiveMenu('kategori'); this.router.navigate(['/kategori']); }
-  goToSubKategori() { this.setActiveMenu('sub-kategori'); this.router.navigate(['/sub-kategori']); }
-  goToTeknisi() { this.setActiveMenu('teknisi'); this.router.navigate(['/teknisi']); }
-  goToInventory() { this.setActiveMenu('inventory'); this.router.navigate(['/inventory']); }
-  goToSchedule() { this.setActiveMenu('schedule'); this.router.navigate(['/schedule']); } // 🛠️ Ditambahkan untuk mengatasi error TS2339
-  goToLaporanFeedback() { this.setActiveMenu('laporan-feedback'); this.router.navigate(['/laporan-feedback']); }
-  goToStatistikTicket() { this.setActiveMenu('statistik-ticket'); this.router.navigate(['/statistik-ticket']); }
-  goToProfile() { this.setActiveMenu('profile'); this.router.navigate(['/profile']); }
-  goToNotifikasi() { this.setActiveMenu('notifikasi'); }
 
   logout() {
     localStorage.removeItem('token');

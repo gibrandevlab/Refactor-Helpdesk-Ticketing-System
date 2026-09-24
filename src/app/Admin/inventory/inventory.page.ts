@@ -2,10 +2,20 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
-import { IonicModule } from '@ionic/angular';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { IonicModule, ToastController, AlertController, IonicSafeString } from '@ionic/angular';
+import { HttpClient, HttpHeaders, HttpErrorResponse } from '@angular/common/http';
 import * as XLSX from 'xlsx';
 import { forkJoin } from 'rxjs';
+import { addIcons } from 'ionicons';
+import {
+  menuOutline, downloadOutline, addOutline, informationCircleOutline,
+  createOutline, trashOutline, chevronBackOutline, chevronForwardOutline,
+  closeOutline, personCircleOutline, hardwareChipOutline, appsOutline,
+  globeOutline, timeOutline, saveOutline, pricetagsOutline,
+  swapHorizontalOutline, businessOutline, chevronUpOutline, chevronDownOutline,
+  arrowForwardOutline, cubeOutline
+} from 'ionicons/icons';
+
 import { DepartemenService } from 'src/app/services/departemen.services';
 import { KaryawanService } from 'src/app/services/karyawan.service';
 import { SidebarComponent } from '../shared/components/sidebar/sidebar.component';
@@ -146,8 +156,19 @@ export class InventoryPage implements OnInit {
     private http: HttpClient,
     private departemenService: DepartemenService,
     private karyawanService: KaryawanService,
-    private inventoryService: InventoryService
-  ) {}
+    private inventoryService: InventoryService,
+    private toastCtrl: ToastController,
+    private alertCtrl: AlertController
+  ) {
+    addIcons({
+      menuOutline, downloadOutline, addOutline, informationCircleOutline,
+      createOutline, trashOutline, chevronBackOutline, chevronForwardOutline,
+      closeOutline, personCircleOutline, hardwareChipOutline, appsOutline,
+      globeOutline, timeOutline, saveOutline, pricetagsOutline,
+      swapHorizontalOutline, businessOutline, chevronUpOutline, chevronDownOutline,
+      arrowForwardOutline, cubeOutline
+    });
+  }
 
   ngOnInit() {
     this.route.queryParams.subscribe((params) => {
@@ -168,6 +189,19 @@ export class InventoryPage implements OnInit {
 
     this.loadStats();
     this.loadJenisOptions();
+  }
+
+  /** Helper Toast Notification */
+  async showToast(message: string, color: 'success' | 'danger' | 'warning' = 'success') {
+    const toast = await this.toastCtrl.create({
+      message,
+      duration: 3000,
+      position: 'top',
+      color,
+      cssClass: `custom-toast toast-${color}`,
+      buttons: [{ text: 'OK', role: 'cancel' }]
+    });
+    await toast.present();
   }
 
   private emptyHardwareDetail(): AssetHardwareDetail {
@@ -227,7 +261,10 @@ export class InventoryPage implements OnInit {
           this.tryOpenAssetFromQuery();
         }
       },
-      error: (err) => console.error('Gagal memuat data inventory:', err)
+      error: (err: HttpErrorResponse) => {
+        console.error('Gagal memuat data inventory:', err);
+        this.showToast('Gagal memuat data inventory.', 'danger');
+      }
     });
   }
 
@@ -336,13 +373,9 @@ export class InventoryPage implements OnInit {
     this.kategoriOptions = [...new Set(this.inventoryList.map((i) => i.kategori).filter(Boolean))];
   }
 
-  // =========================================================
-  // 🔥 EXPORT EXCEL — 1 sheet gabungan, ambil detail lengkap
-  // tiap asset (Profile, Hardware, Software, IP, History) dulu
-  // =========================================================
   exportToExcel() {
     if (this.filteredInventory.length === 0) {
-      alert('Tidak ada data untuk diexport.');
+      this.showToast('Tidak ada data untuk diexport.', 'warning');
       return;
     }
 
@@ -359,7 +392,7 @@ export class InventoryPage implements OnInit {
       },
       error: (err) => {
         console.error('Gagal mengambil detail untuk export:', err);
-        alert('Gagal mengambil sebagian detail asset untuk export.');
+        this.showToast('Gagal mengambil sebagian detail asset untuk export.', 'danger');
         this.isExporting = false;
       },
     });
@@ -447,6 +480,7 @@ export class InventoryPage implements OnInit {
     const tanggal = new Date().toISOString().slice(0, 10);
     const namaFileFilter = this.filterDept ? `_${this.filterDept.replace(/\s+/g, '-')}` : '';
     XLSX.writeFile(workbook, `Data_Inventory_Lengkap${namaFileFilter}_${tanggal}.xlsx`);
+    this.showToast('Export Excel berhasil diunduh!', 'success');
   }
 
   private formatTanggal(tgl: string): string {
@@ -576,7 +610,7 @@ export class InventoryPage implements OnInit {
       },
       error: (err) => {
         console.error('Gagal memuat detail aset:', err);
-        alert('Gagal memuat detail aset');
+        this.showToast('Gagal memuat detail aset', 'danger');
         this.isDetailLoading = false;
       },
     });
@@ -600,14 +634,10 @@ export class InventoryPage implements OnInit {
 
   onPemegangChange() {
     const selectedNik = this.formData.nik_pemegang;
-    if (!selectedNik) {
-      return;
-    }
+    if (!selectedNik) return;
 
     const karyawan = this.karyawanList.find((k: any) => k.nik === selectedNik);
-    if (!karyawan || !karyawan.departemen) {
-      return;
-    }
+    if (!karyawan || !karyawan.departemen) return;
 
     const matchedDept = this.departemenList.find(
       (d: any) => d.namaDepartemen === karyawan.departemen
@@ -628,7 +658,7 @@ export class InventoryPage implements OnInit {
 
   simpanInventory() {
     if (!this.formData.nama_barang || !this.formData.id_departemen || !this.formData.id_kategori) {
-      alert('Nama Barang, Departemen, dan Kategori wajib diisi!');
+      this.showToast('Nama Barang, Departemen, dan Kategori wajib diisi!', 'warning');
       return;
     }
 
@@ -638,56 +668,70 @@ export class InventoryPage implements OnInit {
     if (this.isEditing && this.selectedKode !== null) {
       this.http.put(`http://localhost:5000/api/inventory/${this.selectedKode}`, this.formData, { headers }).subscribe({
         next: () => {
-          alert('Data asset berhasil diperbarui!');
+          this.showToast('Data asset berhasil diperbarui!', 'success');
           this.closeModal();
           this.loadInventory();
           this.loadStats();
         },
-        error: (err) => alert('Gagal memperbarui: ' + (err.error?.message || err.message))
+        error: (err: HttpErrorResponse) => this.showToast('Gagal memperbarui: ' + (err.error?.message || err.message), 'danger')
       });
     } else {
       this.http.post('http://localhost:5000/api/inventory', this.formData, { headers }).subscribe({
         next: () => {
-          alert('Asset berhasil ditambahkan!');
+          this.showToast('Asset berhasil ditambahkan!', 'success');
           this.closeModal();
           this.loadInventory();
           this.loadStats();
           this.loadJenisOptions();
         },
-        error: (err) => alert('Gagal menambah asset: ' + (err.error?.message || err.message))
+        error: (err: HttpErrorResponse) => this.showToast('Gagal menambah asset: ' + (err.error?.message || err.message), 'danger')
       });
     }
   }
 
-  hapusInventory(item: Inventory) {
-    if (confirm(`Apakah Anda yakin ingin menghapus asset "${item.kodeAsset}" (${item.namaBarang})?`)) {
-      const token = localStorage.getItem('token');
-      const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
+  async hapusInventory(item: Inventory) {
+    const alertEl = await this.alertCtrl.create({
+      header: 'Hapus Asset Inventory',
+      message: new IonicSafeString(`Apakah Anda yakin ingin menghapus asset <strong>"${item.kodeAsset}"</strong> (${item.namaBarang})?`),
+      cssClass: 'custom-alert-dialog',
+      buttons: [
+        { text: 'Batal', role: 'cancel', cssClass: 'alert-button-cancel' },
+        {
+          text: 'Hapus',
+          role: 'destructive',
+          handler: () => {
+            const token = localStorage.getItem('token');
+            const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
 
-      this.http.delete(`http://localhost:5000/api/inventory/${item.kodeAsset}`, { headers }).subscribe({
-        next: () => {
-          alert('Asset berhasil dihapus!');
-          this.loadInventory();
-          this.loadStats();
-        },
-        error: (err) => alert('Gagal menghapus: ' + (err.error?.message || err.message))
-      });
-    }
+            this.http.delete(`http://localhost:5000/api/inventory/${item.kodeAsset}`, { headers }).subscribe({
+              next: () => {
+                this.showToast('Asset berhasil dihapus!', 'success');
+                this.loadInventory();
+                this.loadStats();
+              },
+              error: (err: HttpErrorResponse) => this.showToast('Gagal menghapus: ' + (err.error?.message || err.message), 'danger')
+            });
+          }
+        }
+      ]
+    });
+
+    await alertEl.present();
   }
 
   submitHardwareDetail() {
     if (!this.selectedKode) return;
     this.inventoryService.saveHardwareDetail(this.selectedKode, this.hardwareDetail).subscribe({
-      next: () => alert('Detail hardware berhasil disimpan!'),
-      error: (err) => alert('Gagal menyimpan hardware: ' + (err.error?.message || err.message)),
+      next: () => this.showToast('Detail hardware berhasil disimpan!', 'success'),
+      error: (err: HttpErrorResponse) => this.showToast('Gagal menyimpan hardware: ' + (err.error?.message || err.message), 'danger'),
     });
   }
 
   submitSoftwareDetail() {
     if (!this.selectedKode) return;
     this.inventoryService.saveSoftwareDetail(this.selectedKode, this.softwareDetail).subscribe({
-      next: () => alert('Detail software berhasil disimpan!'),
-      error: (err) => alert('Gagal menyimpan software: ' + (err.error?.message || err.message)),
+      next: () => this.showToast('Detail software berhasil disimpan!', 'success'),
+      error: (err: HttpErrorResponse) => this.showToast('Gagal menyimpan software: ' + (err.error?.message || err.message), 'danger'),
     });
   }
 
@@ -696,37 +740,18 @@ export class InventoryPage implements OnInit {
     if (s === 'solved') return 'success';
     if (s === 'on process') return 'warning';
     if (s === 'rejected') return 'danger';
-    if (s.includes('menunggu')) return 'medium';
     return 'medium';
   }
 
-  toggleSidebar() { 
-    this.isSidebarOpen = !this.isSidebarOpen; 
+  // ===== NAVIGASI & SIDEBAR =====
+  toggleSidebar() {
+    this.isSidebarOpen = !this.isSidebarOpen;
   }
 
-  setActiveMenu(menu: string) { 
-    this.activeMenu = menu; 
+  setActiveMenu(menu: string) {
+    this.activeMenu = menu;
     if (window.innerWidth < 1024) this.isSidebarOpen = false;
   }
-
-  goToDashboard() { this.setActiveMenu('dashboard'); this.router.navigate(['/dashboard']); }
-  goToListTicket() { this.setActiveMenu('list-ticket'); this.router.navigate(['/list']); }
-  goToApprovalTicket() { this.setActiveMenu('approval-ticket'); this.router.navigate(['/approval']); }
-  goToAssignmentTicket() { this.setActiveMenu('assignment-ticket'); this.router.navigate(['/assignment']); }
-  goToKaryawan() { this.setActiveMenu('karyawan'); this.router.navigate(['/karyawan']); }
-  goToUser() { this.setActiveMenu('user'); this.router.navigate(['/users']); }
-  goToJabatan() { this.setActiveMenu('jabatan'); this.router.navigate(['/jabatan']); }
-  goToDepartemen() { this.setActiveMenu('departemen'); this.router.navigate(['/departemen']); }
-  goToBagianDepartemen() { this.setActiveMenu('bagian-departemen'); this.router.navigate(['/bagian-departemen']); }
-  goToKategori() { this.setActiveMenu('kategori'); this.router.navigate(['/kategori']); }
-  goToSubKategori() { this.setActiveMenu('sub-kategori'); this.router.navigate(['/sub-kategori']); }
-  goToTeknisi() { this.setActiveMenu('teknisi'); this.router.navigate(['/teknisi']); }
-  goToInventory() { this.setActiveMenu('inventory'); this.router.navigate(['/inventory']); }
-  goToSchedule() { this.setActiveMenu('schedule'); this.router.navigate(['/schedule']); }
-  goToLaporanFeedback() { this.setActiveMenu('laporan-feedback'); this.router.navigate(['/laporan-feedback']); }
-  goToStatistikTicket() { this.setActiveMenu('statistik-ticket'); this.router.navigate(['/statistik-ticket']); }
-  goToProfile() { this.setActiveMenu('profile'); this.router.navigate(['/profile']); }
-  goToNotifikasi() { this.setActiveMenu('notifikasi'); }
 
   logout() {
     localStorage.removeItem('token');

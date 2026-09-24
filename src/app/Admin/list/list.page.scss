@@ -15,7 +15,6 @@
   --teal: #14b8a6;
   --orange: #fb923c;
 
-  /* Global box-sizing protection to prevent overflow */
   box-sizing: border-box;
 }
 
@@ -39,7 +38,7 @@
 
 /* ===================== MAIN CONTENT ===================== */
 .main-content {
-margin-left: var(--sidebar-width);
+  margin-left: var(--sidebar-width);
   width: calc(100% - var(--sidebar-width));
   max-width: calc(100% - var(--sidebar-width));
   min-width: 0;
@@ -159,7 +158,7 @@ margin-left: var(--sidebar-width);
   margin-bottom: 16px;
   width: 100%;
   max-width: 100%;
-  overflow: hidden; /* Mencegah komponen dalam card meluber */
+  overflow: hidden;
 }
 
 .stats-header {
@@ -276,14 +275,13 @@ margin-left: var(--sidebar-width);
   display: flex;
   align-items: flex-end;
   gap: 10px;
-  height: 190px;
-  padding: 10px 4px 0;
+  height: 200px;
+  padding: 28px 8px 0;
   overflow-x: auto;
   overflow-y: hidden;
   width: 100%;
   max-width: 100%;
 
-  /* Scrollbar custom agar rapi */
   &::-webkit-scrollbar {
     height: 6px;
   }
@@ -294,7 +292,7 @@ margin-left: var(--sidebar-width);
 }
 
 .bar-item {
-  flex: 0 0 auto; /* Mencegah bar menyusut paksa yang memicu teks tumpang tindih */
+  flex: 0 0 auto;
   min-width: 52px;
   display: flex;
   flex-direction: column;
@@ -344,14 +342,14 @@ margin-left: var(--sidebar-width);
 
 .bar-value {
   position: absolute;
-  top: -20px;
+  top: -22px;
   left: 50%;
   transform: translateX(-50%);
   background: var(--sidebar-bg);
   color: #fff;
   font-size: 10.5px;
   font-weight: 700;
-  padding: 1px 6px;
+  padding: 2px 6px;
   border-radius: 6px;
   white-space: nowrap;
 }
@@ -542,7 +540,7 @@ margin-left: var(--sidebar-width);
   width: 100%;
   max-width: 100%;
   overflow-x: auto;
-  -webkit-overflow-scrolling: touch; /* Scroll halus di perangkat mobile */
+  -webkit-overflow-scrolling: touch;
 }
 
 .ticket-table {
@@ -597,12 +595,18 @@ margin-left: var(--sidebar-width);
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  background: #eef2ff;
-  color: var(--primary);
+  background: #e0e7ff;
+  color: #3730a3;
   font-size: 11.5px;
   font-weight: 600;
-  padding: 3px 8px;
-  border-radius: 6px;
+  padding: 4px 10px;
+  border-radius: 12px;
+  text-decoration: none;
+  transition: opacity 0.2s;
+
+  &:hover {
+    opacity: 0.85;
+  }
 }
 
 .status-badge {
@@ -707,10 +711,44 @@ margin-left: var(--sidebar-width);
 }
 
 /* ========================================== */
-/* MODAL STYLING                               */
+/* 🔥 MODAL STYLING & ICON FIX               */
 /* ========================================== */
+ion-modal.custom-modal,
+ion-modal {
+  --primary: #2563eb;
+  --text-dark: #1e293b;
+  --text-muted: #64748b;
+  --border-color: #cbd5e1;
+}
+
+.modal-header {
+  ion-toolbar {
+    --background: #ffffff !important;
+    --color: #1e293b !important;
+    --border-color: #e2e8f0;
+    color: #1e293b !important;
+    border-bottom: 1px solid #e2e8f0;
+
+    ion-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: #1e293b !important;
+    }
+  }
+}
+
+.btn-close-modal {
+  --color: #64748b !important;
+  color: #64748b !important;
+
+  ion-icon {
+    font-size: 22px;
+    color: #64748b !important;
+  }
+}
+
 .modal-content {
-  --background: #f9fafb;
+  --background: #ffffff !important;
 }
 
 .modal-body {
@@ -726,36 +764,41 @@ margin-left: var(--sidebar-width);
 }
 
 .form-group {
-  margin-bottom: 16px;
+  margin-bottom: 18px;
   width: 100%;
 }
 
 .form-label {
   display: block;
-  font-size: 13px;
+  font-size: 13.5px;
   font-weight: 600;
-  color: var(--text-dark);
-  margin-bottom: 4px;
+  color: #1e293b !important;
+  margin-bottom: 6px;
 }
 
 .required {
-  color: var(--danger);
+  color: #ef4444;
 }
 
-.form-input,
 .form-select,
 .form-textarea {
-  --background: #ffffff;
-  --border-radius: 8px;
-  --border-color: var(--border-color);
-  --padding-start: 14px;
-  --padding-end: 14px;
-  border: 1px solid var(--border-color);
+  --background: #ffffff !important;
+  --color: #1e293b !important;
+  --placeholder-color: #94a3b8;
+  --placeholder-opacity: 1;
+  --padding-start: 12px;
+  --padding-end: 12px;
+  border: 1px solid #cbd5e1;
   border-radius: 8px;
   background: #ffffff;
-  font-size: 14px;
+  color: #1e293b !important;
+  font-size: 13.5px;
   width: 100%;
   max-width: 100%;
+
+  &:focus-within {
+    border-color: #2563eb;
+  }
 }
 
 .upload-wrapper {
@@ -766,13 +809,31 @@ margin-left: var(--sidebar-width);
   width: 100%;
 }
 
+.btn-upload {
+  --color: #2563eb !important;
+  --border-color: #cbd5e1 !important;
+  --border-radius: 8px;
+  --background: #ffffff !important;
+  color: #2563eb !important;
+  font-weight: 600;
+  font-size: 13px;
+  height: 38px;
+  margin: 0;
+
+  ion-icon {
+    font-size: 18px;
+    color: #2563eb !important;
+    margin-right: 6px;
+  }
+}
+
 .modal-actions {
   display: flex;
   justify-content: flex-end;
   gap: 12px;
-  margin-top: 20px;
+  margin-top: 24px;
   padding-top: 16px;
-  border-top: 1px solid var(--border-color);
+  border-top: 1px solid #e2e8f0;
   flex-wrap: wrap;
 }
 
@@ -782,13 +843,13 @@ margin-left: var(--sidebar-width);
 }
 
 .submit-btn {
-  --background: var(--primary);
+  --background: #2563eb;
   --border-radius: 8px;
   font-weight: 600;
 }
 
 /* ========================================== */
-/* 🔥 STYLING COUNTDOWN TIMER                 */
+/* COUNTDOWN TIMER                            */
 /* ========================================== */
 .countdown-timer {
   display: flex;
@@ -807,4 +868,39 @@ margin-left: var(--sidebar-width);
 
 .countdown-timer ion-icon {
   font-size: 14px;
+}
+/* ========================================== */
+/* 🔥 STYLING DROPDOWN HTML NATIVE            */
+/* ========================================== */
+.form-select-native {
+  width: 100%;
+  height: 42px;
+  padding: 8px 36px 8px 14px;
+  font-size: 13.5px;
+  color: #1e293b;
+  background-color: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  outline: none;
+  appearance: none; /* Sembunyikan panah bawaan OS */
+  -webkit-appearance: none;
+  -moz-appearance: none;
+
+  /* Icon panah chevron custom warna gelap agar kontras */
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%3c1e293b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 16px;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+
+  &:focus {
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+  }
+
+  option {
+    color: #1e293b;
+    background: #ffffff;
+    padding: 8px;
+  }
 }

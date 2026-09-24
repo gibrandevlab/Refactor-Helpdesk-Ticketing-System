@@ -143,6 +143,7 @@
   font-size: 13px;
   width: 100%;
   background: transparent;
+  color: var(--text-dark);
 }
 
 .search-icon {
@@ -251,15 +252,6 @@
   border-radius: 6px;
 }
 
-/* ============================================================
-   🔧 FIX: .status-badge sebelumnya cuma punya class
-   status-proses/status-selesai/status-waiting/status-default,
-   padahal getStatusClass() di myticket.page.ts balikin class
-   status-success/status-primary/status-warning/status-danger/status-info.
-   Nama class-nya nggak pernah match, jadi badge-nya tampil polos
-   tanpa warna. Sekarang ditambahkan class yang benar-benar dipakai
-   TS, class lama tetap dipertahankan kalau masih dipakai di tempat lain.
-   ============================================================ */
 .status-badge {
   display: inline-block;
   font-size: 11.5px;
@@ -292,7 +284,6 @@
     color: #0284c7;
   }
 
-  /* classes lama, dipertahankan buat kompatibilitas */
   &.status-proses {
     background: #fff7ed;
     color: var(--warning);
@@ -365,70 +356,54 @@
   }
 }
 
-/* ===================== RESPONSIVE ===================== */
-@media (min-width: 1024px) {
-  .sidebar {
-    transform: translateX(0) !important;
-    position: sticky;
-    top: 0;
+/* ========================================== */
+/* OVERRIDE OVERLAY MODAL                    */
+/* ========================================== */
+ion-modal.custom-myticket-modal {
+  --width: 90%;
+  --max-width: 500px;
+  --border-radius: 16px;
+  --box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.15);
+  --background: #ffffff !important;
+
+  &::part(content) {
+    background: #ffffff !important;
+    border-radius: 16px;
+    overflow: hidden;
   }
 
-  .sidebar-close {
-    display: none !important;
-  }
+  ion-header {
+    background: #ffffff !important;
 
-  .sidebar-overlay {
-    display: none !important;
-  }
+    ion-toolbar {
+      --background: #ffffff !important;
+      --color: #0f172a !important;
+      --border-color: #cbd5e1 !important;
+      color: #0f172a !important;
+      font-weight: 700;
+      padding: 4px 8px;
 
-  .menu-toggle {
-    display: none !important;
-  }
+      ion-title {
+        color: #0f172a !important;
+        font-weight: 700;
+      }
 
-  .main-content {
-    margin-left: 250px;
-  }
-}
-
-@media (max-width: 992px) {
-  .sidebar {
-    transform: translateX(-100%);
-    &.open {
-      transform: translateX(0);
+      ion-button {
+        --color: #64748b !important;
+      }
     }
   }
 
-  .sidebar-close {
-    display: flex !important;
-  }
-
-  .main-content {
-    margin-left: 0;
-  }
-}
-
-@media (max-width: 768px) {
-  .list-toolbar {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .btn-new-ticket {
-    margin-left: 0;
-    width: 100%;
-  }
-
-  .main-header {
-    padding: 12px 16px;
-  }
-
-  .content-area {
-    padding: 16px;
+  ion-content {
+    --background: #ffffff !important;
+    --color: #0f172a !important;
+    background: #ffffff !important;
+    color: #0f172a !important;
   }
 }
 
 /* ========================================== */
-/* 🔥 STYLING MODAL CHAT (WhatsApp Style)      */
+/* STYLING MODAL CHAT                         */
 /* ========================================== */
 .modal-content {
   --background: #f2f5f8;
@@ -500,15 +475,15 @@
 }
 
 .bubble-me .bubble-header {
-  color: rgba(0, 0, 0, 0.8);
+  color: rgba(255, 255, 255, 0.8);
 }
 
 .bubble-me .sender-name {
-  color: rgba(24, 23, 23, 0.9);
+  color: #ffffff;
 }
 
 .bubble-me .bubble-text {
-  color: #060606;
+  color: #ffffff;
 }
 
 .chat-input-area {
@@ -524,6 +499,7 @@
 .chat-input {
   --padding-start: 16px;
   --padding-end: 16px;
+  --color: #0f172a !important;
   background: #f3f4f6;
   border-radius: 24px;
   font-size: 14px;
@@ -548,7 +524,7 @@
 }
 
 /* ========================================== */
-/* 🔥 STYLING COUNTDOWN TIMER                 */
+/* STYLING COUNTDOWN TIMER                   */
 /* ========================================== */
 .countdown-timer {
   display: flex;
@@ -573,26 +549,24 @@
 }
 
 /* ========================================== */
-/* 🔥 STYLING MODAL TAMBAH TIKET (Modern)     */
+/* STYLING FORM & MODAL TAMBAH TIKET         */
 /* ========================================== */
-
 .modal-body {
-  padding: 28px 24px 32px;
+  padding: 24px;
+  max-width: 500px;
+  margin: 0 auto;
+  background: #ffffff !important;
 }
 
 .form-group {
-  margin-bottom: 22px;
-
-  &:last-of-type {
-    margin-bottom: 28px;
-  }
+  margin-bottom: 20px;
 }
 
 .form-label {
   display: block;
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--text-dark);
+  font-size: 13.5px;
+  font-weight: 700;
+  color: #0f172a !important;
   margin-bottom: 8px;
 
   .required {
@@ -601,125 +575,104 @@
   }
 }
 
-.form-select {
-  --background: #f8fafc;
-  --border-radius: 12px;
-  --padding-start: 16px;
-  --padding-end: 16px;
-  --padding-top: 13px;
-  --padding-bottom: 13px;
-  border: 1.5px solid var(--border-color);
-  border-radius: 12px;
-  font-size: 14px;
-  transition:
-    border-color 0.2s ease,
-    box-shadow 0.2s ease;
+/* OVERRIDE ION-SELECT AGAR TAMPIL MODERN & RAPI */
+ion-select.form-select {
+  --background: #ffffff !important;
+  --color: #0f172a !important;
+  --placeholder-color: #64748b !important;
+  --placeholder-opacity: 1 !important;
+  --padding-start: 14px !important;
+  --padding-end: 14px !important;
+  --padding-top: 10px !important;
+  --padding-bottom: 10px !important;
+  border: 1px solid #cbd5e1 !important;
+  border-radius: 8px !important;
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  width: 100%;
+  min-height: 42px;
+  margin-top: 4px;
 
-  &.select-expanded,
-  &:focus-within {
-    border-color: var(--primary);
-    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+  &::part(text) {
+    color: #0f172a !important;
+    font-weight: 500;
+  }
+
+  &::part(icon) {
+    color: #64748b !important;
+    opacity: 1;
   }
 }
 
-.form-textarea {
-  --background: #f8fafc;
-  --border-radius: 12px;
-  --padding-start: 16px;
-  --padding-end: 16px;
-  --padding-top: 13px;
-  --padding-bottom: 13px;
-  border: 1.5px solid var(--border-color);
-  border-radius: 12px;
-  font-size: 14px;
-  transition:
-    border-color 0.2s ease,
-    box-shadow 0.2s ease;
-
-  &:focus-within {
-    border-color: var(--primary);
-    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
-  }
+ion-textarea.form-textarea {
+  --color: #0f172a !important;
+  --placeholder-color: #64748b !important;
+  --placeholder-opacity: 1 !important;
+  --background: #ffffff !important;
+  --padding-start: 14px !important;
+  --padding-end: 14px !important;
+  border: 1px solid #cbd5e1 !important;
+  border-radius: 8px !important;
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  color: #0f172a !important;
+  margin-top: 4px;
 }
 
 .form-input[type="file"] {
   width: 100%;
-  padding: 12px 14px;
-  background: #f8fafc;
-  border: 1.5px dashed var(--border-color);
-  border-radius: 12px;
-  font-size: 13px;
-  color: var(--text-muted);
+  padding: 10px 14px;
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  font-size: 13.5px;
+  color: #0f172a;
   cursor: pointer;
-  transition:
-    border-color 0.2s ease,
-    background 0.2s ease;
-
-  &:hover {
-    border-color: var(--primary);
-    background: #eef2ff;
-  }
+  margin-top: 4px;
 
   &::file-selector-button {
-    padding: 8px 16px;
+    padding: 6px 12px;
     margin-right: 12px;
     border: none;
-    border-radius: 8px;
+    border-radius: 6px;
     background: var(--primary);
     color: #fff;
     font-weight: 600;
-    font-size: 12.5px;
+    font-size: 12px;
     cursor: pointer;
-    transition: background 0.2s ease;
-
-    &:hover {
-      background: #1d4ed8;
-    }
   }
 }
 
 .modal-actions {
   display: flex;
+  justify-content: flex-end;
   gap: 12px;
-  margin-top: 8px;
-  padding-top: 20px;
-  border-top: 1px solid var(--border-color);
+  margin-top: 24px;
+  padding-top: 16px;
+  border-top: 1px solid #e2e8f0;
 }
 
 .cancel-modal-btn {
-  flex: 1;
-  --border-radius: 12px;
-  --padding-top: 14px;
-  --padding-bottom: 14px;
-  --border-color: var(--border-color);
-  font-weight: 500;
-  font-size: 14px;
-  text-transform: none;
+  --border-radius: 8px;
+  --color: #475569 !important;
+  --border-color: #cbd5e1 !important;
+  font-weight: 600;
 }
 
 .submit-modal-btn {
-  flex: 2;
-  --background: var(--primary);
-  --background-activated: #1d4ed8;
-  --border-radius: 12px;
-  --padding-top: 14px;
-  --padding-bottom: 14px;
-  --box-shadow: 0 4px 14px rgba(37, 99, 235, 0.3);
+  --background: #2563eb !important;
+  --background-activated: #1d4ed8 !important;
+  --background-disabled: #93c5fd !important;
+  --color: #ffffff !important;
+  --color-disabled: #ffffff !important;
+  --opacity: 1 !important;
+  --border-radius: 8px;
   font-weight: 600;
-  font-size: 14px;
-  text-transform: none;
-
-  &[disabled] {
-    --background: #cbd5e1;
-    --box-shadow: none;
-    opacity: 0.8;
-  }
 }
 
-/* ============================================================
-   🔥 MODAL CHECK SHEET USER — dibikin lebar penuh biar semua
-   kolom keliatan (defaultnya ion-modal cuma ~500px lebar di desktop)
-   ============================================================ */
+/* ========================================== */
+/* MODAL CHECK SHEET USER                    */
+/* ========================================== */
 .checksheet-modal-user {
   --width: 95%;
   --max-width: 1100px;
@@ -729,11 +682,9 @@
 
 .checksheet-form {
   padding: 12px 16px 24px;
+  background: #ffffff !important;
 }
 
-/* ============================================================
-   🔥 HEADER FORM (logo kiri, judul tengah, no.form kanan)
-   ============================================================ */
 .checksheet-header-table {
   width: 100%;
   border-collapse: collapse;
@@ -743,6 +694,7 @@
     border: 1px solid #333;
     padding: 8px 10px;
     vertical-align: middle;
+    color: #111;
   }
 
   .cs-logo-cell {
@@ -763,23 +715,23 @@
   .cs-title-main {
     font-weight: 700;
     font-size: 16px;
+    color: #0f172a;
   }
 
   .cs-title-sub {
     font-size: 11px;
     margin-top: 2px;
+    color: #334155;
   }
 
   .cs-formno-cell {
     width: 160px;
     font-size: 11px;
     text-align: left;
+    color: #334155;
   }
 }
 
-/* ============================================================
-   TABEL INFO (Tanggal Pelaksanaan, IT Propertis, dst)
-   ============================================================ */
 .checksheet-info-table {
   width: 100%;
   border-collapse: collapse;
@@ -795,18 +747,14 @@
   .cs-info-label {
     width: 160px;
     font-weight: 600;
-    color: #333;
+    color: #0f172a;
   }
 
   .cs-info-value {
-    color: #111;
+    color: #0f172a;
   }
 }
 
-/* ============================================================
-   🔥 TABEL CHECKLIST — border tipis, section "Kode Assets"
-   full-width, checkmark, sama seperti tabel Check Sheet Teknisi
-   ============================================================ */
 .checksheet-table-wrapper {
   overflow-x: auto;
   margin: 12px 0;
@@ -831,6 +779,7 @@
     font-weight: 700;
     text-align: center;
     font-size: 11px;
+    color: #0f172a;
   }
 
   td.unit-cell {
@@ -868,12 +817,10 @@
     font-weight: 700;
     font-size: 12px;
     padding: 4px 6px;
+    color: #0f172a;
   }
 }
 
-/* ============================================================
-   🔥 KOTAK CENTANG OK / NC (read-only, sisi User)
-   ============================================================ */
 .cs-checkbox {
   width: 16px;
   height: 16px;
@@ -893,11 +840,9 @@
 .cs-checkbox-nc span {
   font-size: 12px;
   font-weight: 700;
+  color: #111;
 }
 
-/* ============================================================
-   🔥 LEGENDA CATATAN & KONDISI NC — dua kolom seperti PDF
-   ============================================================ */
 .checksheet-legend-table {
   width: 100%;
   border-collapse: collapse;
@@ -908,6 +853,7 @@
     border: 1px solid #333;
     padding: 6px 8px;
     vertical-align: top;
+    color: #0f172a;
   }
 
   p {
@@ -915,9 +861,6 @@
   }
 }
 
-/* ============================================================
-   🔥 STATUS APPROVAL — ringkas, di atas tabel tanda tangan
-   ============================================================ */
 .checksheet-approval-status {
   background: #f8fafc;
   border-radius: 8px;
@@ -927,12 +870,10 @@
   .approval-status-text {
     font-weight: 600;
     margin: 0;
+    color: #0f172a;
   }
 }
 
-/* ============================================================
-   TABEL TANDA TANGAN — DIBUAT OLEH / DIKETAHUI / DISETUJUI
-   ============================================================ */
 .checksheet-signature-table {
   width: 100%;
   border-collapse: collapse;
@@ -944,6 +885,7 @@
   td {
     border: 1px solid #333;
     padding: 6px;
+    color: #0f172a;
   }
 
   th {
@@ -974,9 +916,6 @@
   }
 }
 
-/* ============================================================
-   🔥 TOMBOL AKSI (Approve / Reject / Download PDF)
-   ============================================================ */
 .checksheet-approval-actions {
   display: flex;
   gap: 8px;
@@ -984,9 +923,6 @@
   margin-top: 12px;
 }
 
-/* ============================================================
-   🔥 NOTE ALASAN REJECT DI KOLOM STATUS (My Ticket User)
-   ============================================================ */
 .reject-reason-note {
   margin-top: 4px;
   font-size: 0.75rem;
@@ -1001,5 +937,67 @@
     flex-shrink: 0;
     margin-top: 1px;
     font-size: 0.9rem;
+  }
+}
+
+/* ===================== RESPONSIVE ===================== */
+@media (min-width: 1024px) {
+  .sidebar {
+    transform: translateX(0) !important;
+    position: sticky;
+    top: 0;
+  }
+
+  .sidebar-close {
+    display: none !important;
+  }
+
+  .sidebar-overlay {
+    display: none !important;
+  }
+
+  .menu-toggle {
+    display: none !important;
+  }
+
+  .main-content {
+    margin-left: 250px;
+  }
+}
+
+@media (max-width: 992px) {
+  .sidebar {
+    transform: translateX(-100%);
+    &.open {
+      transform: translateX(0);
+    }
+  }
+
+  .sidebar-close {
+    display: flex !important;
+  }
+
+  .main-content {
+    margin-left: 0;
+  }
+}
+
+@media (max-width: 768px) {
+  .list-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .btn-new-ticket {
+    margin-left: 0;
+    width: 100%;
+  }
+
+  .main-header {
+    padding: 12px 16px;
+  }
+
+  .content-area {
+    padding: 16px;
   }
 }

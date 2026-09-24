@@ -30,7 +30,7 @@
       <!-- CONTENT -->
       <div class="content-area">
         <div class="page-heading">
-          <h1 class="page-title">📋 List Ticket</h1>
+          <h1 class="page-title">List Ticket</h1>
           <p class="page-subtitle">Kelola dan pantau seluruh ticket yang masuk</p>
         </div>
 
@@ -212,12 +212,12 @@
                   <td class="ticket-id">{{ t.id_ticket }}</td>
                   <td>{{ t.reported }}</td>
                   <td>{{ t.dept }}</td>
-                  <td class="nowrap">{{ t.tanggal }}</td>
+                  <td class="nowrap">{{ formatDate(t.tanggal) }}</td>
                   <td>{{ t.nama_kategori }}</td>
                   <td>{{ t.nama_sub_kategori }}</td>
                   <td>{{ t.aset || '-' }}</td>
                   <td>
-                    <a *ngIf="t.lampiran" [href]="getLampiranUrl(t.lampiran)" target="_blank" class="lampiran-badge" style="background-color: #e0e7ff; color: #3730a3; padding: 4px 10px; border-radius: 12px; font-size: 12px; font-weight: 500; text-decoration: none; display: inline-flex; align-items: center; justify-content: center;">
+                    <a *ngIf="t.lampiran" [href]="getLampiranUrl(t.lampiran)" target="_blank" class="lampiran-badge">
                       Lihat Foto
                     </a>
                     <span *ngIf="!t.lampiran">-</span>
@@ -234,13 +234,13 @@
                   </td>
                   <td>
                     <div class="action-buttons">
-                      <ion-button fill="clear" size="small" (click)="onViewDetail(t)">
+                      <ion-button fill="clear" size="small" (click)="onViewDetail(t)" title="Detail">
                         <ion-icon name="eye-outline"></ion-icon>
                       </ion-button>
-                      <ion-button fill="clear" size="small" (click)="openEditModal(t)">
+                      <ion-button fill="clear" size="small" (click)="openEditModal(t)" title="Edit">
                         <ion-icon name="create-outline"></ion-icon>
                       </ion-button>
-                      <ion-button fill="clear" size="small" (click)="hapusTicket(t)">
+                      <ion-button fill="clear" size="small" color="danger" (click)="hapusTicket(t)" title="Hapus">
                         <ion-icon name="trash-outline"></ion-icon>
                       </ion-button>
                     </div>
@@ -275,87 +275,103 @@
           </div>
         </div>
       </div>
-    </div> <!-- 👈 Penutup main-content yang benar -->
-  </div> <!-- 👈 Penutup dashboard-container yang benar -->
+    </div>
+  </div>
 </ion-content>
 
 <!-- ========================================== -->
 <!-- MODAL TAMBAH / EDIT TICKET                 -->
 <!-- ========================================== -->
-<ion-modal [isOpen]="isModalOpen" (didDismiss)="closeModal()">
+<ion-modal [isOpen]="isModalOpen" (didDismiss)="closeModal()" class="custom-modal">
   <ng-template>
-    <ion-header>
+    <ion-header class="modal-header">
       <ion-toolbar>
         <ion-title>{{ isEditing ? 'Edit Ticket' : 'Tambah Ticket' }}</ion-title>
         <ion-buttons slot="end">
-          <ion-button (click)="closeModal()">
+          <ion-button (click)="closeModal()" class="btn-close-modal">
             <ion-icon name="close-outline"></ion-icon>
           </ion-button>
         </ion-buttons>
       </ion-toolbar>
     </ion-header>
+
     <ion-content class="modal-content">
       <div class="modal-body">
+
+        <!-- DEPARTEMEN -->
         <div class="form-group">
           <label class="form-label">Departemen <span class="required">*</span></label>
-          <ion-select
+          <select
+            class="form-select-native"
             [(ngModel)]="formData.id_departemen"
             (ngModelChange)="onDepartemenChange()"
-            class="form-select"
-            placeholder="Pilih Departemen"
           >
-            <ion-select-option *ngFor="let d of departemenOptionsForModal" [value]="d.id_departemen ?? d.id">
+            <option value="" disabled selected hidden>Pilih Departemen</option>
+            <option *ngFor="let d of departemenOptionsForModal" [value]="d.id_departemen ?? d.id">
               {{ d.nama_departemen ?? d.nama }}
-            </ion-select-option>
-          </ion-select>
+            </option>
+          </select>
         </div>
 
+        <!-- KATEGORI -->
         <div class="form-group">
           <label class="form-label">Kategori <span class="required">*</span></label>
-          <ion-select
+          <select
+            class="form-select-native"
             [(ngModel)]="formData.id_kategori"
             (ngModelChange)="onKategoriChange()"
-            class="form-select"
-            placeholder="Pilih Kategori"
           >
-            <ion-select-option *ngFor="let k of kategoriOptionsForModal" [value]="k.id ?? k.id_kategori">
+            <option value="" disabled selected hidden>Pilih Kategori</option>
+            <option *ngFor="let k of kategoriOptionsForModal" [value]="k.id ?? k.id_kategori">
               {{ k.nama ?? k.nama_kategori }}
-            </ion-select-option>
-          </ion-select>
+            </option>
+          </select>
         </div>
 
+        <!-- SUB KATEGORI -->
         <div class="form-group">
           <label class="form-label">Sub Kategori</label>
-          <ion-select [(ngModel)]="formData.id_sub_kategori" class="form-select" placeholder="Pilih Sub Kategori">
-            <ion-select-option *ngFor="let sub of filteredSubKategoriOptions" [value]="sub.id ?? sub.id_sub_kategori">
+          <select
+            class="form-select-native"
+            [(ngModel)]="formData.id_sub_kategori"
+          >
+            <option value="">Pilih Sub Kategori</option>
+            <option *ngFor="let sub of filteredSubKategoriOptions" [value]="sub.id ?? sub.id_sub_kategori">
               {{ sub.namaSubKategori ?? sub.nama_sub_kategori }}
-            </ion-select-option>
-          </ion-select>
+            </option>
+          </select>
         </div>
 
+        <!-- ASET -->
         <div class="form-group">
           <label class="form-label">Aset</label>
-          <ion-select [(ngModel)]="formData.kode_asset" class="form-select" placeholder="Pilih Aset">
-            <ion-select-option *ngFor="let item of filteredAssetOptions" [value]="item.kode_asset">
+          <select
+            class="form-select-native"
+            [(ngModel)]="formData.kode_asset"
+          >
+            <option value="">Pilih Aset</option>
+            <option *ngFor="let item of filteredAssetOptions" [value]="item.kode_asset">
               {{ item.kode_asset }} - {{ item.nama_barang }}
-            </ion-select-option>
-          </ion-select>
+            </option>
+          </select>
         </div>
 
+        <!-- LAMPIRAN -->
         <div class="form-group">
           <label class="form-label">Lampiran (Foto)</label>
           <div class="upload-wrapper">
             <input type="file" (change)="onFileSelected($event)" accept="image/*" style="display: none;" #fileInput>
-            <ion-button fill="outline" (click)="fileInput.click()">
+            <ion-button fill="outline" size="small" class="btn-upload" (click)="fileInput.click()">
               <ion-icon name="cloud-upload-outline" slot="start"></ion-icon>
               {{ selectedFile ? selectedFile.name : 'Pilih Foto' }}
             </ion-button>
-            <ion-button *ngIf="selectedFile" fill="clear" color="danger" (click)="selectedFile = null">
-              <ion-icon name="close-circle-outline"></ion-icon>
+            <ion-button *ngIf="selectedFile" fill="clear" color="danger" size="small" (click)="selectedFile = null">
+              <ion-icon name="close-circle-outline" slot="icon-only"></ion-icon>
             </ion-button>
           </div>
         </div>
 
+        <!-- DESKRIPSI -->
         <div class="form-group">
           <label class="form-label">Deskripsi Keluhan <span class="required">*</span></label>
           <ion-textarea
@@ -366,6 +382,7 @@
           ></ion-textarea>
         </div>
 
+        <!-- ACTIONS -->
         <div class="modal-actions">
           <ion-button class="cancel-btn" fill="outline" color="medium" (click)="closeModal()">
             Batal
@@ -379,6 +396,7 @@
             {{ isEditing ? 'Update' : 'Simpan' }}
           </ion-button>
         </div>
+
       </div>
     </ion-content>
   </ng-template>

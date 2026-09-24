@@ -35,7 +35,7 @@
           </div>
           <div class="header-right">
             <ion-button class="tambah-btn" fill="solid" (click)="openTambahModal()">
-              <ion-icon name="add-outline"></ion-icon>
+              <ion-icon name="add-outline" slot="start"></ion-icon>
               Tambah Teknisi
             </ion-button>
           </div>
@@ -44,19 +44,33 @@
         <!-- FILTER -->
         <div class="filter-section">
           <div class="filter-group">
-            <input type="text" placeholder="Cari ID / Nama Teknisi..." [(ngModel)]="searchTerm" (ngModelChange)="onFilterChange()" class="filter-input" />
+            <input
+              type="text"
+              placeholder="Cari ID / Nama Teknisi..."
+              [(ngModel)]="searchTerm"
+              (ngModelChange)="onFilterChange()"
+              class="filter-input"
+            />
           </div>
           <div class="filter-group">
-            <ion-select [(ngModel)]="filterKategori" interface="action-sheet" (ionChange)="onFilterChange()" placeholder="Kategori Spesialis">
-              <ion-select-option value="">Semua Kategori</ion-select-option>
-              <ion-select-option *ngFor="let k of kategoriOptions" [value]="k">{{ k }}</ion-select-option>
-            </ion-select>
+            <select
+              [(ngModel)]="filterKategori"
+              (change)="onFilterChange()"
+              class="form-select-native"
+            >
+              <option value="">Semua Kategori</option>
+              <option *ngFor="let k of kategoriOptions" [value]="k">{{ k }}</option>
+            </select>
           </div>
           <div class="filter-group">
-            <ion-select [(ngModel)]="filterStatus" interface="action-sheet" (ionChange)="onFilterChange()" placeholder="Status">
-              <ion-select-option value="">Semua Status</ion-select-option>
-              <ion-select-option *ngFor="let s of statusOptions" [value]="s">{{ s }}</ion-select-option>
-            </ion-select>
+            <select
+              [(ngModel)]="filterStatus"
+              (change)="onFilterChange()"
+              class="form-select-native"
+            >
+              <option value="">Semua Status</option>
+              <option *ngFor="let s of statusOptions" [value]="s">{{ s }}</option>
+            </select>
           </div>
         </div>
 
@@ -107,9 +121,13 @@
           <div class="table-footer" *ngIf="totalPages > 1">
             <span class="table-info">Menampilkan {{ pagedTeknisi.length }} dari {{ filteredTeknisi.length }} data</span>
             <div class="pagination">
-              <ion-button fill="clear" size="small" [disabled]="currentPage === 1" (click)="prevPage()"><ion-icon name="chevron-back-outline"></ion-icon></ion-button>
+              <ion-button fill="clear" size="small" [disabled]="currentPage === 1" (click)="prevPage()">
+                <ion-icon name="chevron-back-outline"></ion-icon>
+              </ion-button>
               <span class="page-number" *ngFor="let p of totalPagesArray" [class.active]="p === currentPage" (click)="goToPage(p)">{{ p }}</span>
-              <ion-button fill="clear" size="small" [disabled]="currentPage === totalPages" (click)="nextPage()"><ion-icon name="chevron-forward-outline"></ion-icon></ion-button>
+              <ion-button fill="clear" size="small" [disabled]="currentPage === totalPages" (click)="nextPage()">
+                <ion-icon name="chevron-forward-outline"></ion-icon>
+              </ion-button>
             </div>
           </div>
         </div>
@@ -120,15 +138,15 @@
           <h3>Belum Ada Data Teknisi</h3>
           <p>Klik tombol "Tambah Teknisi" untuk menambahkan data baru</p>
         </div>
-      </div> <!-- 👈 Penutup content-area -->
-    </div> <!-- 👈 Penutup main-content -->
-  </div> <!-- 👈 Penutup dashboard-container -->
+      </div>
+    </div>
+  </div>
 </ion-content>
 
 <!-- ========================================== -->
-<!-- MODAL TAMBAH/EDIT TEKNISI                  -->
+<!-- 🔥 MODAL TAMBAH/EDIT TEKNISI               -->
 <!-- ========================================== -->
-<ion-modal [isOpen]="isModalOpen" (didDismiss)="closeModal()">
+<ion-modal [isOpen]="isModalOpen" (didDismiss)="closeModal()" class="custom-teknisi-modal">
   <ng-template>
     <ion-header>
       <ion-toolbar>
@@ -146,39 +164,57 @@
         <!-- User/Akun -->
         <div class="form-group" *ngIf="!isEditing">
           <label class="form-label">User / Akun <span class="required">*</span></label>
-          <ion-select [(ngModel)]="formData.nik" interface="action-sheet" class="form-select" placeholder="Pilih User">
-            <ion-select-option *ngFor="let u of userList" [value]="u.nik">
+          <select
+            [(ngModel)]="formData.nik"
+            class="form-select-native"
+          >
+            <option value="" disabled selected hidden>Pilih User</option>
+            <option *ngFor="let u of userList" [value]="u.nik">
               {{ u.nama }} ({{ u.username }} - {{ u.level }})
-            </ion-select-option>
-          </ion-select>
+            </option>
+          </select>
         </div>
 
         <!-- Nama (Readonly) -->
         <div class="form-group" *ngIf="isEditing">
           <label class="form-label">Nama</label>
-          <ion-input type="text" [value]="editingNamaDisplay" [disabled]="true" class="form-input"></ion-input>
+          <ion-input
+            type="text"
+            [value]="editingNamaDisplay"
+            [readonly]="true"
+            class="form-input"
+          ></ion-input>
         </div>
 
         <!-- Kategori Spesialis -->
         <div class="form-group">
           <label class="form-label">Kategori Spesialis <span class="required">*</span></label>
-          <ion-select [(ngModel)]="formData.idKategori" interface="action-sheet" class="form-select" placeholder="Pilih Kategori">
-            <ion-select-option *ngFor="let k of kategoriList" [value]="k.id">{{ k.nama }}</ion-select-option>
-          </ion-select>
+          <select
+            [(ngModel)]="formData.idKategori"
+            class="form-select-native"
+          >
+            <option [ngValue]="null" disabled selected hidden>Pilih Kategori</option>
+            <option *ngFor="let k of kategoriList" [ngValue]="k.id">
+              {{ k.nama }}
+            </option>
+          </select>
         </div>
 
         <!-- Status -->
         <div class="form-group">
           <label class="form-label">Status</label>
-          <ion-select [(ngModel)]="formData.status" interface="action-sheet" class="form-select">
-            <ion-select-option value="Aktif">Aktif</ion-select-option>
-            <ion-select-option value="Non-Aktif">Non-Aktif</ion-select-option>
-          </ion-select>
+          <select
+            [(ngModel)]="formData.status"
+            class="form-select-native"
+          >
+            <option value="Aktif">Aktif</option>
+            <option value="Non-Aktif">Non-Aktif</option>
+          </select>
         </div>
 
         <!-- Tombol -->
         <div class="modal-actions">
-          <ion-button class="cancel-modal-btn" fill="outline" color="medium" (click)="closeModal()">
+          <ion-button class="cancel-modal-btn" fill="outline" (click)="closeModal()">
             Batal
           </ion-button>
           <ion-button

@@ -38,7 +38,7 @@
         <!-- ==================== VIEW LIST ==================== -->
         <ng-container *ngIf="viewMode === 'list'">
           <div class="page-heading">
-            <h1 class="page-title">📊 Status Pemeliharaan per Departemen</h1>
+            <h1 class="page-title">Status Pemeliharaan per Departemen</h1>
             <p class="page-subtitle">Pantau progress pemeliharaan rutin semua departemen</p>
           </div>
 
@@ -54,13 +54,13 @@
               />
             </div>
             <div class="toolbar-filters">
-              <select [(ngModel)]="filterDept" (change)="onFilterChange()">
+              <select [(ngModel)]="filterDept" (change)="onFilterChange()" class="form-select-native">
                 <option value="">Semua Departemen</option>
                 <option *ngFor="let d of departemenOptions" [value]="d.nama_departemen || d.nama || d">
                   {{ d.nama_departemen || d.nama || d }}
                 </option>
               </select>
-              <select [(ngModel)]="filterStatus" (change)="onFilterChange()">
+              <select [(ngModel)]="filterStatus" (change)="onFilterChange()" class="form-select-native">
                 <option value="">Semua Status</option>
                 <option value="Aktif">Aktif</option>
                 <option value="Nonaktif">Nonaktif</option>
@@ -83,30 +83,26 @@
               </ion-segment-button>
             </ion-segment>
 
-            <ion-select
+            <select
               *ngIf="selectedPeriod === 'monthly'"
               [(ngModel)]="selectedMonth"
-              (ionChange)="onPeriodChange()"
-              interface="popover"
-              placeholder="Pilih Bulan"
-              class="period-select"
+              (change)="onPeriodChange()"
+              class="form-select-native period-select"
             >
-              <ion-select-option *ngFor="let m of monthOptions" [value]="m.value">
+              <option *ngFor="let m of monthOptions" [value]="m.value">
                 {{ m.label }}
-              </ion-select-option>
-            </ion-select>
+              </option>
+            </select>
 
-            <ion-select
+            <select
               [(ngModel)]="selectedYear"
-              (ionChange)="onPeriodChange()"
-              interface="popover"
-              placeholder="Pilih Tahun"
-              class="period-select"
+              (change)="onPeriodChange()"
+              class="form-select-native period-select"
             >
-              <ion-select-option *ngFor="let y of yearOptions" [value]="y">
+              <option *ngFor="let y of yearOptions" [value]="y">
                 {{ y }}
-              </ion-select-option>
-            </ion-select>
+              </option>
+            </select>
 
             <span class="period-label">Periode: {{ getPeriodLabel() }}</span>
           </div>
@@ -192,10 +188,10 @@
           <!-- ===== TABEL REKAPAN ===== -->
           <div class="rekapan-section" *ngIf="rekapanData.length > 0">
             <div class="chart-header">
-              <h3 class="chart-title">📋 Rekapan Pemeliharaan per Departemen</h3>
+              <h3 class="chart-title">Rekapan Pemeliharaan per Departemen</h3>
               <div class="rekapan-filter">
                 <ion-icon name="filter-outline" class="rekapan-filter-icon"></ion-icon>
-                <select [(ngModel)]="rekapanFilterDept" (change)="onRekapanFilterChange()">
+                <select [(ngModel)]="rekapanFilterDept" (change)="onRekapanFilterChange()" class="form-select-native">
                   <option value="">Semua Departemen ({{ rekapanData.length }})</option>
                   <option *ngFor="let d of rekapanDeptOptions" [value]="d">
                     {{ d }} ({{ getRekapanCountByDept(d) }})
@@ -335,13 +331,13 @@
             </div>
           </div>
         </ng-container>
-      </div> <!-- 👈 Penutup content-area -->
-    </div> <!-- 👈 Penutup main-content -->
-  </div> <!-- 👈 Penutup dashboard-container -->
+      </div>
+    </div>
+  </div>
 </ion-content>
 
 <!-- ===== MODAL TAMBAH / EDIT SCHEDULE ===== -->
-<ion-modal [isOpen]="isModalOpen" (didDismiss)="closeModal()">
+<ion-modal [isOpen]="isModalOpen" (didDismiss)="closeModal()" class="custom-schedule-modal">
   <ng-template>
     <ion-header>
       <ion-toolbar color="primary">
@@ -354,7 +350,7 @@
       </ion-toolbar>
     </ion-header>
 
-    <ion-content class="modal-content ion-padding">
+    <ion-content class="modal-content">
       <div class="modal-body">
         <div class="form-group">
           <label class="form-label">Nama Schedule <span class="required">*</span></label>
@@ -362,9 +358,10 @@
         </div>
         <div class="form-group">
           <label class="form-label">Departemen <span class="required">*</span></label>
-          <ion-select [(ngModel)]="formData.id_departemen" (ionChange)="onDepartemenChange()" class="form-select" placeholder="Pilih Departemen">
-            <ion-select-option *ngFor="let d of departemenOptions" [value]="d.id_departemen || d.id">{{ d.nama_departemen || d.nama }}</ion-select-option>
-          </ion-select>
+          <select [(ngModel)]="formData.id_departemen" (change)="onDepartemenChange()" class="form-select-native">
+            <option [ngValue]="null" disabled selected hidden>Pilih Departemen</option>
+            <option *ngFor="let d of departemenOptions" [value]="d.id_departemen || d.id">{{ d.nama_departemen || d.nama }}</option>
+          </select>
         </div>
 
         <div class="form-row">
@@ -372,12 +369,12 @@
             <label class="form-label">Tanggal Mulai <span class="required">*</span></label>
             <ion-input
               id="tglMulaiTrigger"
-              readonly="true"
+              [readonly]="true"
               [value]="formData.tanggal_mulai ? formatDate(formData.tanggal_mulai) : ''"
               placeholder="Pilih tanggal mulai"
               class="form-input"
             ></ion-input>
-            <ion-popover trigger="tglMulaiTrigger" show-backdrop="true" [dismissOnSelect]="false">
+            <ion-popover trigger="tglMulaiTrigger" [showBackdrop]="true" [dismissOnSelect]="false">
               <ng-template>
                 <ion-datetime
                   presentation="date"
@@ -392,12 +389,12 @@
             <label class="form-label">Tanggal Selesai <span class="required">*</span></label>
             <ion-input
               id="tglSelesaiTrigger"
-              readonly="true"
+              [readonly]="true"
               [value]="formData.tanggal_selesai ? formatDate(formData.tanggal_selesai) : ''"
               placeholder="Pilih tanggal selesai"
               class="form-input"
             ></ion-input>
-            <ion-popover trigger="tglSelesaiTrigger" show-backdrop="true" [dismissOnSelect]="false">
+            <ion-popover trigger="tglSelesaiTrigger" [showBackdrop]="true" [dismissOnSelect]="false">
               <ng-template>
                 <ion-datetime
                   presentation="date"
@@ -429,13 +426,13 @@
 
         <div class="form-group">
           <label class="form-label">Deskripsi</label>
-          <ion-textarea placeholder="Deskripsi pekerjaan..." [(ngModel)]="formData.deskripsi" class="form-textarea" rows="3"></ion-textarea>
+          <ion-textarea placeholder="Deskripsi pekerjaan..." [(ngModel)]="formData.deskripsi" class="form-textarea" [rows]="3"></ion-textarea>
         </div>
         <div class="form-group">
           <label class="form-label">Aset Terkait</label>
           <div class="asset-selection">
             <ion-item lines="none">
-              <ion-select [(ngModel)]="formData.aset_list" class="form-select" placeholder="Pilih Aset" multiple="true">
+              <ion-select [(ngModel)]="formData.aset_list" class="form-select" placeholder="Pilih Aset" [multiple]="true">
                 <ion-select-option *ngFor="let asset of availableAssets" [value]="asset.kode_asset || asset.id">
                   {{ asset.nama_barang || asset.nama_aset || asset.kode_asset }} - {{ asset.merk_model || 'Tidak ada merk' }}
                 </ion-select-option>
@@ -447,7 +444,7 @@
         <div class="form-group">
           <label class="form-label">Checklist Pengecekan Preventive</label>
           <div style="display:flex; flex-wrap:wrap; gap:6px;">
-            <ion-badge color="medium" *ngFor="let kat of checklistKategoriOptions">{{ kat }}</ion-badge>
+            <span class="dept-badge" *ngFor="let kat of checklistKategoriOptions">{{ kat }}</span>
           </div>
         </div>
       </div>
@@ -470,7 +467,7 @@
 </ion-modal>
 
 <!-- ===== MODAL LIHAT ASET ===== -->
-<ion-modal [isOpen]="isAssetModalOpen" (didDismiss)="closeAssetModal()" cssClass="asset-modal">
+<ion-modal [isOpen]="isAssetModalOpen" (didDismiss)="closeAssetModal()" class="custom-schedule-modal">
   <ng-template>
     <ion-header>
       <ion-toolbar>
@@ -484,7 +481,7 @@
     </ion-header>
 
     <ion-content>
-      <ion-searchbar placeholder="Cari aset..." (ionInput)="filterAssets($event)" debounce="300"></ion-searchbar>
+      <ion-searchbar placeholder="Cari aset..." (ionInput)="filterAssets($event)" [debounce]="300"></ion-searchbar>
       <ion-list>
         <ion-item *ngFor="let asset of pagedAssetList">
           <ion-label>
@@ -499,7 +496,7 @@
             </p>
           </ion-label>
           <div slot="end" style="display:flex; flex-direction:column; gap:4px; align-items:flex-end;">
-            <ion-badge color="medium">{{ asset.nama_kategori || '-' }}</ion-badge>
+            <span class="dept-badge">{{ asset.nama_kategori || '-' }}</span>
             <ion-button
               *ngIf="asset.status_pengerjaan_asset === 'Selesai' && asset.user_konfirmasi === 1 && asset.admin_konfirmasi !== 1"
               size="small" fill="solid" color="primary" (click)="approveByAdmin(asset)">
@@ -537,7 +534,7 @@
 </ion-modal>
 
 <!-- ===== MODAL DETAIL STATUS (KLIK BAR CHART) ===== -->
-<ion-modal [isOpen]="isStatusModalOpen" (didDismiss)="closeStatusModal()" cssClass="asset-modal">
+<ion-modal [isOpen]="isStatusModalOpen" (didDismiss)="closeStatusModal()" class="custom-schedule-modal">
   <ng-template>
     <ion-header>
       <ion-toolbar>
@@ -562,8 +559,8 @@
       <ion-list *ngIf="!statusModalLoading">
         <ion-item
           *ngFor="let asset of statusModalItems"
-          button="true"
-          detail="true"
+          [button]="true"
+          [detail]="true"
           class="asset-history-link"
           (click)="goToAssetDetail(asset.kode_asset)"
         >

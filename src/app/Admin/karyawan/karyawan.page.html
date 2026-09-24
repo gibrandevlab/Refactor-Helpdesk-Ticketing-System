@@ -17,7 +17,7 @@
           <span class="page-title-inline">Karyawan</span>
         </div>
         <div class="header-right">
-          <div class="header-avatar" routerLink="/admin/profile">
+          <div class="header-avatar" routerLink="/profile">
             <img
               [src]="'https://ui-avatars.com/api/?name=Admin&background=2563eb&color=fff&size=64&bold=true'"
               alt="Avatar"
@@ -31,7 +31,7 @@
       <div class="content-area">
         <!-- Page Heading -->
         <div class="page-heading">
-          <h1 class="page-title">📋 Data Karyawan</h1>
+          <h1 class="page-title">Data Karyawan</h1>
           <p class="page-subtitle">Kelola data seluruh karyawan perusahaan</p>
         </div>
 
@@ -73,12 +73,12 @@
           </div>
 
           <div class="toolbar-filters">
-            <select [(ngModel)]="filterDepartemen" (change)="onFilterChange()">
+            <select class="form-select-native" [(ngModel)]="filterDepartemen" (change)="onFilterChange()">
               <option value="">Semua Departemen</option>
               <option *ngFor="let d of departemenOptions" [value]="d">{{ d }}</option>
             </select>
 
-            <select [(ngModel)]="filterBagian" (change)="onFilterChange()">
+            <select class="form-select-native" [(ngModel)]="filterBagian" (change)="onFilterChange()">
               <option value="">Semua Bagian</option>
               <option *ngFor="let b of bagianOptions" [value]="b">{{ b }}</option>
             </select>
@@ -112,11 +112,11 @@
                   <td>{{ (currentPage - 1) * pageSize + i + 1 }}</td>
                   <td class="nik-id">{{ k.nik }}</td>
                   <td class="fw-bold">{{ k.nama }}</td>
-                  <td>{{ k.alamat }}</td>
+                  <td>{{ k.alamat || '-' }}</td>
                   <td>{{ k.jenisKelamin }}</td>
                   <td><span class="dept-badge">{{ k.departemen }}</span></td>
-                  <td>{{ k.bagian }}</td>
-                  <td>{{ k.jabatan }}</td>
+                  <td>{{ k.bagian || '-' }}</td>
+                  <td>{{ k.jabatan || '-' }}</td>
                   <td>
                     <div class="action-buttons">
                       <ion-button fill="clear" size="small" (click)="openEditModal(k)">
@@ -164,7 +164,7 @@
 <!-- ========================================== -->
 <!-- 🔥 MODAL TAMBAH / EDIT KARYAWAN            -->
 <!-- ========================================== -->
-<ion-modal [isOpen]="isModalOpen" (didDismiss)="closeModal()">
+<ion-modal [isOpen]="isModalOpen" (didDismiss)="closeModal()" class="custom-karyawan-modal">
   <ng-template>
     <ion-header>
       <ion-toolbar>
@@ -176,6 +176,7 @@
         </ion-buttons>
       </ion-toolbar>
     </ion-header>
+
     <ion-content class="modal-content">
       <div class="modal-body">
         <!-- Nama Lengkap -->
@@ -204,38 +205,41 @@
         <div class="form-row">
           <div class="form-group">
             <label class="form-label">Jenis Kelamin</label>
-            <ion-select [(ngModel)]="formData.jenisKelamin" class="form-select">
-              <ion-select-option *ngFor="let jk of jenisKelaminOptions" [value]="jk">{{ jk }}</ion-select-option>
-            </ion-select>
+            <select [(ngModel)]="formData.jenisKelamin" class="form-select-native">
+              <option *ngFor="let jk of jenisKelaminOptions" [value]="jk">{{ jk }}</option>
+            </select>
           </div>
+
           <div class="form-group">
             <label class="form-label">Departemen</label>
-            <ion-select
+            <select
               [(ngModel)]="formData.departemen"
               (ngModelChange)="onDepartemenModalChange()"
-              class="form-select"
-              placeholder="Pilih Departemen">
-              <ion-select-option *ngFor="let d of departemenOptions" [value]="d">{{ d }}</ion-select-option>
-            </ion-select>
+              class="form-select-native">
+              <option value="" disabled selected hidden>Pilih Departemen</option>
+              <option *ngFor="let d of departemenOptions" [value]="d">{{ d }}</option>
+            </select>
           </div>
+
           <div class="form-group">
             <label class="form-label">Bagian</label>
-            <ion-select
+            <select
               [(ngModel)]="formData.bagian"
-              class="form-select"
-              placeholder="Pilih Bagian"
+              class="form-select-native"
               [disabled]="!formData.departemen">
-              <ion-select-option *ngFor="let b of filteredBagianOptions" [value]="b">{{ b }}</ion-select-option>
-            </ion-select>
+              <option value="" disabled selected hidden>Pilih Bagian</option>
+              <option *ngFor="let b of filteredBagianOptions" [value]="b">{{ b }}</option>
+            </select>
           </div>
         </div>
 
         <!-- Jabatan -->
         <div class="form-group">
           <label class="form-label">Jabatan</label>
-          <ion-select [(ngModel)]="formData.jabatan" class="form-select">
-            <ion-select-option *ngFor="let j of jabatanOptions" [value]="j">{{ j }}</ion-select-option>
-          </ion-select>
+          <select [(ngModel)]="formData.jabatan" class="form-select-native">
+            <option value="" disabled selected hidden>Pilih Jabatan</option>
+            <option *ngFor="let j of jabatanOptions" [value]="j">{{ j }}</option>
+          </select>
         </div>
 
         <!-- Tombol Aksi -->

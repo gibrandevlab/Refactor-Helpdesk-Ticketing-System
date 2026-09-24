@@ -40,7 +40,22 @@ import {
   IonCheckbox,
   IonPopover,
   IonDatetime,
+  ToastController,
+  AlertController,
+  IonicSafeString,
 } from '@ionic/angular/standalone';
+import { addIcons } from 'ionicons';
+import {
+  menuOutline, searchOutline, addOutline, desktopOutline,
+  filterOutline, createOutline, trashOutline, arrowBackOutline,
+  businessOutline, documentTextOutline, calendarNumberOutline,
+  peopleOutline, calendarOutline, cubeOutline, eyeOutline,
+  pauseOutline, playOutline, closeOutline, personCircleOutline,
+  closeCircleOutline, saveOutline, downloadOutline, chevronBackOutline,
+  chevronForwardOutline, shieldCheckmark, alertCircle, checkmarkCircle,
+  timeOutline
+} from 'ionicons/icons';
+
 import { ScheduleService, DepartmentSchedule, Schedule } from '../../services/schedule.service';
 import { DepartemenService } from '../../services/departemen.services';
 import { TeknisiService } from '../../services/teknisi.service';
@@ -74,23 +89,11 @@ export interface GanttRow {
   departemen?: string;
 }
 
-// 🔥 BARU — hasil parse teknisi_klaim: siapa ngerjain berapa aset
 export interface TeknisiKlaimItem {
   nama: string;
   jumlah: number;
 }
 
-// ============================================================
-// 🔧 HELPER TANGGAL (module-level, dipakai di seluruh komponen)
-// 🔧 FIXED (BUG "tanggal mulai balik ke hari ini"):
-// - todayDateStr()   -> tanggal hari ini dalam format lokal 'YYYY-MM-DD'
-//   (BUKAN new Date().toISOString() yang berbasis UTC dan bisa geser
-//   ±1 hari tergantung timezone browser, mis. WIB/UTC+7).
-// - toLocalDateStr() -> normalisasi input apapun (Date object, ISO
-//   string dengan waktu, atau string 'YYYY-MM-DD' polos) selalu jadi
-//   'YYYY-MM-DD' lokal yang konsisten dipakai di ion-datetime, payload
-//   ke backend, dan perbandingan tanggal.
-// ============================================================
 function todayDateStr(): string {
   const d = new Date();
   const tzOffset = d.getTimezoneOffset() * 60000;
@@ -207,11 +210,6 @@ export class SchedulePage implements OnInit, OnDestroy {
   // ===== MODAL CRUD =====
   isModalOpen = false;
   isEditing = false;
-  // 🔥 GANTI: tidak ada lagi id_teknisi_utama/id_teknisi_pendamping (bukan kolom asli).
-  // id_teknis & teknisi_list sekarang cuma DIBACA (read-only) untuk ditampilkan
-  // di status box, TIDAK PERNAH dikirim balik ke backend dari sini.
-  // 🔧 FIXED: tanggal_mulai default pakai todayDateStr() (format 'YYYY-MM-DD'
-  // lokal), BUKAN new Date().toISOString() (UTC, bisa geser hari).
   formData: any = {
     id: null,
     nama: '',
@@ -274,8 +272,21 @@ export class SchedulePage implements OnInit, OnDestroy {
     private departemenService: DepartemenService,
     private teknisiService: TeknisiService,
     private inventoryService: InventoryService,
-    private ticketService: TicketService
-  ) {}
+    private ticketService: TicketService,
+    private toastCtrl: ToastController,
+    private alertCtrl: AlertController
+  ) {
+    addIcons({
+      menuOutline, searchOutline, addOutline, desktopOutline,
+      filterOutline, createOutline, trashOutline, arrowBackOutline,
+      businessOutline, documentTextOutline, calendarNumberOutline,
+      peopleOutline, calendarOutline, cubeOutline, eyeOutline,
+      pauseOutline, playOutline, closeOutline, personCircleOutline,
+      closeCircleOutline, saveOutline, downloadOutline, chevronBackOutline,
+      chevronForwardOutline, shieldCheckmark, alertCircle, checkmarkCircle,
+      timeOutline
+    });
+  }
 
   ngOnInit() {
     const currentYear = new Date().getFullYear();
@@ -284,9 +295,6 @@ export class SchedulePage implements OnInit, OnDestroy {
     this.loadDropdownOptions();
     this.loadData();
 
-    // 🔧 FIXED: skip auto-refresh selagi ada modal yang sedang terbuka,
-    // supaya proses isi form (termasuk pilih tanggal di datetime popover)
-    // tidak terganggu / ter-reset oleh reload data background tiap 10 detik.
     this.refreshInterval = setInterval(() => {
       if (this.isModalOpen || this.isStatusModalOpen || this.isAssetModalOpen) return;
       this.loadData(true);
@@ -298,6 +306,18 @@ export class SchedulePage implements OnInit, OnDestroy {
       clearInterval(this.refreshInterval);
     }
     this.subscriptions.unsubscribe();
+  }
+
+  async showToast(message: string, color: 'success' | 'danger' | 'warning' = 'success') {
+    const toast = await this.toastCtrl.create({
+      message,
+      duration: 3000,
+      position: 'top',
+      color,
+      cssClass: `custom-toast toast-${color}`,
+      buttons: [{ text: 'OK', role: 'cancel' }]
+    });
+    await toast.present();
   }
 
   // ===== LOAD DATA =====
@@ -321,10 +341,6 @@ export class SchedulePage implements OnInit, OnDestroy {
         this.isLoading = false;
         this.onFilterChange();
 
-        if (!isBackgroundRefresh) {
-          this.debugLogStatuses();
-        }
-
         if (!this.hasInitialScrolled) {
           this.scrollGanttToToday();
           this.hasInitialScrolled = true;
@@ -334,6 +350,7 @@ export class SchedulePage implements OnInit, OnDestroy {
         console.error('Gagal load data', err);
         this.errorMessage = 'Gagal memuat data schedule.';
         this.isLoading = false;
+        this.showToast('Gagal memuat data schedule.', 'danger');
       },
     });
 
@@ -422,30 +439,6 @@ export class SchedulePage implements OnInit, OnDestroy {
     return 'plan';
   }
 
-  private debugLogStatuses() {
-    console.log('%c=== DEBUG STATUS SCHEDULE ===', 'color: blue; font-weight: bold;');
-    for (const dept of this.departments) {
-      if (!dept.schedules) continue;
-      for (const sched of dept.schedules) {
-        const s = sched as any;
-        const computedStatus = this.determineStatus(s);
-        console.log(
-          `[${computedStatus.toUpperCase()}] ${dept.nama_departemen} - ${sched.nama_schedule}`,
-          s
-        );
-      }
-    }
-  }
-
-  // ============================================================
-  // 🔥 BARU — parse field teknisi_klaim dari backend, format:
-  // "Bagas:1||Putra:1" -> [{ nama: 'Bagas', jumlah: 1 }, { nama: 'Putra', jumlah: 1 }]
-  // Ini data klaim per-asset yang SEBENARNYA (dari schedule_asset_claim),
-  // beda dari teknisi_list (assign manual lama yang cuma gabungan nama).
-  // Sama persis dengan logic yang sudah dipakai di halaman Teknisi
-  // (schedule-tersedia), supaya kolom TEKNISI di tabel rekapan Admin
-  // juga bisa menampilkan split multi-teknisi ("Putra (2/3 aset)").
-  // ============================================================
   private parseTeknisiKlaim(raw: any): TeknisiKlaimItem[] {
     if (!raw || typeof raw !== 'string') return [];
     return raw
@@ -524,17 +517,12 @@ export class SchedulePage implements OnInit, OnDestroy {
           endDate.setDate(endDate.getDate() + durationDays);
         }
 
-        // 🔥 BARU — PRIORITAS 1: data klaim per-asset asli (schedule_asset_claim),
-        // menunjukkan siapa ngerjain berapa aset di schedule ini. Sama seperti
-        // di halaman Teknisi, ini dicoba dulu sebelum fallback ke skema lama.
         const teknisiKlaim = this.parseTeknisiKlaim(s.teknisi_klaim);
-
         let teknisiNames: string[] = [];
 
         if (teknisiKlaim.length > 0) {
           teknisiNames = teknisiKlaim.map((tk) => `${tk.nama} (${tk.jumlah} aset)`);
         } else {
-          // FALLBACK: skema assign manual lama (id_teknis / teknisi_list)
           const rawCandidates = [
             sched.teknisi_list,
             s.teknisi,
@@ -576,9 +564,6 @@ export class SchedulePage implements OnInit, OnDestroy {
 
         let teknisi = teknisiNames.length > 0 ? teknisiNames.join(', ') : 'Belum diklaim';
 
-        // 🔧 FIXED: tambah id_schedule & id_departemen di rekItem, supaya
-        // tabel Rekapan (halaman list utama) bisa punya tombol Edit/Hapus
-        // langsung tanpa harus masuk ke viewMode 'detail' dulu.
         const rekItem = {
           id_schedule: sched.id_schedule,
           id_departemen: dept.id_departemen,
@@ -589,7 +574,7 @@ export class SchedulePage implements OnInit, OnDestroy {
           startDate,
           endDate,
           teknisi,
-          teknisiKlaim, // 🔥 BARU — dipakai HTML untuk render badge per-teknisi
+          teknisiKlaim,
         };
 
         rekapanItems.push(rekItem);
@@ -613,7 +598,6 @@ export class SchedulePage implements OnInit, OnDestroy {
     this.generateTimeline();
   }
 
-  // ===== FILTER REKAPAN =====
   get rekapanDeptOptions(): string[] {
     const names = this.rekapanData.map((item) => item.departemen).filter((n) => !!n);
     return Array.from(new Set(names)).sort((a, b) => a.localeCompare(b));
@@ -630,12 +614,6 @@ export class SchedulePage implements OnInit, OnDestroy {
 
   onRekapanFilterChange() {}
 
-  // ============================================================
-  // 🔥 BARU — Edit / Hapus langsung dari tabel Rekapan (halaman list
-  // utama), tanpa perlu masuk ke viewMode 'detail' dulu. Schedule asli
-  // dicari lagi dari this.departments (bukan dari rekItem, yang cuma
-  // data ringkasan) supaya editSchedule() dapat objek Schedule lengkap.
-  // ============================================================
   private findScheduleByIds(idDepartemen: number, idSchedule: number): Schedule | null {
     const dept = this.departments.find((d) => d.id_departemen === idDepartemen);
     if (!dept || !dept.schedules) return null;
@@ -645,7 +623,7 @@ export class SchedulePage implements OnInit, OnDestroy {
   editFromRekapan(item: any) {
     const sched = this.findScheduleByIds(item.id_departemen, item.id_schedule);
     if (!sched) {
-      alert('Schedule tidak ditemukan, coba refresh halaman.');
+      this.showToast('Schedule tidak ditemukan, coba refresh halaman.', 'warning');
       return;
     }
     this.editSchedule(sched);
@@ -654,7 +632,7 @@ export class SchedulePage implements OnInit, OnDestroy {
   hapusFromRekapan(item: any) {
     const sched = this.findScheduleByIds(item.id_departemen, item.id_schedule);
     if (!sched) {
-      alert('Schedule tidak ditemukan, coba refresh halaman.');
+      this.showToast('Schedule tidak ditemukan, coba refresh halaman.', 'warning');
       return;
     }
     this.deleteSchedule(sched);
@@ -1062,73 +1040,22 @@ export class SchedulePage implements OnInit, OnDestroy {
     this.activeMenu = menu;
   }
 
-  goToProfile() {
-    this.router.navigate(['/profile']);
-  }
-
-  goToDashboard() {
-    this.router.navigate(['/dashboard']);
-  }
-
-  goToListTicket() {
-    this.router.navigate(['/list-ticket']);
-  }
-
-  goToApprovalTicket() {
-    this.router.navigate(['/approval-ticket']);
-  }
-
-  goToAssignmentTicket() {
-    this.router.navigate(['/assignment-ticket']);
-  }
-
-  goToKaryawan() {
-    this.router.navigate(['/karyawan']);
-  }
-
-  goToUser() {
-    this.router.navigate(['/user']);
-  }
-
-  goToJabatan() {
-    this.router.navigate(['/jabatan']);
-  }
-
-  goToDepartemen() {
-    this.router.navigate(['/departemen']);
-  }
-
-  goToBagianDepartemen() {
-    this.router.navigate(['/bagian-departemen']);
-  }
-
-  goToTeknisi() {
-    this.router.navigate(['/teknisi']);
-  }
-
-  goToInventory() {
-    this.router.navigate(['/inventory']);
-  }
-
-  goToKategori() {
-    this.router.navigate(['/kategori']);
-  }
-
-  goToSubKategori() {
-    this.router.navigate(['/sub-kategori']);
-  }
-
-  goToLaporanFeedback() {
-    this.router.navigate(['/laporan-feedback']);
-  }
-
-  goToStatistikTicket() {
-    this.router.navigate(['/statistik-ticket']);
-  }
-
-  goToPengaturan() {
-    this.router.navigate(['/pengaturan']);
-  }
+  goToProfile() { this.router.navigate(['/profile']); }
+  goToDashboard() { this.router.navigate(['/dashboard']); }
+  goToListTicket() { this.router.navigate(['/list']); }
+  goToApprovalTicket() { this.router.navigate(['/approval']); }
+  goToAssignmentTicket() { this.router.navigate(['/assignment']); }
+  goToKaryawan() { this.router.navigate(['/karyawan']); }
+  goToUser() { this.router.navigate(['/users']); }
+  goToJabatan() { this.router.navigate(['/jabatan']); }
+  goToDepartemen() { this.router.navigate(['/departemen']); }
+  goToBagianDepartemen() { this.router.navigate(['/bagian-departemen']); }
+  goToTeknisi() { this.router.navigate(['/teknisi']); }
+  goToInventory() { this.router.navigate(['/inventory']); }
+  goToKategori() { this.router.navigate(['/kategori']); }
+  goToSubKategori() { this.router.navigate(['/sub-kategori']); }
+  goToLaporanFeedback() { this.router.navigate(['/laporan-feedback']); }
+  goToStatistikTicket() { this.router.navigate(['/statistik-ticket']); }
 
   viewDetail(dept: DepartmentSchedule) {
     this.selectedDepartment = dept;
@@ -1141,14 +1068,6 @@ export class SchedulePage implements OnInit, OnDestroy {
   }
 
   // ===== MODAL CRUD =====
-  // 🔧 FIXED: checklist_kategori sekarang di-default isi SEMUA kategori
-  // (bukan array kosong) supaya saat admin buat schedule baru, semua
-  // checklist otomatis tercentang. Admin tinggal uncheck kalau memang
-  // tidak perlu, daripada harus centang manual satu-satu.
-  // 🔧 FIXED (BUG TANGGAL): tanggal_mulai default pakai todayDateStr()
-  // (format 'YYYY-MM-DD' lokal). TIDAK ADA batas/clamp yang memaksa
-  // tanggal_mulai harus hari ini — admin bebas pilih tanggal ke depan
-  // lewat ion-datetime, lihat onTanggalMulaiChange() di bawah.
   openCreateModal(deptId?: number) {
     this.isEditing = false;
     this.formData = {
@@ -1159,7 +1078,7 @@ export class SchedulePage implements OnInit, OnDestroy {
       tanggal_selesai: '',
       deskripsi: '',
       aset_list: [],
-      checklist_kategori: [...this.checklistKategoriOptions], // ✅ default semua tercentang
+      checklist_kategori: [...this.checklistKategoriOptions],
       id_teknis: [],
       teknisi_list: '',
     };
@@ -1168,25 +1087,6 @@ export class SchedulePage implements OnInit, OnDestroy {
     this.isModalOpen = true;
   }
 
-  // ============================================================
-  // 🔧 FIXED (ROOT CAUSE BUG "tanggal mulai balik ke hari ini"):
-  // Sebelumnya ion-datetime pakai [(ngModel)] di dalam ion-popover.
-  // Popover Ionic di-render lewat overlay/portal TERPISAH dari tree
-  // komponen utama, sehingga two-way binding ngModel sering GAGAL
-  // commit balik ke formData saat user memilih tanggal — akibatnya
-  // tampilan/nilai balik ke default awal (hari ini) begitu popover
-  // ditutup atau change detection berikutnya jalan.
-  //
-  // FIX: ion-datetime sekarang pakai [value] (one-way, baca dari
-  // formData) + (ionChange) yang secara EKSPLISIT menulis ke formData
-  // lewat method ini (lihat schedule.page.html). Ini pola yang
-  // direkomendasikan untuk ion-datetime di dalam ion-popover/overlay.
-  //
-  // Tidak ada validasi "tidak boleh sebelum hari ini" di sini — admin
-  // bebas memilih tanggal berapa pun ke depan. Satu-satunya aturan:
-  // kalau tanggal_selesai yang sudah dipilih jadi lebih awal dari
-  // tanggal_mulai baru, tanggal_selesai direset (harus dipilih ulang).
-  // ============================================================
   onTanggalMulaiChange(event: any) {
     const raw = event?.detail?.value ?? event;
     const val = toLocalDateStr(raw);
@@ -1202,8 +1102,6 @@ export class SchedulePage implements OnInit, OnDestroy {
     }
   }
 
-  // 🔥 BARU — pasangan onTanggalMulaiChange untuk field tanggal_selesai,
-  // pakai pola [value]+(ionChange) yang sama (bukan ngModel).
   onTanggalSelesaiChange(event: any) {
     const raw = event?.detail?.value ?? event;
     const val = toLocalDateStr(raw);
@@ -1215,12 +1113,6 @@ export class SchedulePage implements OnInit, OnDestroy {
     this.editSchedule(schedule);
   }
 
-  // 🔥 GANTI: id_teknis diambil apa adanya (array string dari backend, mis. ["TKN-0009"]),
-  // TIDAK dikonversi ke Number lagi (id_teknisi memang berformat string).
-  // 🔧 FIXED: tanggal_mulai & tanggal_selesai dinormalisasi lewat
-  // toLocalDateStr() supaya formatnya konsisten 'YYYY-MM-DD' saat masuk
-  // ke ion-datetime (mencegah masalah timezone/parse yang sama seperti
-  // bug tanggal_mulai balik ke hari ini).
   editSchedule(schedule: Schedule) {
     this.isEditing = true;
     const sId = schedule.id_schedule!;
@@ -1315,8 +1207,6 @@ export class SchedulePage implements OnInit, OnDestroy {
     }
   }
 
-  // 🔧 FIXED: dipanggil dari checkbox di template. Menambah/menghapus kategori
-  // dari formData.checklist_kategori sesuai status checked pada ion-checkbox.
   onChecklistKategoriToggle(kategori: string, event: any) {
     if (!this.formData.checklist_kategori) this.formData.checklist_kategori = [];
     const checked = event?.detail?.checked;
@@ -1329,12 +1219,10 @@ export class SchedulePage implements OnInit, OnDestroy {
     }
   }
 
-  // 🔧 BARU — helper untuk menentukan status checked sebuah kategori di template
   isChecklistKategoriSelected(kategori: string): boolean {
     return Array.isArray(this.formData.checklist_kategori) && this.formData.checklist_kategori.includes(kategori);
   }
 
-  // 🔧 BARU — toggle pilih semua / kosongkan semua kategori checklist sekaligus
   toggleAllChecklistKategori(checked: boolean) {
     this.formData.checklist_kategori = checked ? [...this.checklistKategoriOptions] : [];
   }
@@ -1347,16 +1235,9 @@ export class SchedulePage implements OnInit, OnDestroy {
     );
   }
 
-  // 🔥 GANTI: payload TIDAK PERNAH mengirim id_teknis lagi dari sini.
-  // Assignment teknisi sekarang HANYA lewat klaim teknisi sendiri
-  // (claim) atau batal klaim Admin (unclaim/batalkanKlaim).
-  // 🔧 FIXED: tanggal_mulai/tanggal_selesai dinormalisasi lewat
-  // toLocalDateStr() sebelum dikirim ke backend — memastikan format
-  // selalu 'YYYY-MM-DD' apa pun sumber nilainya (hasil ionChange yang
-  // sudah date-only, ATAU nilai lama yang mungkin masih ISO timestamp).
   saveSchedule() {
     if (!this.formData.nama || !this.formData.id_departemen || !this.formData.tanggal_mulai || !this.formData.tanggal_selesai) {
-      alert('Nama, Departemen, Tanggal Mulai, dan Tanggal Selesai wajib diisi!');
+      this.showToast('Nama, Departemen, Tanggal Mulai, dan Tanggal Selesai wajib diisi!', 'warning');
       return;
     }
 
@@ -1364,14 +1245,10 @@ export class SchedulePage implements OnInit, OnDestroy {
     const tglSelesai = toLocalDateStr(this.formData.tanggal_selesai);
 
     if (new Date(tglSelesai) < new Date(tglMulai)) {
-      alert('Tanggal Selesai tidak boleh lebih awal dari Tanggal Mulai!');
+      this.showToast('Tanggal Selesai tidak boleh lebih awal dari Tanggal Mulai!', 'warning');
       return;
     }
 
-    // 🔧 FIXED: checklist_kategori TIDAK lagi bergantung pada pilihan admin.
-    // Semua kategori (this.checklistKategoriOptions) otomatis dikirim ke
-    // backend setiap kali Simpan diklik, sehingga Check Sheet tiket hasil
-    // auto-create selalu terisi lengkap tanpa perlu interaksi apa pun dari admin.
     const payload = {
       nama_schedule: this.formData.nama,
       id_departemen: this.formData.id_departemen,
@@ -1385,18 +1262,18 @@ export class SchedulePage implements OnInit, OnDestroy {
     if (this.isEditing) {
       const updateId = this.formData.id;
       if (!updateId) {
-        alert('ID schedule tidak ditemukan!');
+        this.showToast('ID schedule tidak ditemukan!', 'warning');
         return;
       }
       this.scheduleService.update(updateId, payload).subscribe({
         next: () => {
           this.isModalOpen = false;
           this.loadData();
-          alert('Schedule berhasil diupdate!');
+          this.showToast('Schedule berhasil diupdate!', 'success');
         },
         error: (err: any) => {
           console.error('Gagal update:', err);
-          alert('Gagal update schedule: ' + (err?.error?.message || 'Terjadi kesalahan'));
+          this.showToast('Gagal update schedule: ' + (err?.error?.message || 'Terjadi kesalahan'), 'danger');
         },
       });
     } else {
@@ -1404,11 +1281,11 @@ export class SchedulePage implements OnInit, OnDestroy {
         next: () => {
           this.isModalOpen = false;
           this.loadData();
-          alert('Schedule berhasil dibuat! Menunggu diklaim teknisi.');
+          this.showToast('Schedule berhasil dibuat! Menunggu diklaim teknisi.', 'success');
         },
         error: (err: any) => {
           console.error('Gagal tambah:', err);
-          alert('Gagal menambah schedule: ' + (err?.error?.message || 'Terjadi kesalahan'));
+          this.showToast('Gagal menambah schedule: ' + (err?.error?.message || 'Terjadi kesalahan'), 'danger');
         },
       });
     }
@@ -1418,22 +1295,35 @@ export class SchedulePage implements OnInit, OnDestroy {
     this.saveSchedule();
   }
 
-  // 🔥 BARU — batalkan klaim teknisi lewat endpoint dedicated (bukan update biasa,
-  // karena updateSchedule pakai COALESCE yang tidak bisa mengosongkan nilai)
-  batalkanKlaim() {
+  async batalkanKlaim() {
     const sId = this.formData.id;
     if (!sId) return;
-    if (!confirm('Batalkan klaim teknisi dari schedule ini?')) return;
 
-    this.scheduleService.unclaim(sId).subscribe({
-      next: () => {
-        this.formData.id_teknis = [];
-        this.formData.teknisi_list = '';
-        alert('Klaim dibatalkan. Schedule kembali tersedia untuk teknisi lain.');
-        this.loadData();
-      },
-      error: (err: any) => alert(err?.error?.message || 'Gagal membatalkan klaim'),
+    const alertEl = await this.alertCtrl.create({
+      header: 'Batalkan Klaim',
+      message: 'Apakah Anda yakin ingin membatalkan klaim teknisi dari schedule ini?',
+      cssClass: 'custom-alert-dialog',
+      buttons: [
+        { text: 'Batal', role: 'cancel', cssClass: 'alert-button-cancel' },
+        {
+          text: 'Batalkan Klaim',
+          role: 'destructive',
+          handler: () => {
+            this.scheduleService.unclaim(sId).subscribe({
+              next: () => {
+                this.formData.id_teknis = [];
+                this.formData.teknisi_list = '';
+                this.showToast('Klaim dibatalkan. Schedule kembali tersedia untuk teknisi lain.', 'success');
+                this.loadData();
+              },
+              error: (err: any) => this.showToast(err?.error?.message || 'Gagal membatalkan klaim', 'danger'),
+            });
+          }
+        }
+      ]
     });
+
+    await alertEl.present();
   }
 
   closeModal() {
@@ -1454,39 +1344,48 @@ export class SchedulePage implements OnInit, OnDestroy {
       },
       error: (err: any) => {
         console.error('Gagal mengubah status schedule', err);
-        alert('Gagal mengubah status schedule');
+        this.showToast('Gagal mengubah status schedule', 'danger');
       },
     });
   }
 
-  // ============================================================
-  // HAPUS SCHEDULE — dipakai dari view detail (tombol "Hapus" di kartu)
-  // maupun dari tabel Rekapan di halaman list utama (hapusFromRekapan).
-  // Backend (scheduleController.js deleteSchedule) sudah dibuat ikut
-  // menghapus seluruh tiket/assignment/checklist terkait schedule ini,
-  // bukan cuma baris preventive_schedule-nya saja.
-  // ============================================================
-  deleteSchedule(schedule: Schedule) {
+  async deleteSchedule(schedule: Schedule) {
     const sId = schedule.id_schedule!;
-    if (confirm(`Apakah Anda yakin ingin menghapus schedule "${schedule.nama_schedule}"?\nSemua tiket preventive yang sudah dibuat dari schedule ini ikut terhapus.`)) {
-      this.scheduleService.delete(sId).subscribe({
-        next: () => {
-          this.loadData();
-          if (this.selectedDepartment) {
-            this.selectedDepartment.schedules = this.selectedDepartment.schedules.filter(
-              (s) => s.id_schedule !== sId
-            );
-            this.selectedDepartment.total_aktif = this.selectedDepartment.schedules.filter(
-              (s) => s.is_active
-            ).length;
+
+    const alertEl = await this.alertCtrl.create({
+      header: 'Hapus Schedule',
+      message: new IonicSafeString(`Apakah Anda yakin ingin menghapus schedule <strong>"${schedule.nama_schedule}"</strong>?<br><br><small>Semua tiket preventive yang sudah dibuat dari schedule ini ikut terhapus.</small>`),
+      cssClass: 'custom-alert-dialog',
+      buttons: [
+        { text: 'Batal', role: 'cancel', cssClass: 'alert-button-cancel' },
+        {
+          text: 'Hapus',
+          role: 'destructive',
+          handler: () => {
+            this.scheduleService.delete(sId).subscribe({
+              next: () => {
+                this.showToast('Schedule berhasil dihapus!', 'success');
+                this.loadData();
+                if (this.selectedDepartment) {
+                  this.selectedDepartment.schedules = this.selectedDepartment.schedules.filter(
+                    (s) => s.id_schedule !== sId
+                  );
+                  this.selectedDepartment.total_aktif = this.selectedDepartment.schedules.filter(
+                    (s) => s.is_active
+                  ).length;
+                }
+              },
+              error: (err: any) => {
+                console.error('Gagal menghapus schedule', err);
+                this.showToast(err?.error?.message || 'Gagal menghapus schedule', 'danger');
+              },
+            });
           }
-        },
-        error: (err: any) => {
-          console.error('Gagal menghapus schedule', err);
-          alert(err?.error?.message || 'Gagal menghapus schedule');
-        },
-      });
-    }
+        }
+      ]
+    });
+
+    await alertEl.present();
   }
 
   // ===== MODAL ASET =====
@@ -1537,10 +1436,10 @@ export class SchedulePage implements OnInit, OnDestroy {
     if (!asset.id_ticket) return;
     this.ticketService.approveChecklistByItService(asset.id_ticket, 'Approve').subscribe({
       next: () => {
-        alert('Berhasil approve. Aset ini sekarang bisa didownload PDF-nya.');
+        this.showToast('Berhasil approve. Aset ini sekarang bisa didownload PDF-nya.', 'success');
         asset.admin_konfirmasi = 1;
       },
-      error: (err: any) => alert(err?.error?.message || 'Gagal approve')
+      error: (err: any) => this.showToast(err?.error?.message || 'Gagal approve', 'danger')
     });
   }
 
@@ -1548,10 +1447,10 @@ export class SchedulePage implements OnInit, OnDestroy {
     if (!asset.id_ticket) return;
     this.ticketService.approveChecklistByItService(asset.id_ticket, 'Reject', catatan).subscribe({
       next: () => {
-        alert('Checklist ditolak.');
+        this.showToast('Checklist ditolak.', 'warning');
         asset.admin_konfirmasi = 0;
       },
-      error: (err: any) => alert(err?.error?.message || 'Gagal reject')
+      error: (err: any) => this.showToast(err?.error?.message || 'Gagal reject', 'danger')
     });
   }
 

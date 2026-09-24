@@ -4,9 +4,15 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import {
-  IonContent, IonButton, IonIcon, IonModal, IonHeader, IonToolbar,
-  IonTitle, IonButtons, IonInput, IonSelect, IonSelectOption
-} from '@ionic/angular/standalone';
+  IonicModule, ToastController, AlertController, IonicSafeString, IonModal
+} from '@ionic/angular';
+import { addIcons } from 'ionicons';
+import {
+  menuOutline, searchOutline, peopleOutline, laptopOutline, businessOutline,
+  addOutline, createOutline, trashOutline, chevronBackOutline, chevronForwardOutline,
+  closeOutline, saveOutline
+} from 'ionicons/icons';
+
 import { JabatanService } from '../../services/Jabatan.service';
 import { SidebarComponent } from '../shared/components/sidebar/sidebar.component';
 
@@ -27,10 +33,7 @@ export interface Karyawan {
   styleUrls: ['./karyawan.page.scss'],
   standalone: true,
   imports: [
-    CommonModule, FormsModule,
-    IonContent, IonButton, IonIcon, IonModal, IonHeader, IonToolbar,
-    IonTitle, IonButtons, IonInput, IonSelect, IonSelectOption,
-    SidebarComponent
+    CommonModule, FormsModule, IonicModule, SidebarComponent
   ],
 })
 export class KaryawanPage implements OnInit {
@@ -55,21 +58,18 @@ export class KaryawanPage implements OnInit {
   filterDepartemen = '';
   filterBagian = '';
 
-  // DEPARTEMEN: Data diambil dari tabel departemen
   get departemenOptions(): string[] {
     const fromMaster = this.departemenMasterList.map(d => d.nama_departemen);
     const fromKaryawan = this.karyawanList.map(k => k.departemen);
     return [...new Set([...fromMaster, ...fromKaryawan])].filter(Boolean);
   }
 
-  // BAGIAN (SEMUA, untuk filter toolbar tabel utama)
   get bagianOptions(): string[] {
     const fromMaster = this.bagianMasterList.map(b => b.nama_bagian);
     const fromKaryawan = this.karyawanList.map(k => k.bagian);
     return [...new Set([...fromMaster, ...fromKaryawan])].filter(Boolean);
   }
 
-  // 🔥 BAGIAN UNTUK MODAL: ter-filter sesuai Departemen yang dipilih di form
   get filteredBagianOptions(): string[] {
     if (!this.formData.departemen) return [];
     return this.bagianMasterList
@@ -77,7 +77,6 @@ export class KaryawanPage implements OnInit {
       .map(b => b.nama_bagian);
   }
 
-  // JABATAN: Data diambil dari tabel jabatan
   get jabatanOptions(): string[] {
     const fromMaster = this.jabatanMasterList.map(j => j.nama_jabatan);
     const fromKaryawan = this.karyawanList.map(k => k.jabatan);
@@ -107,12 +106,33 @@ export class KaryawanPage implements OnInit {
   constructor(
     private router: Router,
     private http: HttpClient,
-    private jabatanService: JabatanService
-  ) {}
+    private jabatanService: JabatanService,
+    private toastCtrl: ToastController,
+    private alertCtrl: AlertController
+  ) {
+    addIcons({
+      menuOutline, searchOutline, peopleOutline, laptopOutline, businessOutline,
+      addOutline, createOutline, trashOutline, chevronBackOutline, chevronForwardOutline,
+      closeOutline, saveOutline
+    });
+  }
 
   ngOnInit() {
     this.loadDataKaryawan();
     this.loadMasterData();
+  }
+
+  /** Helper Toast Notification */
+  async showToast(message: string, color: 'success' | 'danger' | 'warning' = 'success') {
+    const toast = await this.toastCtrl.create({
+      message,
+      duration: 3000,
+      position: 'top',
+      color,
+      cssClass: `custom-toast toast-${color}`,
+      buttons: [{ text: 'OK', role: 'cancel' }]
+    });
+    await toast.present();
   }
 
   loadDataKaryawan() {
@@ -214,14 +234,13 @@ export class KaryawanPage implements OnInit {
     this.isModalOpen = false;
   }
 
-  // 🔥 Reset pilihan Bagian setiap kali Departemen di modal diganti
   onDepartemenModalChange() {
     this.formData.bagian = '';
   }
 
   simpanKaryawan() {
     if (!this.formData.nama) {
-      alert('Nama wajib diisi!');
+      this.showToast('Nama karyawan wajib diisi!', 'warning');
       return;
     }
 
@@ -231,67 +250,61 @@ export class KaryawanPage implements OnInit {
     if (this.isEditing) {
       this.http.put(`${this.apiUrl}/${this.formData.id}`, this.formData, { headers }).subscribe({
         next: () => {
-          alert('Data karyawan berhasil diperbarui!');
+          this.showToast('Data karyawan berhasil diperbarui!', 'success');
           this.loadDataKaryawan();
           this.closeModal();
         },
-        error: (err) => alert('Gagal memperbarui data: ' + (err.error?.message || err.message))
+        error: (err) => this.showToast('Gagal memperbarui data: ' + (err.error?.error || err.error?.message || err.message), 'danger')
       });
     } else {
       this.http.post(this.apiUrl, this.formData, { headers }).subscribe({
         next: () => {
-          alert('Karyawan berhasil ditambahkan!');
+          this.showToast('Karyawan berhasil ditambahkan!', 'success');
           this.loadDataKaryawan();
           this.closeModal();
         },
-        error: (err) => alert('Gagal menambah data: ' + (err.error?.message || err.message))
+        error: (err) => this.showToast('Gagal menambah data: ' + (err.error?.error || err.error?.message || err.message), 'danger')
       });
     }
   }
 
-  hapusKaryawan(karyawan: Karyawan) {
-    if (confirm(`Apakah Anda yakin ingin menghapus karyawan "${karyawan.nama}"?`)) {
-      const token = localStorage.getItem('token');
-      const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
+  async hapusKaryawan(karyawan: Karyawan) {
+    const alertEl = await this.alertCtrl.create({
+      header: 'Hapus Karyawan',
+      message: new IonicSafeString(`Apakah Anda yakin ingin menghapus data karyawan <strong>${karyawan.nama}</strong>?`),
+      cssClass: 'custom-alert-dialog',
+      buttons: [
+        { text: 'Batal', role: 'cancel', cssClass: 'alert-button-cancel' },
+        {
+          text: 'Hapus',
+          role: 'destructive',
+          handler: () => {
+            const token = localStorage.getItem('token');
+            const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
 
-      this.http.delete(`${this.apiUrl}/${karyawan.id}`, { headers }).subscribe({
-        next: () => {
-          alert('Karyawan berhasil dihapus!');
-          this.loadDataKaryawan();
-        },
-        error: (err) => alert(err.error?.error || err.error?.message || 'Gagal menghapus data.')
-      });
-    }
+            this.http.delete(`${this.apiUrl}/${karyawan.id}`, { headers }).subscribe({
+              next: () => {
+                this.showToast('Karyawan berhasil dihapus.', 'success');
+                this.loadDataKaryawan();
+              },
+              error: (err) => this.showToast(err.error?.error || err.error?.message || 'Gagal menghapus data.', 'danger')
+            });
+          }
+        }
+      ]
+    });
+
+    await alertEl.present();
   }
 
-  toggleSidebar() { 
-    this.isSidebarOpen = !this.isSidebarOpen; 
+  toggleSidebar() {
+    this.isSidebarOpen = !this.isSidebarOpen;
   }
 
-  setActiveMenu(menu: string) { 
-    this.activeMenu = menu; 
+  setActiveMenu(menu: string) {
+    this.activeMenu = menu;
     if (window.innerWidth < 1024) this.isSidebarOpen = false;
   }
-
-  goToDashboard() { this.setActiveMenu('dashboard'); this.router.navigate(['/dashboard']); }
-  goToListTicket() { this.setActiveMenu('list-ticket'); this.router.navigate(['/list']); }
-  goToApprovalTicket() { this.setActiveMenu('approval-ticket'); this.router.navigate(['/approval']); }
-  goToAssignmentTicket() { this.setActiveMenu('assignment-ticket'); this.router.navigate(['/assignment']); }
-  goToKaryawan() { this.setActiveMenu('karyawan'); this.router.navigate(['/karyawan']); }
-  goToUser() { this.setActiveMenu('user'); this.router.navigate(['/users']); }
-  goToJabatan() { this.setActiveMenu('jabatan'); this.router.navigate(['/jabatan']); }
-  goToDepartemen() { this.setActiveMenu('departemen'); this.router.navigate(['/departemen']); }
-  goToBagianDepartemen() { this.setActiveMenu('bagian-departemen'); this.router.navigate(['/bagian-departemen']); }
-  goToKategori() { this.setActiveMenu('kategori'); this.router.navigate(['/kategori']); }
-  goToSubKategori() { this.setActiveMenu('sub-kategori'); this.router.navigate(['/sub-kategori']); }
-  goToTeknisi() { this.setActiveMenu('teknisi'); this.router.navigate(['/teknisi']); }
-  goToInventory() { this.setActiveMenu('inventory'); this.router.navigate(['/inventory']); }
-  goToSchedule() { this.setActiveMenu('schedule'); this.router.navigate(['/schedule']); } // 🛠️ Ditambahkan untuk mengatasi error TS2339
-  goToLaporanFeedback() { this.setActiveMenu('laporan-feedback'); this.router.navigate(['/laporan-feedback']); }
-  goToStatistikTicket() { this.setActiveMenu('statistik-ticket'); this.router.navigate(['/statistik-ticket']); }
-  goToProfile() { this.setActiveMenu('profile'); this.router.navigate(['/profile']); }
-  goToNotifikasi() { this.setActiveMenu('notifikasi'); }
-
   logout() {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
