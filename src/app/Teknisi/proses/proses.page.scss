@@ -4,9 +4,9 @@
   --sidebar-bg-hover: #1e2a4a;
   --content-bg: #f4f6fb;
   --card-bg: #ffffff;
-  --text-dark: #1e293b;
-  --text-muted: #64748b;
-  --border-color: #e2e8f0;
+  --text-dark: #0f172a;
+  --text-muted: #475569;
+  --border-color: #cbd5e1;
   --danger: #ef4444;
   --success: #22c55e;
   --warning: #f59e0b;
@@ -19,11 +19,16 @@
 .dashboard-container {
   display: flex;
   min-height: 100vh;
+  width: 100%;
+  overflow-x: hidden;
 }
 
-/* Main Content */
+/* ========================================== */
+/* MAIN CONTENT & FLEX OVERFLOW FIX           */
+/* ========================================== */
 .main-content {
   flex: 1;
+  min-width: 0; /* 🔥 Kunci agar flexbox mau menyusut & tidak dorong layar */
   margin-left: 250px;
   display: flex;
   flex-direction: column;
@@ -95,6 +100,8 @@
 
 .content-area {
   padding: 24px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .page-heading {
@@ -114,7 +121,7 @@
   color: var(--text-muted);
 }
 
-/* Toolbar */
+/* Toolbar Search */
 .list-toolbar {
   display: flex;
   flex-wrap: wrap;
@@ -132,14 +139,20 @@
   border-radius: 8px;
   padding: 8px 14px;
   min-width: 240px;
-  flex: 1 1 240px;
+  max-width: 400px;
 
   input {
     border: none;
     outline: none;
-    font-size: 13px;
+    font-size: 13.5px;
+    font-weight: 500;
     width: 100%;
     background: transparent;
+    color: var(--text-dark);
+
+    &::placeholder {
+      color: #64748b;
+    }
   }
 
   .search-icon {
@@ -147,20 +160,27 @@
   }
 }
 
-/* Table */
+/* ========================================== */
+/* TABLE CARD & OVERFLOW SCROLLBAR            */
+/* ========================================== */
 .table-card {
   background: var(--card-bg);
   border-radius: 14px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+  border: 1px solid var(--border-color);
   overflow: hidden;
+  width: 100%;
 }
 
 .table-wrapper {
-  overflow-x: auto;
+  width: 100%;
+  overflow-x: auto; /* 🔥 scrollbar horizontal aktif otomatis */
+  -webkit-overflow-scrolling: touch;
 }
 
 .proses-tiket-table {
   width: 100%;
+  min-width: 1250px; /* 🔥 Batas minimum agar kolom akhir tidak kepotong/desak-desakan */
   border-collapse: collapse;
   font-size: 13px;
 
@@ -172,20 +192,20 @@
   }
 
   thead th {
-    background: var(--content-bg);
-    color: var(--text-muted);
-    font-weight: 600;
-    font-size: 11.5px;
+    background: #e2e8f0;
+    color: #1e293b;
+    font-weight: 700;
+    font-size: 12px;
     letter-spacing: 0.3px;
     text-transform: uppercase;
-    border-bottom: 1px solid var(--border-color);
+    border-bottom: 2px solid var(--border-color);
   }
 
   tbody tr {
     border-bottom: 1px solid var(--border-color);
 
     &:hover {
-      background: #fafbfe;
+      background: #f1f5f9;
     }
 
     &:last-child {
@@ -195,17 +215,19 @@
 
   td {
     color: var(--text-dark);
+    font-weight: 500;
     white-space: normal;
   }
 }
 
 .ticket-id {
-  font-weight: 600;
+  font-weight: 700;
   color: var(--primary);
 }
 
 .fw-bold {
   font-weight: 700;
+  color: var(--text-dark);
 }
 
 .lampiran-badge {
@@ -220,7 +242,6 @@
   border-radius: 6px;
 }
 
-/* Deskripsi Column */
 .deskripsi-col {
   min-width: 180px;
   max-width: 250px;
@@ -230,43 +251,45 @@
   color: var(--text-dark);
 }
 
-/* Progress Input */
+/* Input Dalam Tabel */
 .progress-input-wrap {
   display: flex;
   align-items: center;
   gap: 4px;
 }
 
-.progress-input {
-  --padding-start: 8px;
-  --padding-end: 4px;
-  width: 60px;
-  height: 32px;
-  font-size: 13px;
-  --background: #f8fafc;
-  --border-radius: 6px;
-  --border-color: var(--border-color);
-  border: 1px solid var(--border-color);
-  border-radius: 6px;
+ion-input.progress-input {
+  --background: #ffffff !important;
+  --color: #0f172a !important;
+  --padding-start: 8px !important;
+  --padding-end: 4px !important;
+  width: 65px;
+  height: 34px;
+  font-size: 13.5px !important;
+  font-weight: 600 !important;
+  border: 1px solid #cbd5e1 !important;
+  border-radius: 6px !important;
 }
 
 .progress-symbol {
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--text-muted);
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--text-dark);
 }
 
-/* Catatan Input */
-.catatan-input {
-  --padding-start: 8px;
-  --padding-end: 8px;
-  height: 32px;
-  font-size: 13px;
-  --background: #f8fafc;
-  --border-radius: 6px;
-  --border-color: var(--border-color);
-  border: 1px solid var(--border-color);
-  border-radius: 6px;
+ion-input.catatan-input {
+  --background: #ffffff !important;
+  --color: #0f172a !important;
+  --placeholder-color: #64748b !important;
+  --placeholder-opacity: 1 !important;
+  --padding-start: 10px !important;
+  --padding-end: 10px !important;
+  height: 34px;
+  font-size: 13px !important;
+  font-weight: 500 !important;
+  border: 1px solid #cbd5e1 !important;
+  border-radius: 6px !important;
+  min-width: 150px;
 }
 
 /* Status & Action */
@@ -279,14 +302,14 @@
 .status-badge {
   display: inline-block;
   font-size: 11.5px;
-  font-weight: 600;
+  font-weight: 700;
   padding: 4px 10px;
   border-radius: 20px;
   text-align: center;
 
   &.status-proses {
     background: #fff7ed;
-    color: var(--warning);
+    color: #d97706;
   }
 
   &.status-selesai {
@@ -305,7 +328,7 @@
   gap: 6px;
 }
 
-.btn-proses {
+.btn-proses, .btn-selesai {
   --border-radius: 6px;
   --box-shadow: none;
   font-size: 11px;
@@ -314,20 +337,30 @@
   text-transform: none;
 }
 
-.btn-selesai {
-  --border-radius: 6px;
-  --box-shadow: none;
-  font-size: 11px;
-  font-weight: 700;
-  height: 28px;
-  text-transform: none;
+.table-actions-flex {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px;
+
+  ion-button {
+    --padding-start: 6px;
+    --padding-end: 6px;
+    margin: 0;
+    font-size: 12px;
+    font-weight: 600;
+
+    span {
+      margin-left: 4px;
+    }
+  }
 }
 
 .empty-row {
   text-align: center;
   padding: 32px 0;
   color: var(--text-muted);
-  white-space: normal;
+  font-weight: 600;
 }
 
 .table-footer {
@@ -336,14 +369,15 @@
   align-items: center;
   flex-wrap: wrap;
   gap: 12px;
-  margin-top: 16px;
-  padding-top: 16px;
+  padding: 14px 18px;
+  background: #f8fafc;
   border-top: 1px solid var(--border-color);
 }
 
 .table-info {
   font-size: 12.5px;
-  color: var(--text-muted);
+  color: var(--text-dark);
+  font-weight: 600;
 }
 
 .pagination {
@@ -360,27 +394,128 @@
   justify-content: center;
   border-radius: 6px;
   font-size: 12.5px;
-  color: var(--text-muted);
+  color: var(--text-dark);
+  font-weight: 600;
   cursor: pointer;
+  border: 1px solid var(--border-color);
+
+  &:hover {
+    background: #e2e8f0;
+  }
+
+  &.active {
+    background: var(--primary);
+    color: #ffffff;
+    border-color: var(--primary);
+    font-weight: 700;
+  }
 }
 
-.page-number:hover {
-  background: var(--content-bg);
+/* ========================================== */
+/* OVERRIDE OVERLAY MODAL                     */
+/* ========================================== */
+ion-modal.custom-proses-modal {
+  --background: #ffffff !important;
+
+  &::part(content) {
+    background: #ffffff !important;
+    border-radius: 16px;
+    overflow: hidden;
+  }
+
+  ion-header {
+    background: #ffffff !important;
+
+    ion-toolbar {
+      --background: #ffffff !important;
+      --color: #0f172a !important;
+      --border-color: #cbd5e1 !important;
+      color: #0f172a !important;
+      font-weight: 700;
+      padding: 4px 8px;
+
+      ion-title {
+        color: #0f172a !important;
+        font-weight: 700;
+      }
+
+      ion-button {
+        --color: #64748b !important;
+      }
+    }
+  }
+
+  ion-content {
+    --background: #ffffff !important;
+    --color: #0f172a !important;
+    background: #ffffff !important;
+    color: #0f172a !important;
+  }
 }
 
-.page-number.active {
-  background: var(--primary);
-  color: #fff;
+/* ========================================== */
+/* MODAL CHAT & FORM STYLES                   */
+/* ========================================== */
+.modal-body {
+  padding: 24px;
+  max-width: 500px;
+  margin: 0 auto;
+  background: #ffffff !important;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-label {
+  display: block;
+  font-size: 13.5px;
+  font-weight: 700;
+  color: #0f172a !important;
+  margin-bottom: 8px;
+
+  .required {
+    color: var(--danger);
+  }
+}
+
+ion-textarea.form-textarea {
+  --color: #0f172a !important;
+  --placeholder-color: #64748b !important;
+  --placeholder-opacity: 1 !important;
+  --background: #ffffff !important;
+  --padding-start: 14px !important;
+  --padding-end: 14px !important;
+  border: 1px solid #cbd5e1 !important;
+  border-radius: 8px !important;
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  color: #0f172a !important;
+  margin-top: 4px;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 24px;
+  padding-top: 16px;
+  border-top: 1px solid #e2e8f0;
+}
+
+.cancel-modal-btn {
+  --border-radius: 8px;
+  --color: #475569 !important;
+  --border-color: #cbd5e1 !important;
   font-weight: 600;
 }
 
-/* ========================================== */
-/* STYLING MODAL CHAT (WhatsApp Style)         */
-/* ========================================== */
-.modal-content {
-  --background: #f2f5f8;
+.submit-modal-btn-danger {
+  --border-radius: 8px;
+  font-weight: 600;
 }
 
+/* Chat Styling */
 .chat-container {
   display: flex;
   flex-direction: column;
@@ -415,6 +550,13 @@
   border: 1px solid #e5e7eb;
 }
 
+.chat-bubble.bubble-me {
+  align-self: flex-end;
+  background: var(--primary);
+  color: #ffffff;
+  border-color: var(--primary);
+}
+
 .bubble-header {
   display: flex;
   justify-content: space-between;
@@ -437,26 +579,6 @@
   word-break: break-word;
 }
 
-.chat-bubble.bubble-me {
-  align-self: flex-end;
-  background: var(--primary);
-  color: #ffffff;
-  border-color: var(--primary);
-  border-bottom-right-radius: 4px;
-}
-
-.bubble-me .bubble-header {
-  color: rgba(1, 1, 1, 0.8);
-}
-
-.bubble-me .sender-name {
-  color: rgba(17, 17, 17, 0.9);
-}
-
-.bubble-me .bubble-text {
-  color: #000000;
-}
-
 .chat-input-area {
   display: flex;
   align-items: center;
@@ -464,135 +586,100 @@
   padding: 12px 16px;
   border-top: 1px solid var(--border-color);
   background: #ffffff;
-  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.03);
 }
 
-.chat-input {
+ion-input.chat-input {
   --padding-start: 16px;
   --padding-end: 16px;
+  --color: #0f172a !important;
   background: #f3f4f6;
   border-radius: 24px;
   font-size: 14px;
   flex: 1;
 }
 
-.chat-input-area ion-button {
-  --border-radius: 50%;
-  width: 44px;
-  height: 44px;
-  --padding-start: 0;
-  --padding-end: 0;
-  margin: 0;
-}
-
-.chat-messages::-webkit-scrollbar {
-  width: 4px;
-}
-.chat-messages::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
-  border-radius: 4px;
-}
-
-/* ========================================== */
-/* STYLING COUNTDOWN TIMER                     */
-/* ========================================== */
+/* Countdown & Histori */
 .countdown-timer {
   display: flex;
   align-items: center;
   gap: 4px;
-  font-weight: 600;
+  font-weight: 700;
   font-size: 13px;
   color: #1e293b;
-  font-variant-numeric: tabular-nums;
+
+  &.is-late {
+    color: #ef4444 !important;
+  }
 }
 
-.countdown-timer.is-late {
-  color: #ef4444 !important;
-}
-
-.countdown-timer ion-icon {
-  font-size: 14px;
-}
-
-/* ========================================== */
-/* STYLING HISTORI PROGRES                     */
-/* ========================================== */
 .history-container {
   display: flex;
   flex-direction: column;
   gap: 8px;
+  color: #0f172a;
 }
+
 .history-empty {
   color: var(--text-muted);
   font-size: 13px;
 }
+
 .history-item {
   display: flex;
   align-items: center;
   gap: 12px;
   padding: 6px 0;
-  border-bottom: 1px dashed #e2e8f0;
+  border-bottom: 1px dashed #cbd5e1;
 }
-.history-item:last-child {
-  border-bottom: none;
-}
+
 .history-badge {
   background: #e2e8f0;
-  color: #1e293b;
+  color: #0f172a;
   padding: 2px 10px;
   border-radius: 12px;
   font-weight: 700;
   font-size: 13px;
-  min-width: 40px;
-  text-align: center;
 }
+
 .history-text {
   flex: 1;
   display: flex;
   justify-content: space-between;
 }
+
 .history-note {
   color: #334155;
   font-size: 13px;
 }
+
 .history-date {
   color: var(--text-muted);
   font-size: 12px;
 }
 
 /* ========================================== */
-/* STYLING MODAL CHECK SHEET (mirip PDF)       */
+/* MODAL CHECK SHEET                          */
 /* ========================================== */
-.checksheet-modal {
-  --width: 900px;
+ion-modal.checksheet-modal {
+  --width: 95%;
+  --max-width: 1100px;
   --height: 90%;
   --border-radius: 12px;
-
-  @media (max-width: 992px) {
-    --width: 100%;
-    --height: 100%;
-  }
 }
 
 .checksheet-form {
   padding: 20px;
-  background: #ffffff;
+  background: #ffffff !important;
 }
 
-/* ========================================== */
-/* HEADER FORM PERSIS SEPERTI PDF RESMI        */
-/* (pakai <table> beneran biar border-nya      */
-/* menyatu jadi satu kotak, sama seperti PDF)  */
-/* ========================================== */
-.checksheet-header-table {
+.checksheet-header-table, .checksheet-info-table, .checksheet-table, .checksheet-legend-table, .checksheet-signature-table {
   width: 100%;
   border-collapse: collapse;
-  margin-bottom: 0;
+  color: #0f172a;
 
-  td {
+  th, td {
     border: 1px solid #1f2937;
-    vertical-align: middle;
-    padding: 8px 10px;
+    padding: 6px 8px;
   }
 }
 
@@ -636,13 +723,9 @@
 }
 
 .checksheet-info-table {
-  width: 100%;
-  border-collapse: collapse;
-  border: 1px solid #1f2937;
   border-top: none;
   margin-bottom: 14px;
   font-size: 12.5px;
-  color: var(--text-dark);
 
   td {
     padding: 3px 10px;
@@ -652,42 +735,27 @@
     width: 160px;
     font-weight: 600;
   }
-
-  .cs-info-value {
-    text-align: left;
-  }
 }
 
 .checksheet-table-wrapper {
   overflow-x: auto;
-  overflow-y: visible; /* penting: jangan sampai popup B/C/D kepotong */
+  overflow-y: visible;
 }
 
 .checksheet-table {
-  width: 100%;
-  border-collapse: collapse;
   font-size: 12px;
   min-width: 560px;
-
-  th, td {
-    border: 1px solid #cbd5e1;
-    padding: 6px 8px;
-    vertical-align: middle;
-    overflow: visible; /* jangan potong popup B/C/D yang keluar dari sel */
-  }
 
   th {
     background: #f1f5f9;
     text-align: center;
     font-weight: 700;
-    color: var(--text-dark);
   }
 
   .unit-cell {
     text-align: center;
     font-weight: 600;
     background: #f8fafc;
-    color: var(--text-dark);
   }
 
   .check-col {
@@ -695,36 +763,17 @@
   }
 }
 
-/* ========================================== */
-/* 🔥 KOTAK CHECK OK/NC CUSTOM                 */
-/* (ganti ion-checkbox yang sebelumnya bug     */
-/* jadi kotak biru solid tanpa tanda centang)  */
-/* ========================================== */
 .cs-checkbox {
   width: 22px;
   height: 22px;
   margin: 0 auto;
-  border: 2px solid #94a3b8;
+  border: 2px solid #333;
   border-radius: 4px;
   background: #ffffff;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: all 0.15s ease;
-  font-size: 12px;
-  font-weight: 700;
-  line-height: 1;
-  user-select: none;
-
-  ion-icon {
-    font-size: 16px;
-    color: #ffffff;
-  }
-
-  &:hover {
-    border-color: #2563eb;
-  }
 
   &.checked {
     background: #2563eb !important;
@@ -733,28 +782,20 @@
 }
 
 .cs-checkbox-nc {
-  color: #070606;
+  color: #000000;
 
   &.checked {
     background: #ffffff !important;
-    border-color: #020202 !important;
-    color: #0e0c0c;
+    border-color: #000000 !important;
+    color: #000000;
+    font-weight: 700;
   }
 }
 
-.checksheet-actions {
-  margin-top: 18px;
-  display: flex;
-  justify-content: flex-end;
-  gap: 8px;
-}
-
-/* ========================================== */
-/* POPUP PILIHAN HURUF B/C/D DI NC             */
-/* ========================================== */
+/* NC Popup Selection */
 .nc-popup-col {
   position: relative;
-  overflow: visible; /* supaya popup tidak kepotong border cell */
+  overflow: visible;
 }
 
 .nc-huruf-popup {
@@ -796,13 +837,9 @@
   font-size: 13px;
   font-weight: 700;
   cursor: pointer;
-  transition: all 0.15s ease;
-  padding: 0;
-  line-height: 1;
 
   &:hover {
     background: #f1f5f9;
-    border-color: #94a3b8;
   }
 
   &.active {
@@ -822,28 +859,13 @@
   font-size: 10.5px;
   cursor: pointer;
   text-decoration: underline;
-
-  &:hover {
-    color: var(--text-dark);
-  }
 }
 
-/* ========================================== */
-/* LEGENDA "CATATAN" & "KONDISI NC"            */
-/* (persis footer kiri-kanan di PDF resmi,     */
-/* pakai <table> biar border-nya nyatu, sama   */
-/* gaya dengan checksheet-header-table dan     */
-/* checksheet-signature-table)                 */
-/* ========================================== */
 .checksheet-legend-table {
-  width: 100%;
-  border-collapse: collapse;
   margin-top: 12px;
   font-size: 11px;
-  color: var(--text-dark);
 
   td {
-    border: 1px solid #1f2937;
     padding: 10px 14px;
     vertical-align: top;
   }
@@ -852,7 +874,6 @@
     display: block;
     margin-bottom: 4px;
     font-size: 12px;
-    color: var(--text-dark);
   }
 
   p {
@@ -869,29 +890,17 @@
   width: 30%;
 }
 
-.checksheet-approval-actions {
-  margin: 16px 0 10px;
-  display: flex;
-  justify-content: flex-end;
-}
-
 .checksheet-signature-table {
-  width: 100%;
-  border-collapse: collapse;
   margin-top: 4px;
   font-size: 11px;
-  color: #1e293b;
 
   th, td {
-    border: 1px solid #1f2937;
-    padding: 6px 8px;
     text-align: center;
   }
 
   th {
     background: #f1f5f9;
     font-weight: 700;
-    font-size: 11px;
   }
 
   .signature-row td {
@@ -900,24 +909,12 @@
     font-weight: 600;
   }
 
-  .signature-date {
-    font-weight: 400;
-    color: #64748b;
-    font-size: 10px;
-  }
-
   .signature-label {
     font-size: 10px;
-    font-weight: 400;
     color: #64748b;
   }
 }
 
-/* ========================================== */
-/* 🔥 SEL TANDA TANGAN (gambar PNG + nama + tanggal) */
-/* dipakai di dalam .checksheet-signature-table,     */
-/* muncul otomatis begitu approver pernah upload TTD */
-/* ========================================== */
 .signature-cell {
   display: flex;
   flex-direction: column;
@@ -937,4 +934,10 @@
   font-weight: 600;
   font-size: 11px;
   color: #1e293b;
+}
+
+.signature-date {
+  font-weight: 400;
+  color: #64748b;
+  font-size: 10px;
 }

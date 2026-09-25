@@ -14,7 +14,7 @@
           <ion-button class="menu-toggle" fill="clear" (click)="toggleSidebar()">
             <ion-icon name="menu-outline"></ion-icon>
           </ion-button>
-          <span class="page-title-inline">Laporan Feedback</span>
+          <span class="page-title-inline">Laporan Feedback Teknisi</span>
         </div>
         <div class="header-right">
           <div class="header-avatar" routerLink="/admin/profile">
@@ -24,86 +24,235 @@
         </div>
       </div>
 
-      <!-- CONTENT -->
+      <!-- CONTENT AREA -->
       <div class="content-area">
-        <div class="page-header">
-          <div class="header-left">
+
+        <!-- ==================== TAMPILAN 1: GRID CARD TEKNISI ==================== -->
+        <div *ngIf="!selectedTeknisi">
+          <div class="page-header">
+            <div class="header-left">
+              <div>
+                <h1 class="page-title">Daftar Teknisi & Penilaian</h1>
+                <p class="page-subtitle">Pilih teknisi untuk melihat rincian laporan feedback pengguna</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- TOOLBAR SEARCH TEKNISI -->
+          <div class="list-toolbar">
+            <div class="search-box">
+              <ion-icon name="search-outline" class="search-icon"></ion-icon>
+              <input
+                type="text"
+                placeholder="Cari Nama / ID Teknisi..."
+                [(ngModel)]="searchTeknisi"
+                (ngModelChange)="onSearchTeknisiChange()"
+              />
+            </div>
+          </div>
+
+          <!-- GRID CARD REKAP TEKNISI -->
+          <div class="teknisi-grid">
+            <div class="teknisi-card" *ngFor="let tek of teknisiSummaryList" (click)="selectTeknisi(tek)">
+              <div class="teknisi-card-header">
+                <div class="avatar-circle">
+                  <ion-icon name="person-outline"></ion-icon>
+                </div>
+                <div class="teknisi-info">
+                  <h3 class="teknisi-card-name">{{ tek.namaTeknisi }}</h3>
+                  <span class="teknisi-card-id">ID: {{ tek.idTeknisi }}</span>
+                </div>
+              </div>
+
+              <div class="teknisi-card-body">
+                <div class="stat-box">
+                  <span class="stat-label">Total Feedback</span>
+                  <span class="stat-value">{{ tek.totalFeedback }} Laporan</span>
+                </div>
+                <div class="stat-box">
+                  <span class="stat-label">Rata-rata Rating</span>
+                  <div class="rating-badge-card">
+                    <ion-icon name="star" class="star-icon"></ion-icon>
+                    <span class="rating-num">{{ tek.averageRating }} / 5</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="teknisi-card-footer">
+                <span>Lihat Detail Feedback</span>
+                <ion-icon name="chevron-forward-outline"></ion-icon>
+              </div>
+            </div>
+          </div>
+
+          <!-- EMPTY STATE TEKNISI -->
+          <div class="empty-state" *ngIf="teknisiSummaryList.length === 0">
+            <ion-icon name="people-outline"></ion-icon>
+            <h3>Tidak Ada Data Teknisi</h3>
+            <p>Belum ada feedback yang masuk atau teknisi tidak ditemukan.</p>
+          </div>
+        </div>
+
+
+        <!-- ==================== TAMPILAN 2: DETAIL FEEDBACK PER TEKNISI ==================== -->
+        <div *ngIf="selectedTeknisi">
+          <div class="page-header-detail">
+            <button class="btn-back" (click)="backToTeknisiList()">
+              <ion-icon name="arrow-back-outline"></ion-icon>
+              Kembali ke Daftar Teknisi
+            </button>
+            <div class="teknisi-detail-header-card">
+              <h2>{{ selectedTeknisi.namaTeknisi }}</h2>
+              <p>ID Teknisi: {{ selectedTeknisi.idTeknisi }} | Rata-rata Rating: <b>{{ selectedTeknisi.averageRating }} / 5</b> ({{ selectedTeknisi.totalFeedback }} Feedback)</p>
+            </div>
+          </div>
+
+          <!-- TOOLBAR: SEARCH TICKET/PELAPOR + FILTER RATING -->
+          <div class="list-toolbar">
+            <div class="search-box">
+              <ion-icon name="search-outline" class="search-icon"></ion-icon>
+              <input
+                type="text"
+                placeholder="Cari ID Ticket / Pelapor / Ulasan..."
+                [(ngModel)]="searchDetail"
+                (ngModelChange)="onFilterDetailChange()"
+              />
+            </div>
+
+            <div class="toolbar-filters">
+              <select [(ngModel)]="filterRating" (change)="onFilterDetailChange()">
+                <option value="">Semua Feedback</option>
+                <option *ngFor="let r of ratingOptions" [value]="r">{{ r }}</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- TABEL FEEDBACK (PAGINATION 15 ROW) -->
+          <div class="table-card">
+            <div class="table-wrapper">
+              <table class="feedback-table">
+                <thead>
+                  <tr>
+                    <th style="width: 50px;">No</th>
+                    <th>ID Ticket</th>
+                    <th>Pelapor</th>
+                    <th>Rating</th>
+                    <th>Kategori</th>
+                    <th style="text-align: center; width: 110px;">Aksi</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let f of pagedFeedback; let i = index">
+                    <td>{{ (currentPage - 1) * pageSize + i + 1 }}</td>
+                    <td class="ticket-id">{{ f.idTicket }}</td>
+                    <td class="fw-bold">{{ f.reportedBy }}</td>
+                    <td class="nowrap">
+                      <div class="rating-cell">
+                        <ion-icon name="star" class="star-icon"></ion-icon>
+                        <span class="rating-text">{{ f.rating }} / 5</span>
+                      </div>
+                    </td>
+                    <td>
+                      <span class="feedback-badge" [ngClass]="getRatingClass(f.feedback)">
+                        {{ f.feedback }}
+                      </span>
+                    </td>
+                    <td style="text-align: center;">
+                      <button class="btn-detail" (click)="openDetail(f)">
+                        <ion-icon name="eye-outline"></ion-icon>
+                        Detail
+                      </button>
+                    </td>
+                  </tr>
+
+                  <tr *ngIf="filteredFeedbackDetail.length === 0">
+                    <td colspan="6" class="empty-row">Tidak ada data feedback yang cocok</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div class="table-footer" *ngIf="totalPages > 1">
+              <span class="table-info">Menampilkan {{ pagedFeedback.length }} dari {{ filteredFeedbackDetail.length }} data (15 baris/hal)</span>
+              <div class="pagination">
+                <ion-button fill="clear" size="small" [disabled]="currentPage === 1" (click)="prevPage()"><ion-icon name="chevron-back-outline"></ion-icon></ion-button>
+                <span class="page-number" *ngFor="let p of totalPagesArray" [class.active]="p === currentPage" (click)="goToPage(p)">{{ p }}</span>
+                <ion-button fill="clear" size="small" [disabled]="currentPage === totalPages" (click)="nextPage()"><ion-icon name="chevron-forward-outline"></ion-icon></ion-button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== MODAL POP-UP DETAIL FEEDBACK ===== -->
+  <div class="modal-backdrop" *ngIf="isDetailOpen" (click)="closeDetail()">
+    <div class="modal-card" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>Detail Laporan Feedback</h3>
+        <button class="btn-close" (click)="closeDetail()">
+          <ion-icon name="close-outline"></ion-icon>
+        </button>
+      </div>
+
+      <div class="modal-body" *ngIf="selectedFeedback">
+        <div class="detail-grid">
+          <div class="detail-item">
+            <label>ID Ticket</label>
+            <p class="ticket-id-highlight">{{ selectedFeedback.idTicket }}</p>
+          </div>
+
+          <div class="detail-item">
+            <label>Tanggal Feedback</label>
+            <p>{{ selectedFeedback.tanggal }}</p>
+          </div>
+
+          <div class="detail-item">
+            <label>Pelapor (Karyawan)</label>
+            <p class="fw-bold">{{ selectedFeedback.reportedBy }}</p>
+          </div>
+
+          <div class="detail-item">
+            <label>Teknisi Penanggung Jawab</label>
+            <p class="fw-bold">
+              {{ selectedFeedback.idTeknisi !== '-' ? selectedFeedback.idTeknisi + ' (' + selectedFeedback.namaTeknisi + ')' : '-' }}
+            </p>
+          </div>
+
+          <div class="detail-item">
+            <label>Rating Kepuasan</label>
+            <div class="star-rating-display">
+              <ion-icon
+                *ngFor="let star of [1,2,3,4,5]"
+                [name]="star <= selectedFeedback.rating ? 'star' : 'star-outline'"
+                class="star-icon-modal">
+              </ion-icon>
+              <span class="rating-num">{{ selectedFeedback.rating }} / 5</span>
+            </div>
+          </div>
+
+          <div class="detail-item">
+            <label>Kategori Feedback</label>
             <div>
-              <h1 class="page-title">Laporan Feedback</h1>
-              <p class="page-subtitle">Rekapitulasi feedback positif dan negatif dari pengguna</p>
+              <span class="feedback-badge" [ngClass]="getRatingClass(selectedFeedback.feedback)">
+                {{ selectedFeedback.feedback }}
+              </span>
             </div>
           </div>
         </div>
 
-        <!-- TOOLBAR: SEARCH + FILTER -->
-        <div class="list-toolbar">
-          <div class="search-box">
-            <ion-icon name="search-outline" class="search-icon"></ion-icon>
-            <input
-              type="text"
-              placeholder="Cari ID Ticket / Pelapor..."
-              [(ngModel)]="searchTerm"
-              (ngModelChange)="onFilterChange()"
-            />
-          </div>
-
-          <div class="toolbar-filters">
-            <select [(ngModel)]="filterRating" (change)="onFilterChange()">
-              <option value="">Semua Feedback</option>
-              <option *ngFor="let r of ratingOptions" [value]="r">{{ r }}</option>
-            </select>
+        <div class="detail-full-item">
+          <label>Keterangan / Ulasan Pengguna</label>
+          <div class="keterangan-box">
+            <p>{{ selectedFeedback.keterangan || 'Tidak ada keterangan tambahan.' }}</p>
           </div>
         </div>
+      </div>
 
-        <!-- TABLE -->
-        <div class="table-card">
-          <div class="table-wrapper">
-            <table class="feedback-table">
-              <thead>
-                <tr>
-                  <th style="width: 60px;">No</th>
-                  <th>Id Ticket</th>
-                  <th>Reported</th>
-                  <th style="min-width: 140px;">Tanggal</th>
-                  <th>Feedback</th>
-                  <th>Keterangan</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr *ngFor="let f of pagedFeedback; let i = index">
-                  <td>{{ (currentPage - 1) * pageSize + i + 1 }}</td>
-                  <td class="ticket-id">{{ f.idTicket }}</td>
-                  <td class="fw-bold">{{ f.reportedBy }}</td>
-                  <td class="nowrap">{{ f.tanggal }}</td>
-                  <td>
-                    <span class="feedback-badge" [ngClass]="getRatingClass(f.feedback)">{{ f.feedback }}</span>
-                  </td>
-                  <td class="keterangan-col">{{ f.keterangan || '-' }}</td>
-                </tr>
-
-                <tr *ngIf="filteredFeedback.length === 0">
-                  <td colspan="6" class="empty-row">Tidak ada data feedback yang cocok</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-
-          <div class="table-footer" *ngIf="totalPages > 1">
-            <span class="table-info">Menampilkan {{ pagedFeedback.length }} dari {{ filteredFeedback.length }} data</span>
-            <div class="pagination">
-              <ion-button fill="clear" size="small" [disabled]="currentPage === 1" (click)="prevPage()"><ion-icon name="chevron-back-outline"></ion-icon></ion-button>
-              <span class="page-number" *ngFor="let p of totalPagesArray" [class.active]="p === currentPage" (click)="goToPage(p)">{{ p }}</span>
-              <ion-button fill="clear" size="small" [disabled]="currentPage === totalPages" (click)="nextPage()"><ion-icon name="chevron-forward-outline"></ion-icon></ion-button>
-            </div>
-          </div>
-        </div>
-
-        <!-- EMPTY STATE -->
-        <div class="empty-state" *ngIf="filteredFeedback.length === 0 && feedbackList.length === 0">
-          <ion-icon name="chatbubble-ellipses-outline"></ion-icon>
-          <h3>Belum Ada Data Feedback</h3>
-          <p>Belum ada laporan feedback yang masuk dari pengguna</p>
-        </div>
+      <div class="modal-footer">
+        <button class="btn-modal-close" (click)="closeDetail()">Tutup</button>
       </div>
     </div>
   </div>

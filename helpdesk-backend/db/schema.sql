@@ -305,14 +305,3 @@ SELECT
     (SELECT COUNT(*) FROM list_ticket WHERE status = 'Reject') AS tiket_reject,
     (SELECT COUNT(*) FROM laporan_feedback WHERE feedback = 'Positif') AS feedback_positif,
     (SELECT COUNT(*) FROM laporan_feedback WHERE feedback = 'Negatif') AS feedback_negatif;
-
-CREATE TABLE tb_feedback (
-  id INT AUTO_INCREMENT PRIMARY KEY,
-  id_ticket VARCHAR(50) NOT NULL,
-  id_user INT NOT NULL,
-  id_teknisi INT NULL,
-  rating TINYINT NOT NULL CHECK (rating BETWEEN 1 AND 5),
-  komentar TEXT NULL,
-  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-  FOREIGN KEY (id_ticket) REFERENCES tb_ticket(id_ticket) ON DELETE CASCADE
-);

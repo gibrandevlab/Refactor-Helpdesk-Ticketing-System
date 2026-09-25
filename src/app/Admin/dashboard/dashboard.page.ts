@@ -45,7 +45,7 @@ export class DashboardPage implements OnInit, AfterViewInit {
 
   pendingCount = 0;
 
-  // Data Statistik
+  // Data Statistik Ticket & Users
   totalTicket = 0;
   totalTicketTrend = 0;
 
@@ -62,9 +62,14 @@ export class DashboardPage implements OnInit, AfterViewInit {
   totalTeknisi = 0;
   totalAsset = 0;
 
+  // Data Statistik Feedback & Rating (Diambil dari v_dashboard_summary)
+  totalFeedback = 0;
+  rataRataRating = 0;
+  feedbackPositif = 0;
+  feedbackNegatif = 0;
   feedbackPositifPercent = 0;
-  feedbackPositifTrend = 0;
   feedbackNegatifPercent = 0;
+  feedbackPositifTrend = 0;
 
   // Data Grafik
   chartLabels: string[] = [];
@@ -97,18 +102,33 @@ export class DashboardPage implements OnInit, AfterViewInit {
       next: (res: any) => {
         const data = res.data;
 
-        // 1. Mapping Data Statistik
+        // 1. Mapping Data Statistik Ticket & Users
         const summary = data.summary || {};
         this.totalTicket = summary.total_tiket || 0;
         this.waitingApproval = summary.waiting_approval ?? summary.tiket_menunggu_approval ?? 0;
-        this.onProgress = summary.on_progress ?? summary.tiket_on_process ?? 0;
+        this.onProgress = summary.on_process ?? summary.tiket_on_process ?? 0;
         this.closedTicket = summary.solved ?? summary.tiket_solved ?? 0;
         this.totalUser = summary.total_user ?? summary.total_user_aktif ?? summary.total_karyawan ?? 0;
         this.totalTeknisi = summary.total_teknisi ?? summary.total_teknisi_aktif ?? 0;
         this.totalAsset = summary.total_asset || 0;
         this.pendingCount = this.waitingApproval;
 
-        // 2. Mapping Data Grafik Bulanan
+        // 2. Mapping Data Feedback & Rating dari View v_dashboard_summary
+        this.totalFeedback = summary.total_feedback || 0;
+        this.feedbackPositif = summary.feedback_positif || 0;
+        this.feedbackNegatif = summary.feedback_negatif || 0;
+        this.rataRataRating = summary.rata_rata_rating ? parseFloat(summary.rata_rata_rating) : 0;
+
+        // Hitung persentase dinamis
+        if (this.totalFeedback > 0) {
+          this.feedbackPositifPercent = Math.round((this.feedbackPositif / this.totalFeedback) * 100);
+          this.feedbackNegatifPercent = Math.round((this.feedbackNegatif / this.totalFeedback) * 100);
+        } else {
+          this.feedbackPositifPercent = 0;
+          this.feedbackNegatifPercent = 0;
+        }
+
+        // 3. Mapping Data Grafik Bulanan
         const months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
         const currentYear = new Date().getFullYear();
 
@@ -135,7 +155,7 @@ export class DashboardPage implements OnInit, AfterViewInit {
         this.chartOnProgress = progress;
         this.chartWaitingApproval = waiting;
 
-        // 3. Mapping Aktivitas Terbaru
+        // 4. Mapping Aktivitas Terbaru
         const aktivitas = data.aktivitasTerbaru || [];
         this.activities = aktivitas.map((item: any) => ({
           icon: this.getActivityIcon(item.status),
@@ -145,8 +165,12 @@ export class DashboardPage implements OnInit, AfterViewInit {
         }));
 
         this.isLoading = false;
-        this.renderTicketChart();
-        this.renderFeedbackChart();
+
+        // Render Grafik
+        setTimeout(() => {
+          this.renderTicketChart();
+          this.renderFeedbackChart();
+        }, 100);
       },
       error: (err: any) => {
         console.error('Gagal memuat dashboard', err);
@@ -230,14 +254,16 @@ export class DashboardPage implements OnInit, AfterViewInit {
       this.donutChart.destroy();
     }
 
-    const positif = 92;
-    const negatif = 8;
+    // Menggunakan data riil persentase feedback
+    const hasData = this.totalFeedback > 0;
+    const chartData = hasData ? [this.feedbackPositifPercent, this.feedbackNegatifPercent] : [100, 0];
+    const chartColors = hasData ? ['#22c55e', '#ef4444'] : ['#e2e8f0', '#cbd5e1'];
 
     this.donutChart = new Chart(this.feedbackChartRef.nativeElement, {
       type: 'doughnut',
       data: {
         labels: ['Positif', 'Negatif'],
-        datasets: [{ data: [positif, negatif], backgroundColor: ['#22c55e', '#ef4444'], borderWidth: 0 }],
+        datasets: [{ data: chartData, backgroundColor: chartColors, borderWidth: 0 }],
       },
       options: {
         responsive: true,

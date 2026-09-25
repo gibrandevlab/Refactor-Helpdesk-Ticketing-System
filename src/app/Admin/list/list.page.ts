@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, NgZone, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -35,16 +35,21 @@ export interface ListTicket {
   reported: string;
   dept: string;
   tanggal: string;
+  formattedTanggal?: string;
   nama_kategori: string;
   nama_sub_kategori: string;
   aset: string;
   lampiran: string;
+  lampiranUrl?: string;
   teknisi: string;
   status: string;
+  statusClass?: string;
   deskripsi?: string;
   prioritas?: 'Low' | 'Normal' | 'Urgent';
   deadline?: string | null;
   statusPengerjaan?: string | null;
+  countdownText?: string;
+  isLate?: boolean;
 }
 
 @Component({
@@ -96,7 +101,7 @@ export class ListTicketPage implements OnInit, OnDestroy {
 
   // ================= CHART STATISTIK TICKET =================
   filterTahun: number | null = null;
-  selectedBulan: number | null = null; // 0 = Januari
+  selectedBulan: number | null = null;
   selectedDeptChart: string = '';
   filterStatusChart: string = '';
 
@@ -110,6 +115,20 @@ export class ListTicketPage implements OnInit, OnDestroy {
     { key: 'rejected', label: 'Ditolak' },
   ];
 
+  // 🚀 STATE VARIABLES (Pengganti Getter untuk Mencegah CPU Spike)
+  chartBaseTickets: ListTicket[] = [];
+  chartBulan: { bulan: number; label: string; jumlah: number }[] = [];
+  chartDepartemen: { departemen: string; jumlah: number }[] = [];
+  chartAssets: { aset: string; jumlah: number; tickets: ListTicket[] }[] = [];
+  filteredTickets: ListTicket[] = [];
+  pagedTickets: ListTicket[] = [];
+  totalPages = 1;
+  totalPagesArray: number[] = [];
+  totalTicketChart = 0;
+  maxBulanValue = 1;
+  maxDeptValue = 1;
+  statusCounts: { [key: string]: number } = {};
+
   constructor(
     private router: Router,
     private ticketService: TicketService,
@@ -117,7 +136,9 @@ export class ListTicketPage implements OnInit, OnDestroy {
     private kategoriService: KategoriService,
     private subKategoriService: SubKategoriService,
     private departemenService: DepartemenService,
-    private toastCtrl: ToastController
+    private toastCtrl: ToastController,
+    private ngZone: NgZone,
+    private cdr: ChangeDetectorRef
   ) {
     addIcons({
       closeOutline,
@@ -149,9 +170,18 @@ export class ListTicketPage implements OnInit, OnDestroy {
     this.startTimer();
   }
 
+  ionViewWillLeave() {
+    this.stopTimer();
+  }
+
   ngOnDestroy() {
+    this.stopTimer();
+  }
+
+  private stopTimer() {
     if (this.countdownInterval) {
       clearInterval(this.countdownInterval);
+      this.countdownInterval = null;
     }
   }
 
@@ -181,10 +211,45 @@ export class ListTicketPage implements OnInit, OnDestroy {
   }
 
   startTimer() {
-    if (this.countdownInterval) clearInterval(this.countdownInterval);
-    this.countdownInterval = setInterval(() => {
-      this.tickets = [...this.tickets];
-    }, 1000);
+    this.stopTimer();
+    this.ngZone.runOutsideAngular(() => {
+      this.countdownInterval = setInterval(() => {
+        let updated = false;
+        for (const t of this.tickets) {
+          if (t.deadline && t.status !== 'Solved') {
+            this.updateTicketCountdown(t);
+            updated = true;
+          }
+        }
+        if (updated) {
+          this.cdr.detectChanges();
+        }
+      }, 1000);
+    });
+  }
+
+  private updateTicketCountdown(t: ListTicket) {
+    if (!t.deadline) {
+      t.countdownText = '-';
+      t.isLate = false;
+      return;
+    }
+    const now = new Date().getTime();
+    const target = new Date(t.deadline).getTime();
+    const diff = target - now;
+
+    if (diff <= 0) {
+      t.countdownText = '⚠️ TELAT';
+      t.isLate = true;
+      return;
+    }
+
+    const hours = Math.floor(diff / (1000 * 60 * 60));
+    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+    const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+    t.countdownText = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+    t.isLate = false;
   }
 
   getLampiranUrl(lampiranPath: string): string {
@@ -202,29 +267,39 @@ export class ListTicketPage implements OnInit, OnDestroy {
     this.isLoading = true;
     this.ticketService.getAllRaw().subscribe({
       next: (data: TicketApiRow[]) => {
-        this.tickets = data.map(item => ({
-          id_ticket: item.id_ticket,
-          reported: item.reported,
-          dept: item.dept,
-          tanggal: item.tanggal,
-          nama_kategori: item.nama_kategori,
-          nama_sub_kategori: item.nama_sub_kategori || '',
-          aset: item.aset || '',
-          lampiran: item.lampiran || '',
-          teknisi: item.teknisi || '',
-          status: item.status,
-          deskripsi: '',
-          prioritas: item.prioritas || 'Normal',
-          deadline: item.deadline || null,
-          statusPengerjaan: item.status_pengerjaan || null,
-        }));
+        this.tickets = data.map(item => {
+          const t: ListTicket = {
+            id_ticket: item.id_ticket,
+            reported: item.reported,
+            dept: item.dept,
+            tanggal: item.tanggal,
+            formattedTanggal: this.formatDate(item.tanggal),
+            nama_kategori: item.nama_kategori,
+            nama_sub_kategori: item.nama_sub_kategori || '',
+            aset: item.aset || '',
+            lampiran: item.lampiran || '',
+            lampiranUrl: this.getLampiranUrl(item.lampiran || ''),
+            teknisi: item.teknisi || '',
+            status: item.status,
+            statusClass: this.getStatusClass(item.status),
+            deskripsi: '',
+            prioritas: item.prioritas || 'Normal',
+            deadline: item.deadline || null,
+            statusPengerjaan: item.status_pengerjaan || null,
+          };
+          this.updateTicketCountdown(t);
+          return t;
+        });
+
         this.buildFilterOptions();
 
         if (this.filterTahun === null) {
           this.filterTahun = this.tahunOptions[0] ?? new Date().getFullYear();
         }
 
+        this.recalculateFilteredData();
         this.isLoading = false;
+        this.cdr.detectChanges();
       },
       error: (err) => {
         console.error(err);
@@ -234,26 +309,6 @@ export class ListTicketPage implements OnInit, OnDestroy {
         }
       }
     });
-  }
-
-  getCountdownText(deadline: string | null): string {
-    if (!deadline) return '-';
-    const now = new Date().getTime();
-    const target = new Date(deadline).getTime();
-    const diff = target - now;
-
-    if (diff <= 0) return '⚠️ TELAT';
-
-    const hours = Math.floor(diff / (1000 * 60 * 60));
-    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-    const seconds = Math.floor((diff % (1000 * 60)) / 1000);
-
-    return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
-  }
-
-  isDeadlineLate(deadline: string | null): boolean {
-    if (!deadline) return false;
-    return new Date().getTime() > new Date(deadline).getTime();
   }
 
   loadInventory() {
@@ -316,14 +371,6 @@ export class ListTicketPage implements OnInit, OnDestroy {
     return isNaN(d.getTime()) ? null : d;
   }
 
-  getStatusGroup(status: string): string {
-    const s = (status || '').toLowerCase();
-    if (s.includes('solved') || s.includes('closed') || s.includes('selesai') || s.includes('resolved')) return 'selesai';
-    if (s.includes('proses') || s.includes('progress') || s.includes('assign')) return 'progress';
-    if (s.includes('approve') || s.includes('approval') || s.includes('menunggu')) return 'approval';
-    return 'lainnya';
-  }
-
   getFunnelStage(t: ListTicket): string {
     const statusLower = (t.status || '').toLowerCase();
     const pengerjaanLower = (t.statusPengerjaan || '').toLowerCase();
@@ -350,7 +397,9 @@ export class ListTicketPage implements OnInit, OnDestroy {
   matchesStatusGroup(t: ListTicket, key: string): boolean {
     return this.getFunnelStage(t) === key;
   }
-
+ countByStatusGroup(key: string): number {
+    return this.statusCounts[key] || 0;
+  }
   get tahunOptions(): number[] {
     const set = new Set<number>();
     this.tickets.forEach(t => {
@@ -360,76 +409,102 @@ export class ListTicketPage implements OnInit, OnDestroy {
     return [...set].sort((a, b) => b - a);
   }
 
-  private get chartBaseTickets(): ListTicket[] {
-    return this.tickets.filter(t => {
+  // 🚀 KALKULASI DATA TERPUSAT (Hanya Dipanggil Saat Ada Perubahan Filter/Data)
+  recalculateFilteredData() {
+    // 1. Chart Base
+    this.chartBaseTickets = this.tickets.filter(t => {
       const d = this.parseTanggal(t.tanggal);
       if (!d) return false;
       if (this.filterTahun && d.getFullYear() !== this.filterTahun) return false;
       if (this.filterStatusChart && !this.matchesStatusGroup(t, this.filterStatusChart)) return false;
       return true;
     });
-  }
 
-  get chartBulan(): { bulan: number; label: string; jumlah: number }[] {
+    this.totalTicketChart = this.chartBaseTickets.length;
+
+    // 2. Chart Bulan
     const counts = new Array(12).fill(0);
     this.chartBaseTickets.forEach(t => {
       const d = this.parseTanggal(t.tanggal)!;
       counts[d.getMonth()]++;
     });
-    return counts.map((jumlah, bulan) => ({ bulan, label: this.namaBulan[bulan], jumlah }));
-  }
+    this.chartBulan = counts.map((jumlah, bulan) => ({ bulan, label: this.namaBulan[bulan], jumlah }));
+    this.maxBulanValue = Math.max(1, ...this.chartBulan.map(b => b.jumlah));
 
-  get maxBulanValue(): number {
-    return Math.max(1, ...this.chartBulan.map(b => b.jumlah));
-  }
+    // 3. Chart Departemen
+    if (this.selectedBulan !== null) {
+      const mapDept = new Map<string, number>();
+      this.chartBaseTickets
+        .filter(t => this.parseTanggal(t.tanggal)!.getMonth() === this.selectedBulan)
+        .forEach(t => {
+          const dept = t.dept || '(Belum Diketahui)';
+          mapDept.set(dept, (mapDept.get(dept) || 0) + 1);
+        });
+      this.chartDepartemen = [...mapDept.entries()]
+        .map(([departemen, jumlah]) => ({ departemen, jumlah }))
+        .sort((a, b) => b.jumlah - a.jumlah);
+    } else {
+      this.chartDepartemen = [];
+    }
+    this.maxDeptValue = Math.max(1, ...this.chartDepartemen.map(d => d.jumlah));
 
-  get chartDepartemen(): { departemen: string; jumlah: number }[] {
-    if (this.selectedBulan === null) return [];
-    const map = new Map<string, number>();
-    this.chartBaseTickets
-      .filter(t => this.parseTanggal(t.tanggal)!.getMonth() === this.selectedBulan)
-      .forEach(t => {
-        const dept = t.dept || '(Belum Diketahui)';
-        map.set(dept, (map.get(dept) || 0) + 1);
-      });
-    return [...map.entries()]
-      .map(([departemen, jumlah]) => ({ departemen, jumlah }))
-      .sort((a, b) => b.jumlah - a.jumlah);
-  }
+    // 4. Chart Assets
+    if (this.selectedBulan !== null && this.selectedDeptChart) {
+      const mapAsset = new Map<string, ListTicket[]>();
+      this.chartBaseTickets
+        .filter(t =>
+          this.parseTanggal(t.tanggal)!.getMonth() === this.selectedBulan &&
+          (t.dept || '(Belum Diketahui)') === this.selectedDeptChart
+        )
+        .forEach(t => {
+          const aset = t.aset || '(Tanpa Asset)';
+          if (!mapAsset.has(aset)) mapAsset.set(aset, []);
+          mapAsset.get(aset)!.push(t);
+        });
+      this.chartAssets = [...mapAsset.entries()]
+        .map(([aset, tickets]) => ({ aset, jumlah: tickets.length, tickets }))
+        .sort((a, b) => b.jumlah - a.jumlah);
+    } else {
+      this.chartAssets = [];
+    }
 
-  get maxDeptValue(): number {
-    return Math.max(1, ...this.chartDepartemen.map(d => d.jumlah));
-  }
+    // 5. Status Group Counts
+    this.statusGroups.forEach(g => {
+      this.statusCounts[g.key] = this.tickets.filter(t => {
+        const d = this.parseTanggal(t.tanggal);
+        if (!d) return false;
+        if (this.filterTahun && d.getFullYear() !== this.filterTahun) return false;
+        return this.matchesStatusGroup(t, g.key);
+      }).length;
+    });
 
-  get chartAssets(): { aset: string; jumlah: number; tickets: ListTicket[] }[] {
-    if (this.selectedBulan === null || !this.selectedDeptChart) return [];
-    const map = new Map<string, ListTicket[]>();
-    this.chartBaseTickets
-      .filter(t =>
-        this.parseTanggal(t.tanggal)!.getMonth() === this.selectedBulan &&
-        (t.dept || '(Belum Diketahui)') === this.selectedDeptChart
-      )
-      .forEach(t => {
-        const aset = t.aset || '(Tanpa Asset)';
-        if (!map.has(aset)) map.set(aset, []);
-        map.get(aset)!.push(t);
-      });
-    return [...map.entries()]
-      .map(([aset, tickets]) => ({ aset, jumlah: tickets.length, tickets }))
-      .sort((a, b) => b.jumlah - a.jumlah);
-  }
+    // 6. Filter Table
+    const term = this.searchTerm.trim().toLowerCase();
+    this.filteredTickets = this.tickets.filter((t) => {
+      const matchSearch = !term || (t.id_ticket?.toLowerCase().includes(term) || t.reported?.toLowerCase().includes(term));
+      const matchStatus = !this.filterStatus || t.status === this.filterStatus;
+      const matchDept = !this.filterDepartemen || t.dept === this.filterDepartemen;
+      const matchKategori = !this.filterKategori || t.nama_kategori === this.filterKategori;
 
-  get totalTicketChart(): number {
-    return this.chartBaseTickets.length;
-  }
-
-  countByStatusGroup(key: string): number {
-    return this.tickets.filter(t => {
       const d = this.parseTanggal(t.tanggal);
-      if (!d) return false;
-      if (this.filterTahun && d.getFullYear() !== this.filterTahun) return false;
-      return this.matchesStatusGroup(t, key);
-    }).length;
+      const matchTahun = !this.filterTahun || (d ? d.getFullYear() === this.filterTahun : false);
+      const matchBulan = this.selectedBulan === null || (d ? d.getMonth() === this.selectedBulan : false);
+      const matchDeptChart = !this.selectedDeptChart || (t.dept || '(Belum Diketahui)') === this.selectedDeptChart;
+      const matchStatusChart = !this.filterStatusChart || this.matchesStatusGroup(t, this.filterStatusChart);
+
+      return matchSearch && matchStatus && matchDept && matchKategori
+        && matchTahun && matchBulan && matchDeptChart && matchStatusChart;
+    });
+
+    // 7. Pagination
+    this.totalPages = Math.max(1, Math.ceil(this.filteredTickets.length / this.pageSize));
+    this.totalPagesArray = Array.from({ length: this.totalPages }, (_, i) => i + 1);
+    this.updatePagedTickets();
+  }
+
+  updatePagedTickets() {
+    const start = (this.currentPage - 1) * this.pageSize;
+    this.pagedTickets = this.filteredTickets.slice(start, start + this.pageSize);
   }
 
   onTahunChange() {
@@ -465,36 +540,29 @@ export class ListTicketPage implements OnInit, OnDestroy {
     this.onFilterChange();
   }
 
-  get filteredTickets(): ListTicket[] {
-    const term = this.searchTerm.trim().toLowerCase();
-    return this.tickets.filter((t) => {
-      const matchSearch = !term || (t.id_ticket?.toLowerCase().includes(term) || t.reported?.toLowerCase().includes(term));
-      const matchStatus = !this.filterStatus || t.status === this.filterStatus;
-      const matchDept = !this.filterDepartemen || t.dept === this.filterDepartemen;
-      const matchKategori = !this.filterKategori || t.nama_kategori === this.filterKategori;
-
-      const d = this.parseTanggal(t.tanggal);
-      const matchTahun = !this.filterTahun || (d ? d.getFullYear() === this.filterTahun : false);
-      const matchBulan = this.selectedBulan === null || (d ? d.getMonth() === this.selectedBulan : false);
-      const matchDeptChart = !this.selectedDeptChart || (t.dept || '(Belum Diketahui)') === this.selectedDeptChart;
-      const matchStatusChart = !this.filterStatusChart || this.matchesStatusGroup(t, this.filterStatusChart);
-
-      return matchSearch && matchStatus && matchDept && matchKategori
-        && matchTahun && matchBulan && matchDeptChart && matchStatusChart;
-    });
+  onFilterChange() {
+    this.currentPage = 1;
+    this.recalculateFilteredData();
   }
 
-  get totalPages(): number { return Math.max(1, Math.ceil(this.filteredTickets.length / this.pageSize)); }
-  get totalPagesArray(): number[] { return Array.from({ length: this.totalPages }, (_, i) => i + 1); }
-  get pagedTickets(): ListTicket[] {
-    const start = (this.currentPage - 1) * this.pageSize;
-    return this.filteredTickets.slice(start, start + this.pageSize);
+  goToPage(page: number) {
+    this.currentPage = page;
+    this.updatePagedTickets();
   }
 
-  onFilterChange() { this.currentPage = 1; }
-  goToPage(page: number) { this.currentPage = page; }
-  prevPage() { if (this.currentPage > 1) this.currentPage--; }
-  nextPage() { if (this.currentPage < this.totalPages) this.currentPage++; }
+  prevPage() {
+    if (this.currentPage > 1) {
+      this.currentPage--;
+      this.updatePagedTickets();
+    }
+  }
+
+  nextPage() {
+    if (this.currentPage < this.totalPages) {
+      this.currentPage++;
+      this.updatePagedTickets();
+    }
+  }
 
   openTambahModal() {
     this.isEditing = false;
@@ -589,8 +657,6 @@ export class ListTicketPage implements OnInit, OnDestroy {
     this.activeMenu = menu;
     if (window.innerWidth < 1024) this.isSidebarOpen = false;
   }
-
-
 
   logout() {
     localStorage.removeItem('token');

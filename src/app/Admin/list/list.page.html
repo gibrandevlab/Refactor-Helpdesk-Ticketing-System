@@ -55,7 +55,7 @@
             </div>
           </div>
 
-          <!-- FILTER STATUS -->
+          <!-- FILTER STATUS CHIPS -->
           <div class="status-chips">
             <div class="status-chip" [class.active]="filterStatusChart === ''" (click)="selectStatusGroup('')">
               Semua <span class="chip-count">{{ tickets.length }}</span>
@@ -64,7 +64,7 @@
                  [class.active]="filterStatusChart === g.key"
                  [ngClass]="'chip-' + g.key"
                  (click)="selectStatusGroup(g.key)">
-              {{ g.label }} <span class="chip-count">{{ countByStatusGroup(g.key) }}</span>
+              {{ g.label }} <span class="chip-count">{{ statusCounts[g.key] || 0 }}</span>
             </div>
           </div>
 
@@ -212,23 +212,23 @@
                   <td class="ticket-id">{{ t.id_ticket }}</td>
                   <td>{{ t.reported }}</td>
                   <td>{{ t.dept }}</td>
-                  <td class="nowrap">{{ formatDate(t.tanggal) }}</td>
+                  <td class="nowrap">{{ t.formattedTanggal }}</td>
                   <td>{{ t.nama_kategori }}</td>
                   <td>{{ t.nama_sub_kategori }}</td>
                   <td>{{ t.aset || '-' }}</td>
                   <td>
-                    <a *ngIf="t.lampiran" [href]="getLampiranUrl(t.lampiran)" target="_blank" class="lampiran-badge">
+                    <a *ngIf="t.lampiran" [href]="t.lampiranUrl" target="_blank" class="lampiran-badge">
                       Lihat Foto
                     </a>
                     <span *ngIf="!t.lampiran">-</span>
                   </td>
                   <td>{{ t.teknisi || '-' }}</td>
                   <td>
-                    <span class="status-badge" [ngClass]="getStatusClass(t.status)">{{ t.status }}</span>
+                    <span class="status-badge" [ngClass]="t.statusClass">{{ t.status }}</span>
                   </td>
                   <td>
-                    <div *ngIf="t.deadline && t.status !== 'Solved'" class="countdown-timer" [ngClass]="{'is-late': isDeadlineLate(t.deadline)}">
-                      <ion-icon name="timer-outline"></ion-icon> {{ getCountdownText(t.deadline) }}
+                    <div *ngIf="t.deadline && t.status !== 'Solved'" class="countdown-timer" [ngClass]="{'is-late': t.isLate}">
+                      <ion-icon name="timer-outline"></ion-icon> {{ t.countdownText }}
                     </div>
                     <span *ngIf="!t.deadline || t.status === 'Solved'">-</span>
                   </td>

@@ -1,38 +1,145 @@
 <ion-content class="feedback-content">
   <div class="dashboard-container">
-    <!-- ===== SIDEBAR ===== -->
+    <!-- ===== SIDEBAR (Tetap & Tidak Diubah) ===== -->
     <app-users-sidebar [(isSidebarOpen)]="isSidebarOpen" [activeMenu]="activeMenu"></app-users-sidebar>
 
     <!-- ===== MAIN CONTENT ===== -->
     <div class="main-content">
-      <!-- HEADER -->
+
+      <!-- HEADER (Sesuai Referensi Gambar Input Aset) -->
       <div class="main-header">
         <div class="header-left">
           <ion-button class="menu-toggle" fill="clear" (click)="toggleSidebar()">
             <ion-icon name="menu-outline"></ion-icon>
           </ion-button>
-          <span class="page-title-inline">{{ getPageTitle() }}</span>
+          <span class="header-page-title">Laporan Feedback</span>
         </div>
+
         <div class="header-right">
-          <div class="header-avatar" (click)="goToProfile()">
-            <img [src]="'https://ui-avatars.com/api/?name=' + user.nama + '&background=2563eb&color=fff&size=64&bold=true'" alt="Avatar" />
-            <span class="header-avatar-name">{{ user.nama }}</span>
+          <div class="user-pill" (click)="goToProfile()">
+            <div class="avatar-circle">
+              <span>{{ user.nama ? user.nama.substring(0,2).toUpperCase() : 'US' }}</span>
+            </div>
+            <span class="user-pill-name">{{ user.nama }}</span>
           </div>
         </div>
       </div>
 
-      <!-- CONTENT -->
+      <!-- CONTENT AREA -->
       <div class="content-area">
+
+        <!-- PAGE TITLE -->
         <div class="page-heading">
-          <h1 class="page-title">Laporan Feedback</h1>
-          <p class="page-subtitle">Ulasan dan masukan untuk pelayanan IT Helpdesk</p>
+          <h1 class="page-title">Beri Feedback & Penilaian</h1>
+          <p class="page-subtitle">Berikan ulasan dan tingkat kepuasan layanan IT Helpdesk untuk tiket yang telah selesai.</p>
         </div>
 
-        <div class="placeholder-card">
-          <ion-icon name="chatbox-ellipses-outline" class="placeholder-icon"></ion-icon>
-          <h3>Halaman Feedback</h3>
-          <p>Fitur pengiriman feedback akan segera tersedia.</p>
+        <!-- GRID CONTAINER FOR FORM & HISTORY -->
+        <div class="feedback-grid">
+
+          <!-- FORM CARD (KIRI) -->
+          <div class="card-box">
+            <div class="card-header">
+              <h3>Formulir Penilaian</h3>
+            </div>
+            <div class="card-body">
+
+              <!-- Pilihan Tiket -->
+              <div class="form-group">
+                <label>Pilih Tiket (Status Selesai / Solved)</label>
+                <select class="custom-input" [(ngModel)]="selectedTicketId">
+                  <option value="" disabled selected>-- Pilih Tiket Selesai --</option>
+                  <option *ngFor="let ticket of solvedTickets" [value]="ticket.id_ticket">
+                    {{ ticket.id_ticket }} - {{ ticket.deskripsi }}
+                  </option>
+                </select>
+                <p class="info-empty" *ngIf="solvedTickets.length === 0">
+                  * Tidak ada tiket selesai yang perlu diberi feedback saat ini.
+                </p>
+              </div>
+
+              <!-- Rating Bintang 1-5 -->
+              <div class="form-group">
+                <label>Tingkat Kepuasan (Rating)</label>
+                <div class="star-rating-box">
+                  <div class="stars-wrapper">
+                    <ion-icon
+                      *ngFor="let star of [1,2,3,4,5]"
+                      [name]="star <= selectedRating ? 'star' : 'star-outline'"
+                      class="star-btn"
+                      [class.active]="star <= selectedRating"
+                      (click)="setRating(star)">
+                    </ion-icon>
+                  </div>
+                  <span class="rating-badge" *ngIf="selectedRating > 0">
+                    {{ selectedRating }} / 5 Bintang
+                  </span>
+                </div>
+              </div>
+
+              <!-- Komentar / Catatan -->
+              <div class="form-group">
+                <label>Komentar / Masukan (Opsional)</label>
+                <textarea
+                  rows="3"
+                  class="custom-input textarea-input"
+                  placeholder="Tuliskan saran atau ulasan perbaikan..."
+                  [(ngModel)]="keterangan">
+                </textarea>
+              </div>
+
+              <button
+                class="btn-primary"
+                [disabled]="isSubmitting || solvedTickets.length === 0"
+                (click)="submitFeedback()">
+                <ion-spinner name="crescent" *ngIf="isSubmitting"></ion-spinner>
+                <span *ngIf="!isSubmitting">Kirim Feedback</span>
+              </button>
+
+            </div>
+          </div>
+
+          <!-- RIWAYAT CARD (KANAN) -->
+          <div class="card-box">
+            <div class="card-header">
+              <h3>Riwayat Feedback Saya</h3>
+            </div>
+            <div class="card-body">
+
+              <div class="empty-state" *ngIf="myFeedbacks.length === 0">
+                <ion-icon name="chatbox-ellipses-outline" class="empty-icon"></ion-icon>
+                <p>Belum ada riwayat feedback yang dikirim.</p>
+              </div>
+
+              <div class="history-list" *ngIf="myFeedbacks.length > 0">
+                <div class="history-item" *ngFor="let item of myFeedbacks">
+                  <div class="history-top">
+                    <span class="ticket-code">{{ item.id_ticket }}</span>
+                    <span class="chip-status" [class.positif]="item.feedback === 'Positif'" [class.negatif]="item.feedback === 'Negatif'">
+                      {{ item.feedback }}
+                    </span>
+                  </div>
+
+                  <div class="history-stars">
+                    <div class="mini-stars">
+                      <ion-icon
+                        *ngFor="let star of [1,2,3,4,5]"
+                        [name]="star <= item.rating ? 'star' : 'star-outline'"
+                        class="star-mini">
+                      </ion-icon>
+                    </div>
+                    <span class="history-date">{{ item.tanggal | date:'dd MMM yyyy, HH:mm' }}</span>
+                  </div>
+
+                  <p class="history-desc" *ngIf="item.keterangan">{{ item.keterangan }}</p>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
         </div>
+
       </div>
     </div>
   </div>
