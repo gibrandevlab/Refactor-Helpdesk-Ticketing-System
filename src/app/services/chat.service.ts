@@ -23,11 +23,7 @@ export class ChatService {
 
   private getHeaders(): HttpHeaders {
     const token = localStorage.getItem('token');
-    return new HttpHeaders({
-      Authorization: `Bearer ${token || ''}`,
-    });
-    // Catatan: jangan set 'Content-Type' manual di sini kalau mau kirim FormData,
-    // browser yang harus nentuin boundary multipart-nya sendiri.
+    return new HttpHeaders({ Authorization: `Bearer ${token || ''}` });
   }
 
   getChats(idTicket: string): Observable<any> {
@@ -39,7 +35,10 @@ export class ChatService {
     const formData = new FormData();
     if (message) formData.append('message', message);
     if (foto) formData.append('foto', foto);
-    return this.http.post(`${this.baseUrl}/${idTicket}/chat`, formData, { headers: this.getHeaders() });
+
+    return this.http.post(`${this.baseUrl}/${idTicket}/chat`, formData, {
+      headers: this.getHeaders(),
+    });
   }
 
   /** Buat URL foto lampiran chat jadi URL lengkap yang bisa dibuka browser */

@@ -1,84 +1,119 @@
-const pool = require('../config/db');
+const {
+  karyawan,
+  departemen,
+  bagian_departemen,
+  jabatan,
+  user
+} = require('../models');
+const { Op } = require('sequelize');
 
 // Helper: Mencari ID Departemen, Bagian, Jabatan berdasarkan Nama
-const getMasterIds = async (departemen, bagian, jabatan) => {
+const getMasterIds = async (namaDept, namaBagian, namaJabatan) => {
   let id_departemen = null, id_bagian = null, id_jabatan = null;
 
-  if (departemen) {
-    const [dept] = await pool.query('SELECT id_departemen FROM departemen WHERE nama_departemen = ?', [departemen]);
-    id_departemen = dept.length > 0 ? dept[0].id_departemen : null;
+  if (namaDept) {
+    const dept = await departemen.findOne({
+      where: { nama_departemen: namaDept },
+      attributes: ['id_departemen']
+    });
+    id_departemen = dept ? dept.id_departemen : null;
   }
-  if (bagian) {
-    const [bag] = await pool.query('SELECT id_bagian FROM bagian_departemen WHERE nama_bagian = ?', [bagian]);
-    id_bagian = bag.length > 0 ? bag[0].id_bagian : null;
+  if (namaBagian) {
+    const bag = await bagian_departemen.findOne({
+      where: { nama_bagian: namaBagian },
+      attributes: ['id_bagian']
+    });
+    id_bagian = bag ? bag.id_bagian : null;
   }
-  if (jabatan) {
-    const [jab] = await pool.query('SELECT id_jabatan FROM jabatan WHERE nama_jabatan = ?', [jabatan]);
-    id_jabatan = jab.length > 0 ? jab[0].id_jabatan : null;
+  if (namaJabatan) {
+    const jab = await jabatan.findOne({
+      where: { nama_jabatan: namaJabatan },
+      attributes: ['id_jabatan']
+    });
+    id_jabatan = jab ? jab.id_jabatan : null;
   }
   return { id_departemen, id_bagian, id_jabatan };
 };
 
+// ==========================================
+// Ambil Semua Karyawan
+// ==========================================
 exports.getAll = async (req, res) => {
   try {
-    const [rows] = await pool.query(`
-      SELECT 
-        k.nik AS id, 
-        k.nik, 
-        k.nama, 
-        k.alamat, 
-        k.jenis_kelamin AS jenisKelamin,
-        d.nama_departemen AS departemen, 
-        b.nama_bagian AS bagian, 
-        j.nama_jabatan AS jabatan
-      FROM karyawan k
-      LEFT JOIN departemen d ON d.id_departemen = k.id_departemen
-      LEFT JOIN bagian_departemen b ON b.id_bagian = k.id_bagian
-      LEFT JOIN jabatan j ON j.id_jabatan = k.id_jabatan
-      ORDER BY k.nik
-    `);
-    return res.status(200).json(rows); 
+    const karyawanList = await karyawan.findAll({
+      include: [
+        { model: departemen, as: 'id_departemen_departemen' },
+        { model: bagian_departemen, as: 'id_bagian_bagian_departemen' },
+        { model: jabatan, as: 'id_jabatan_jabatan' }
+      ],
+      order: [['nik', 'ASC']]
+    });
+
+    const rows = karyawanList.map((k) => ({
+      id: k.nik,
+      nik: k.nik,
+      nama: k.nama,
+      alamat: k.alamat,
+      jenisKelamin: k.jenis_kelamin,
+      departemen: k.id_departemen_departemen?.nama_departemen || null,
+      bagian: k.id_bagian_bagian_departemen?.nama_bagian || null,
+      jabatan: k.id_jabatan_jabatan?.nama_jabatan || null
+    }));
+
+    return res.status(200).json(rows);
   } catch (err) {
-    console.error('Gagal mengambil data karyawan:', err);
+    console.error('Gagal mengambil data karyawan (Sequelize):', err);
     return res.status(500).json({ error: 'Gagal mengambil data: ' + err.message });
   }
 };
 
 // ==========================================
-// 🔥 Endpoint baru: Ambil karyawan yang belum punya akun user
+// Ambil Karyawan yang Belum Punya Akun User
 // ==========================================
 exports.getAvailable = async (req, res) => {
   try {
-    const [rows] = await pool.query(`
-      SELECT 
-        k.nik, 
-        k.nama, 
-        d.nama_departemen AS departemen
-      FROM karyawan k
-      LEFT JOIN departemen d ON d.id_departemen = k.id_departemen
-      WHERE k.nik NOT IN (SELECT nik FROM user)  -- user tabel bernama 'user'
-        AND k.nik IS NOT NULL
-      ORDER BY k.nik
-    `);
+    const availableKaryawan = await karyawan.findAll({
+      include: [
+        { model: user, as: 'users', required: false },
+        { model: departemen, as: 'id_departemen_departemen' }
+      ],
+      order: [['nik', 'ASC']]
+    });
+
+    const filtered = availableKaryawan.filter((k) => !k.users || k.users.length === 0);
+
+    const rows = filtered.map((k) => ({
+      nik: k.nik,
+      nama: k.nama,
+      departemen: k.id_departemen_departemen?.nama_departemen || null
+    }));
+
     return res.status(200).json(rows);
   } catch (err) {
-    console.error('Gagal mengambil karyawan yang tersedia:', err);
+    console.error('Gagal mengambil karyawan yang tersedia (Sequelize):', err);
     return res.status(500).json({ error: 'Gagal mengambil data karyawan yang tersedia: ' + err.message });
   }
 };
 
 // ==========================================
-// CREATE dengan generate NIK otomatis
+// CREATE Karyawan dengan NIK Otomatis (K0001, K0002, ...)
 // ==========================================
 exports.create = async (req, res) => {
   try {
-    const { nama, alamat, jenisKelamin, departemen, bagian, jabatan } = req.body;
+    const { nama, alamat, jenisKelamin, departemen: deptName, bagian: bagName, jabatan: jabName } = req.body;
 
-    if (!nama || !jenisKelamin || !departemen || !jabatan) {
+    if (!nama || !jenisKelamin || !deptName || !jabName) {
       return res.status(400).json({ error: 'nama, jenisKelamin, departemen, jabatan wajib diisi' });
     }
 
-    const [rows] = await pool.query(`SELECT nik FROM karyawan WHERE nik LIKE 'K%'`);
+    const rows = await karyawan.findAll({
+      where: {
+        nik: { [Op.like]: 'K%' }
+      },
+      attributes: ['nik'],
+      raw: true
+    });
+
     let maxNum = 0;
     for (const r of rows) {
       if (r.nik) {
@@ -91,54 +126,72 @@ exports.create = async (req, res) => {
     const nextNumber = maxNum + 1;
     const nik = 'K' + String(nextNumber).padStart(4, '0');
 
-    const ids = await getMasterIds(departemen, bagian, jabatan);
+    const ids = await getMasterIds(deptName, bagName, jabName);
     if (!ids.id_departemen) return res.status(400).json({ error: 'Departemen tidak ditemukan' });
     if (!ids.id_jabatan) return res.status(400).json({ error: 'Jabatan tidak ditemukan' });
 
-    await pool.query(
-      `INSERT INTO karyawan (nik, nama, alamat, jenis_kelamin, id_departemen, id_bagian, id_jabatan)
-       VALUES (?, ?, ?, ?, ?, ?, ?)`,
-      [nik, nama, alamat || null, jenisKelamin, ids.id_departemen, ids.id_bagian, ids.id_jabatan]
-    );
-    
-    return res.status(201).json({ message: 'Karyawan berhasil ditambahkan', nik: nik });
+    await karyawan.create({
+      nik,
+      nama,
+      alamat: alamat || null,
+      jenis_kelamin: jenisKelamin,
+      id_departemen: ids.id_departemen,
+      id_bagian: ids.id_bagian,
+      id_jabatan: ids.id_jabatan
+    });
+
+    return res.status(201).json({ message: 'Karyawan berhasil ditambahkan', nik });
   } catch (err) {
-    console.error('Gagal menambah karyawan:', err);
+    console.error('Gagal menambah karyawan (Sequelize):', err);
     return res.status(500).json({ error: 'Gagal menambah karyawan: ' + err.message });
   }
 };
 
+// ==========================================
+// Update Data Karyawan
+// ==========================================
 exports.update = async (req, res) => {
   try {
-    const { nama, alamat, jenisKelamin, departemen, bagian, jabatan } = req.body;
-    const idParam = req.params.id; 
+    const { nama, alamat, jenisKelamin, departemen: deptName, bagian: bagName, jabatan: jabName } = req.body;
+    const idParam = req.params.id;
 
-    const ids = await getMasterIds(departemen, bagian, jabatan);
+    const ids = await getMasterIds(deptName, bagName, jabName);
 
-    await pool.query(
-      `UPDATE karyawan SET nama=?, alamat=?, jenis_kelamin=?, id_departemen=?, id_bagian=?, id_jabatan=?
-       WHERE nik = ?`,
-      [nama, alamat, jenisKelamin, ids.id_departemen, ids.id_bagian, ids.id_jabatan, idParam]
+    await karyawan.update(
+      {
+        nama,
+        alamat,
+        jenis_kelamin: jenisKelamin,
+        id_departemen: ids.id_departemen,
+        id_bagian: ids.id_bagian,
+        id_jabatan: ids.id_jabatan
+      },
+      { where: { nik: idParam } }
     );
+
     return res.status(200).json({ message: 'Karyawan berhasil diperbarui' });
   } catch (err) {
-    console.error('Gagal memperbarui karyawan:', err);
+    console.error('Gagal memperbarui karyawan (Sequelize):', err);
     return res.status(500).json({ error: 'Gagal memperbarui karyawan: ' + err.message });
   }
 };
 
+// ==========================================
+// Hapus Data Karyawan
+// ==========================================
 exports.remove = async (req, res) => {
   try {
     const idParam = req.params.id;
-    await pool.query('DELETE FROM karyawan WHERE nik = ?', [idParam]);
+
+    await karyawan.destroy({
+      where: { nik: idParam }
+    });
+
     return res.status(200).json({ message: 'Karyawan berhasil dihapus' });
   } catch (err) {
-    // 🔧 DITAMBAHKAN: console.error supaya error sebenarnya muncul di terminal
-    console.error('Gagal menghapus karyawan:', err);
+    console.error('Gagal menghapus karyawan (Sequelize):', err);
 
-    // 🔧 DITAMBAHKAN: pesan khusus & jelas kalau penyebabnya foreign key
-    // constraint (karyawan ini masih dipakai sebagai teknisi / punya akun user / dll)
-    if (err.code === 'ER_ROW_IS_REFERENCED_2' || err.code === 'ER_ROW_IS_REFERENCED') {
+    if (err.name === 'SequelizeForeignKeyConstraintError') {
       return res.status(400).json({
         error: 'Karyawan ini tidak bisa dihapus karena masih terhubung dengan data lain (misalnya sudah terdaftar sebagai Teknisi atau punya akun User). Hapus/lepas data terkait itu dulu.'
       });

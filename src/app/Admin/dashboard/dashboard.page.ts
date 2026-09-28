@@ -94,26 +94,25 @@ export class DashboardPage implements OnInit, AfterViewInit {
   }
 
   ngAfterViewInit() {}
-
-  // AMBIL DATA DARI BACKEND
+// AMBIL DATA DARI BACKEND
   loadDashboardData() {
     this.isLoading = true;
     this.dashboardService.getAdminDashboard().subscribe({
       next: (res: any) => {
         const data = res.data;
 
-        // 1. Mapping Data Statistik Ticket & Users
+        // 1. Mapping Data Statistik Ticket & Users (dengan fallback nama variabel)
         const summary = data.summary || {};
         this.totalTicket = summary.total_tiket || 0;
-        this.waitingApproval = summary.waiting_approval ?? summary.tiket_menunggu_approval ?? 0;
+        this.waitingApproval = summary.waiting_approval ?? summary.tiket_menunggu_approval ?? summary.menunggu_approval ?? 0;
         this.onProgress = summary.on_process ?? summary.tiket_on_process ?? 0;
         this.closedTicket = summary.solved ?? summary.tiket_solved ?? 0;
         this.totalUser = summary.total_user ?? summary.total_user_aktif ?? summary.total_karyawan ?? 0;
         this.totalTeknisi = summary.total_teknisi ?? summary.total_teknisi_aktif ?? 0;
-        this.totalAsset = summary.total_asset || 0;
+        this.totalAsset = summary.total_asset ?? summary.total_inventory ?? 0;
         this.pendingCount = this.waitingApproval;
 
-        // 2. Mapping Data Feedback & Rating dari View v_dashboard_summary
+        // 2. Mapping Data Feedback & Rating
         this.totalFeedback = summary.total_feedback || 0;
         this.feedbackPositif = summary.feedback_positif || 0;
         this.feedbackNegatif = summary.feedback_negatif || 0;
@@ -160,7 +159,7 @@ export class DashboardPage implements OnInit, AfterViewInit {
         this.activities = aktivitas.map((item: any) => ({
           icon: this.getActivityIcon(item.status),
           type: this.getActivityType(item.status),
-          text: `${item.reported} ${this.getActivityText(item.status)}`,
+          text: `${item.reported || 'User'} ${this.getActivityText(item.status)}`,
           time: this.formatWaktuRelatif(item.tanggal_lapor)
         }));
 
@@ -175,8 +174,6 @@ export class DashboardPage implements OnInit, AfterViewInit {
       error: (err: any) => {
         console.error('Gagal memuat dashboard', err);
         this.isLoading = false;
-        const msg = err?.error?.message || 'Gagal mengambil data dashboard. Pastikan view v_dashboard_summary ada di database.';
-        alert(msg);
       }
     });
   }

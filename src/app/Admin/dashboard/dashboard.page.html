@@ -67,7 +67,7 @@
             <p class="page-subtitle">{{ getPageSubtitle() }}</p>
           </div>
 
-          <!-- ===== STATS GRID ===== -->
+          <!-- ===== STATS GRID (8 Kartu Utama) ===== -->
           <div class="stats-grid">
             <div class="stat-card" routerLink="/list">
               <div class="stat-card-top">
@@ -78,12 +78,6 @@
                 <div class="stat-icon blue">
                   <ion-icon name="document-text-outline"></ion-icon>
                 </div>
-              </div>
-              <div class="stat-footer">
-                <span class="stat-trend up"
-                  ><ion-icon name="arrow-up-outline"></ion-icon> {{
-                  totalTicketTrend }}% dari bulan lalu</span
-                >
               </div>
             </div>
 
@@ -97,12 +91,6 @@
                   <ion-icon name="time-outline"></ion-icon>
                 </div>
               </div>
-              <div class="stat-footer">
-                <span class="stat-trend up"
-                  ><ion-icon name="arrow-up-outline"></ion-icon> {{
-                  waitingApprovalTrend }}% dari bulan lalu</span
-                >
-              </div>
             </div>
 
             <div class="stat-card" routerLink="/assignment">
@@ -115,12 +103,6 @@
                   <ion-icon name="sync-outline"></ion-icon>
                 </div>
               </div>
-              <div class="stat-footer">
-                <span class="stat-trend up"
-                  ><ion-icon name="arrow-up-outline"></ion-icon> {{
-                  onProgressTrend }}% dari bulan lalu</span
-                >
-              </div>
             </div>
 
             <div class="stat-card" routerLink="/list">
@@ -132,12 +114,6 @@
                 <div class="stat-icon green">
                   <ion-icon name="checkmark-circle-outline"></ion-icon>
                 </div>
-              </div>
-              <div class="stat-footer">
-                <span class="stat-trend up"
-                  ><ion-icon name="arrow-up-outline"></ion-icon> {{
-                  closedTicketTrend }}% dari bulan lalu</span
-                >
               </div>
             </div>
 
@@ -177,7 +153,7 @@
               </div>
             </div>
 
-            <!-- STATS CARD FEEDBACK (Kartu ke-8) -->
+            <!-- STATS CARD FEEDBACK -->
             <div class="stat-card" routerLink="/laporan-feedback">
               <div class="stat-card-top">
                 <div class="stat-info">
@@ -194,32 +170,6 @@
                   feedbackPositifPercent }}% Positif ({{ totalFeedback }}
                   Ulasan)
                 </span>
-              </div>
-            </div>
-
-            <!-- KARTU GRAFIK DONUT FEEDBACK -->
-            <div class="feedback-card">
-              <div class="card-header">
-                <h4 class="card-title">Ringkasan Feedback</h4>
-              </div>
-              <div class="feedback-chart-wrapper">
-                <canvas #feedbackChart></canvas>
-                <div class="feedback-percent-label">
-                  <span class="feedback-percent-value"
-                    >{{ feedbackPositifPercent }}%</span
-                  >
-                  <span class="feedback-percent-text">Positif</span>
-                </div>
-              </div>
-              <div class="feedback-legend">
-                <div class="legend-item">
-                  <span class="legend-dot green"></span> Positif: {{
-                  feedbackPositif }} ({{ feedbackPositifPercent }}%)
-                </div>
-                <div class="legend-item">
-                  <span class="legend-dot red"></span> Negatif: {{
-                  feedbackNegatif }} ({{ feedbackNegatifPercent }}%)
-                </div>
               </div>
             </div>
           </div>
@@ -273,9 +223,10 @@
               </div>
             </div>
 
+            <!-- GRAFIK DONUT FEEDBACK (Satu-satunya Canvas) -->
             <div class="feedback-card">
               <div class="card-header">
-                <h4 class="card-title">Feedback</h4>
+                <h4 class="card-title">Ringkasan Feedback</h4>
               </div>
               <div class="feedback-chart-wrapper">
                 <canvas #feedbackChart></canvas>
@@ -288,12 +239,12 @@
               </div>
               <div class="feedback-legend">
                 <div class="legend-item">
-                  <span class="legend-dot green"></span> Positif ({{
-                  feedbackPositifPercent }}%)
+                  <span class="legend-dot green"></span> Positif: {{
+                  feedbackPositif }} ({{ feedbackPositifPercent }}%)
                 </div>
                 <div class="legend-item">
-                  <span class="legend-dot red"></span> Negatif ({{
-                  feedbackNegatifPercent }}%)
+                  <span class="legend-dot red"></span> Negatif: {{
+                  feedbackNegatif }} ({{ feedbackNegatifPercent }}%)
                 </div>
               </div>
             </div>
@@ -302,4 +253,3 @@
       </div>
     </div>
   </div>
-</ion-content>

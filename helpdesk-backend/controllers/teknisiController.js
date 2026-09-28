@@ -1,92 +1,152 @@
-const pool = require('../config/db');
+const { teknisi, karyawan, kategori, user, sequelize } = require('../models');
 const { ok, created, fail } = require('../utils/response');
 
-// Fitur 13: Teknisi (data teknisi, spesialisasi kategori)
+// ==========================================
+// Fitur: Ambil Semua Data Teknisi
+// ==========================================
 exports.getAll = async (req, res) => {
   try {
-    const [rows] = await pool.query(`
-      SELECT tk.id_teknisi, k.nama, ka.nama_kategori AS kategori_spesialis,
-             tk.status, tk.jumlah_tiket_ditangani
-      FROM teknisi tk
-      JOIN karyawan k ON k.nik = tk.nik
-      JOIN kategori ka ON ka.id_kategori = tk.id_kategori
-      ORDER BY tk.id_teknisi
-    `);
-    return ok(res, rows);
+    const teknisiList = await teknisi.findAll({
+      include: [
+        { model: karyawan, as: 'nik_karyawan' },
+        { model: kategori, as: 'id_kategori_kategori' }
+      ],
+      order: [['id_teknisi', 'ASC']]
+    });
+
+    const formatted = teknisiList.map((tk) => ({
+      id_teknisi: tk.id_teknisi,
+      nama: tk.nik_karyawan?.nama || null,
+      kategori_spesialis: tk.id_kategori_kategori?.nama_kategori || null,
+      status: tk.status,
+      jumlah_tiket_ditangani: tk.jumlah_tiket_ditangani
+    }));
+
+    return ok(res, formatted);
   } catch (err) {
+    console.error('Error getAll teknisi (Sequelize):', err);
     return fail(res, 'Gagal mengambil data teknisi: ' + err.message, 500);
   }
 };
 
-// Ambil teknisi berdasarkan kategori (Untuk halaman Assignment Ticket)
+// ==========================================
+// Ambil Teknisi Berdasarkan Kategori
+// ==========================================
 exports.getByKategori = async (req, res) => {
   try {
     const { id_kategori } = req.params;
 
-    console.log("Mencari teknisi untuk id_kategori:", id_kategori);
+    const teknisiList = await teknisi.findAll({
+      where: {
+        id_kategori: parseInt(id_kategori),
+        status: 'Aktif'
+      },
+      include: [
+        { model: karyawan, as: 'nik_karyawan' }
+      ],
+      order: [['jumlah_tiket_ditangani', 'ASC']]
+    });
 
-    const [rows] = await pool.query(`
-      SELECT tk.id_teknisi, k.nama, tk.jumlah_tiket_ditangani
-      FROM teknisi tk
-      JOIN karyawan k ON k.nik = tk.nik
-      WHERE tk.id_kategori = ? AND tk.status = 'Aktif'
-      ORDER BY tk.jumlah_tiket_ditangani ASC
-    `, [id_kategori]);
+    const formatted = teknisiList.map((tk) => ({
+      id_teknisi: tk.id_teknisi,
+      nama: tk.nik_karyawan?.nama || null,
+      jumlah_tiket_ditangani: tk.jumlah_tiket_ditangani
+    }));
 
-    console.log("Data teknisi ditemukan:", rows);
-    return ok(res, rows);
+    return ok(res, formatted);
   } catch (err) {
+    console.error('Error getByKategori teknisi (Sequelize):', err);
     return fail(res, 'Gagal mengambil data teknisi berdasarkan kategori: ' + err.message, 500);
   }
 };
 
+// ==========================================
+// Tambah Teknisi Baru (Auto Generate ID: TKN-0001)
+// ==========================================
 exports.create = async (req, res) => {
+  const transaction = await sequelize.transaction();
   try {
     const { nik, id_kategori } = req.body;
-    if (!nik || !id_kategori) return fail(res, 'nik dan id_kategori wajib diisi');
+    if (!nik || !id_kategori) {
+      await transaction.rollback();
+      return fail(res, 'nik dan id_kategori wajib diisi', 400);
+    }
 
-    // 🔧 DIPERBAIKI: id_teknisi di-generate otomatis (format TKN-0001, TKN-0002, ...),
-    // tidak lagi wajib dikirim dari frontend (sebelumnya selalu gagal karena
-    // frontend memang tidak pernah mengirim field ini)
-    const [rows] = await pool.query(
-      `SELECT id_teknisi FROM teknisi ORDER BY id_teknisi DESC LIMIT 1`
-    );
+    const lastTeknisi = await teknisi.findOne({
+      order: [['id_teknisi', 'DESC']],
+      transaction
+    });
+
     let nextNumber = 1;
-    if (rows.length > 0) {
-      const lastNumber = parseInt(rows[0].id_teknisi.replace('TKN-', ''), 10);
-      nextNumber = lastNumber + 1;
+    if (lastTeknisi && lastTeknisi.id_teknisi) {
+      const lastNumber = parseInt(lastTeknisi.id_teknisi.replace('TKN-', ''), 10);
+      if (!isNaN(lastNumber)) {
+        nextNumber = lastNumber + 1;
+      }
     }
     const id_teknisi = 'TKN-' + String(nextNumber).padStart(4, '0');
 
-    await pool.query(
-      `INSERT INTO teknisi (id_teknisi, nik, id_kategori, status, jumlah_tiket_ditangani) VALUES (?, ?, ?, 'Aktif', 0)`,
-      [id_teknisi, nik, id_kategori]
+    await teknisi.create({
+      id_teknisi,
+      nik,
+      id_kategori: parseInt(id_kategori),
+      status: 'Aktif',
+      jumlah_tiket_ditangani: 0
+    }, { transaction });
+
+    await user.update(
+      { level: 'Teknisi' },
+      { where: { nik }, transaction }
     );
-    await pool.query(`UPDATE user SET level = 'Teknisi' WHERE nik = ?`, [nik]);
+
+    await transaction.commit();
     return created(res, { id_teknisi }, 'Teknisi berhasil ditambahkan');
   } catch (err) {
+    await transaction.rollback();
+    console.error('Error create teknisi (Sequelize):', err);
     return fail(res, 'Gagal menambah teknisi: ' + err.message, 500);
   }
 };
 
+// ==========================================
+// Update Data / Status Teknisi
+// ==========================================
 exports.update = async (req, res) => {
   try {
     const { id_kategori, status } = req.body;
-    await pool.query('UPDATE teknisi SET id_kategori = ?, status = ? WHERE id_teknisi = ?', [id_kategori, status, req.params.id]);
+    const id_teknisi = req.params.id;
+
+    await teknisi.update(
+      {
+        id_kategori: parseInt(id_kategori),
+        status
+      },
+      { where: { id_teknisi } }
+    );
+
     return ok(res, null, 'Teknisi berhasil diperbarui');
   } catch (err) {
+    console.error('Error update teknisi (Sequelize):', err);
     return fail(res, 'Gagal memperbarui teknisi: ' + err.message, 500);
   }
 };
 
+// ==========================================
+// Hapus Teknisi
+// ==========================================
 exports.remove = async (req, res) => {
   try {
-    await pool.query('DELETE FROM teknisi WHERE id_teknisi = ?', [req.params.id]);
+    const id_teknisi = req.params.id;
+
+    await teknisi.destroy({
+      where: { id_teknisi }
+    });
+
     return ok(res, null, 'Teknisi berhasil dihapus');
   } catch (err) {
-    console.error('Gagal menghapus teknisi:', err);
+    console.error('Gagal menghapus teknisi (Sequelize):', err);
 
-    if (err.code === 'ER_ROW_IS_REFERENCED_2' || err.code === 'ER_ROW_IS_REFERENCED') {
+    if (err.name === 'SequelizeForeignKeyConstraintError') {
       return fail(res, 'Teknisi ini tidak bisa dihapus karena masih punya tiket yang di-assign ke dia (di tabel assignment_ticket). Assign ulang tiketnya ke teknisi lain dulu, atau hapus riwayat assignment-nya.', 400);
     }
 

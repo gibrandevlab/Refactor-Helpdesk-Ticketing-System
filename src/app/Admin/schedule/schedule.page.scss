@@ -242,7 +242,7 @@
   ion-segment {
     flex: 0 0 auto;
     --background: #f1f5f9;
-    --color: #64748b;
+    --color: #475569;
     --color-checked: var(--primary);
     --indicator-color: #ffffff;
     border-radius: 8px;
@@ -250,7 +250,7 @@
   }
 
   ion-segment-button {
-    --color: #64748b !important;
+    --color: #475569 !important;
     --color-checked: var(--primary) !important;
     font-weight: 600;
     font-size: 13px;
@@ -364,11 +364,12 @@
     padding: 8px 10px;
     border-bottom: 1px solid var(--border-color);
     white-space: nowrap;
+    color: var(--text-dark);
   }
 
   thead th {
     background: var(--sidebar-bg);
-    color: #fff;
+    color: #ffffff;
     position: sticky;
     z-index: 3;
     font-size: 11px;
@@ -395,7 +396,7 @@
     box-shadow: 2px 0 4px rgba(0,0,0,0.05);
     vertical-align: middle;
   }
-  thead .gantt-sticky-col { z-index: 7; background: var(--sidebar-bg); top: 0; }
+  thead .gantt-sticky-col { z-index: 7; background: var(--sidebar-bg); top: 0; color: #ffffff; }
 
   .gantt-label-wrapper {
     display: flex;
@@ -418,13 +419,13 @@
 
   .gantt-today-col {
     background: var(--primary) !important;
-    color: #fff !important;
+    color: #ffffff !important;
     font-weight: 700;
   }
 
   .gantt-header-row {
     background: #eef2f9;
-    td { font-weight: 700; }
+    td { font-weight: 700; color: var(--text-dark); }
     .gantt-sticky-col { background: #eef2f9; }
   }
 
@@ -444,10 +445,10 @@
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.12);
     cursor: pointer;
 
-    &.gantt-bar-plan { background: var(--plan-color); ion-icon { color: #64748b; } }
-    &.gantt-bar-progress { background: var(--progress-color); ion-icon { color: #fff; } }
-    &.gantt-bar-approve { background: var(--approve-color); ion-icon { color: #fff; } }
-    &.gantt-bar-userapprove { background: var(--userapprove-color); ion-icon { color: #fff; } }
+    &.gantt-bar-plan { background: var(--plan-color); ion-icon { color: #475569; } }
+    &.gantt-bar-progress { background: var(--progress-color); ion-icon { color: #ffffff; } }
+    &.gantt-bar-approve { background: var(--approve-color); ion-icon { color: #ffffff; } }
+    &.gantt-bar-userapprove { background: var(--userapprove-color); ion-icon { color: #ffffff; } }
   }
 
   .gantt-bar-icon { font-size: 14px; flex-shrink: 0; }
@@ -492,10 +493,14 @@
 
   th {
     background: #e2e8f0;
-    color: #1e293b;
+    color: #0f172a !important;
     font-weight: 700;
     font-size: 11.5px;
     text-transform: uppercase;
+  }
+
+  td {
+    color: #1e293b !important;
   }
 
   tbody tr:hover { background: #f8fafc; }
@@ -504,6 +509,7 @@
 .teknisi-klaim-badge {
   display: inline-block;
   background: #e2e8f0;
+  color: #0f172a !important;
   padding: 2px 8px;
   border-radius: 12px;
   font-size: 11.5px;
@@ -517,7 +523,7 @@
   border-radius: 20px;
   font-size: 12px;
   font-weight: 700;
-  color: #0f172a;
+  color: #0f172a !important;
   display: inline-block;
 }
 
@@ -609,6 +615,7 @@ ion-modal.custom-schedule-modal {
 
   ion-content {
     --background: #ffffff;
+    --color: #0f172a;
   }
 }
 
@@ -645,12 +652,19 @@ ion-input.form-input, ion-textarea.form-textarea {
   color: #0f172a !important;
 }
 
+ion-select {
+  --color: #0f172a !important;
+  --placeholder-color: #64748b !important;
+  --placeholder-opacity: 1 !important;
+}
+
 .teknisi-status-box {
   background: #f8fafc;
   border: 1px solid #cbd5e1;
   padding: 10px 14px;
   border-radius: 8px;
   font-size: 13px;
+  color: #0f172a !important;
   display: flex;
   align-items: center;
   gap: 8px;

@@ -1,86 +1,178 @@
-const pool = require('../config/db');
+// chatController.js
+const {
+  ticket_chat,
+  list_ticket,
+  teknisi,
+  karyawan,
+  assignment_ticket
+} = require('../models');
 const { ok, created, fail } = require('../utils/response');
 
-// Ambil info nama + id_teknisi (kalau dia teknisi) berdasarkan nik.
-// Dibutuhkan karena token JWT cuma nyimpen { id_user, nik, username, level },
-// TIDAK nyimpen nama atau id_teknisi langsung.
-async function getSenderInfo(nik) {
-  const [karyawanRows] = await pool.query('SELECT nama FROM karyawan WHERE nik = ?', [nik]);
-  const [teknisiRows] = await pool.query('SELECT id_teknisi FROM teknisi WHERE nik = ?', [nik]);
-  return {
-    nama: karyawanRows.length > 0 ? karyawanRows[0].nama : 'Unknown',
-    id_teknisi: teknisiRows.length > 0 ? teknisiRows[0].id_teknisi : null,
-  };
+/**
+ * Normalisasi level user dari token.
+ * - Bisa datang dari req.user.level atau req.user.role
+ * - Tidak sensitif huruf besar/kecil ("users", "User", "USERS" -> "Users")
+ * - Selain Admin & Teknisi dianggap user biasa (tetap dibatasi: hanya pelapor tiket)
+ */
+function normalizeLevel(reqUser) {
+  const raw = String(reqUser?.level || reqUser?.role || '').trim().toLowerCase();
+  if (raw === 'admin') return 'Admin';
+  if (raw === 'teknisi') return 'Teknisi';
+  return 'Users';
 }
 
-// Cek apakah orang yang login berhak akses chat tiket ini.
-// PENTING: level di sistem ini "Admin" / "Teknisi" / "Users" (huruf besar di awal),
-// bukan "admin" / "teknisi" / "users".
-async function checkAccess(id_ticket, nik, level) {
-  if (level === 'Admin') return true; // Admin boleh lihat semua chat
+/** Bandingkan NIK sebagai string yang sudah di-trim (aman untuk number vs string / CHAR padding) */
+function sameNik(a, b) {
+  const x = String(a ?? '').trim();
+  const y = String(b ?? '').trim();
+  return x !== '' && x === y;
+}
 
-  if (level === 'Users') {
-    const [rows] = await pool.query('SELECT nik_pelapor FROM list_ticket WHERE id_ticket = ?', [id_ticket]);
-    return rows.length > 0 && rows[0].nik_pelapor === nik;
+async function getSenderInfo(reqUser, level) {
+  const nik = String(reqUser?.nik ?? '').trim();
+  const nama = reqUser?.nama;
+
+  if (level === 'Admin') {
+    return {
+      nama: nama || 'Admin / IT Support',
+      id_teknisi: null
+    };
   }
 
   if (level === 'Teknisi') {
-    const [teknisiRows] = await pool.query('SELECT id_teknisi FROM teknisi WHERE nik = ?', [nik]);
-    if (teknisiRows.length === 0) return false;
-    const [rows] = await pool.query('SELECT id_teknisi FROM assignment_ticket WHERE id_ticket = ?', [id_ticket]);
-    return rows.length > 0 && rows[0].id_teknisi === teknisiRows[0].id_teknisi;
+    const dataTeknisi = await teknisi.findOne({
+      where: { nik },
+      attributes: ['id_teknisi']
+    });
+
+    const dataKaryawan = await karyawan.findOne({
+      where: { nik },
+      attributes: ['nama']
+    });
+
+    return {
+      nama: dataKaryawan?.nama || nama || 'Teknisi',
+      id_teknisi: dataTeknisi?.id_teknisi || null
+    };
+  }
+
+  const dataKaryawan = await karyawan.findOne({
+    where: { nik },
+    attributes: ['nama']
+  });
+
+  return {
+    nama: dataKaryawan?.nama || nama || 'User',
+    id_teknisi: null
+  };
+}
+
+async function checkAccess(id_ticket, nik, level) {
+  if (level === 'Admin') return true;
+
+  if (level === 'Users') {
+    const ticket = await list_ticket.findOne({
+      where: { id_ticket },
+      attributes: ['nik_pelapor']
+    });
+
+    if (!ticket) {
+      console.warn(`[chat] Tiket ${id_ticket} tidak ditemukan`);
+      return false;
+    }
+
+    const allowed = sameNik(ticket.nik_pelapor, nik);
+    if (!allowed) {
+      console.warn(
+        `[chat] Akses ditolak: tiket=${id_ticket}, nik_login="${nik}", nik_pelapor="${ticket.nik_pelapor}"`
+      );
+    }
+    return allowed;
+  }
+
+  if (level === 'Teknisi') {
+    const dataTeknisi = await teknisi.findOne({
+      where: { nik },
+      attributes: ['id_teknisi']
+    });
+
+    if (!dataTeknisi) return false;
+
+    const assignment = await assignment_ticket.findOne({
+      where: {
+        id_ticket,
+        id_teknisi: dataTeknisi.id_teknisi
+      }
+    });
+
+    return !!assignment;
   }
 
   return false;
 }
 
-// ===== AMBIL CHAT =====
 exports.getChats = async (req, res) => {
   try {
     const { id_ticket } = req.params;
-    const { nik, level } = req.user;
+    const nik = String(req.user?.nik ?? '').trim();
+    const level = normalizeLevel(req.user);
 
     const allowed = await checkAccess(id_ticket, nik, level);
-    if (!allowed) return fail(res, 'Anda tidak memiliki akses ke chat tiket ini', 403);
+    if (!allowed) {
+      return fail(res, 'Anda tidak memiliki akses ke chat tiket ini', 403);
+    }
 
-    const [chats] = await pool.query(
-      `SELECT * FROM ticket_chat WHERE id_ticket = ? ORDER BY created_at ASC`,
-      [id_ticket]
-    );
+    const chats = await ticket_chat.findAll({
+      where: { id_ticket },
+      order: [['created_at', 'ASC']]
+    });
+
     return ok(res, chats);
   } catch (err) {
+    console.error('Error getChats (Sequelize):', err?.parent?.message || err);
     return fail(res, 'Gagal mengambil chat: ' + err.message, 500);
   }
 };
 
-// ===== KIRIM CHAT (teks dan/atau foto) =====
 exports.sendChat = async (req, res) => {
   try {
     const { id_ticket } = req.params;
-    const { message } = req.body;
-    const { nik, level } = req.user;
+    const message = String(req.body?.message ?? '');
+    const nik = String(req.user?.nik ?? '').trim();
+    const level = normalizeLevel(req.user);
 
     const hasFile = !!req.file;
-    if ((!message || message.trim() === '') && !hasFile) {
+    if (!message.trim() && !hasFile) {
       return fail(res, 'Pesan atau foto wajib diisi', 400);
     }
 
     const allowed = await checkAccess(id_ticket, nik, level);
-    if (!allowed) return fail(res, 'Anda tidak berhak mengirim chat ke tiket ini', 403);
+    if (!allowed) {
+      return fail(res, 'Anda tidak berhak mengirim chat ke tiket ini', 403);
+    }
 
-    const info = await getSenderInfo(nik);
-    const senderId = level === 'Teknisi' ? (info.id_teknisi || nik) : nik;
+    const info = await getSenderInfo(req.user, level);
+
+    let senderId = nik;
+    if (level === 'Teknisi' && info.id_teknisi) {
+      senderId = String(info.id_teknisi);
+    }
+
     const attachmentUrl = hasFile ? `/uploads/${req.file.filename}` : null;
 
-    const [result] = await pool.query(
-      `INSERT INTO ticket_chat (id_ticket, sender_id, sender_role, sender_name, message, attachment_url)
-       VALUES (?, ?, ?, ?, ?, ?)`,
-      [id_ticket, senderId, level, info.nama, message || '', attachmentUrl]
-    );
+    const newChat = await ticket_chat.create({
+      id_ticket,
+      sender_id: senderId.slice(0, 15),          // kolom STRING(15)
+      sender_role: level,                        // 'Admin' | 'Teknisi' | 'Users' (STRING(7))
+      sender_name: String(info.nama || 'User').slice(0, 100), // kolom STRING(100)
+      message: message.trim(),
+      attachment_url: attachmentUrl,
+      is_read: 0                                 // kolom SMALLINT, jangan pakai boolean
+    });
 
-    const [newChat] = await pool.query('SELECT * FROM ticket_chat WHERE id_chat = ?', [result.insertId]);
-    return created(res, newChat[0], 'Pesan berhasil dikirim');
+    return created(res, newChat, 'Pesan berhasil dikirim');
   } catch (err) {
+    console.error('Error sendChat (Sequelize):', err?.parent?.message || err);
     return fail(res, 'Gagal mengirim chat: ' + err.message, 500);
   }
 };

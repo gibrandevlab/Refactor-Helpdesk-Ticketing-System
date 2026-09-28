@@ -1,11 +1,20 @@
+// chat.routes.js
 const router = require('express').Router();
 const { verifyToken } = require('../middleware/auth');
 const upload = require('../middleware/upload');
 const c = require('../controllers/chatController');
 
-// Dipasang di server.js dengan: app.use('/api/tickets', require('./routes/chat.routes'))
-// supaya URL akhirnya jadi persis /api/tickets/:id_ticket/chat (sesuai yang dipanggil chat.service.ts)
 router.get('/:id_ticket/chat', verifyToken, c.getChats);
-router.post('/:id_ticket/chat', verifyToken, upload.single('foto'), c.sendChat);
+
+// Menggunakan upload.single('foto') dengan penanganan error internal jika tidak ada file
+router.post('/:id_ticket/chat', verifyToken, (req, res, next) => {
+  upload.single('foto')(req, res, (err) => {
+    if (err) {
+      console.error('Multer Error:', err);
+      return res.status(400).json({ status: false, message: 'Gagal memproses file upload: ' + err.message });
+    }
+    next();
+  });
+}, c.sendChat);
 
 module.exports = router;

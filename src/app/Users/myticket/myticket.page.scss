@@ -403,7 +403,7 @@ ion-modal.custom-myticket-modal {
 }
 
 /* ========================================== */
-/* STYLING MODAL CHAT                         */
+/* STYLING MODAL CHAT DUA ARAH & INTERVENSI  */
 /* ========================================== */
 .modal-content {
   --background: #f2f5f8;
@@ -457,6 +457,8 @@ ion-modal.custom-myticket-modal {
 .sender-name {
   font-weight: 600;
   color: var(--primary);
+  display: inline-flex;
+  align-items: center;
 }
 
 .bubble-text {
@@ -466,24 +468,73 @@ ion-modal.custom-myticket-modal {
   word-break: break-word;
 }
 
+.bubble-image img {
+  max-width: 200px;
+  max-height: 200px;
+  border-radius: 8px;
+  margin-bottom: 6px;
+  cursor: pointer;
+  object-fit: cover;
+}
+
+/* BADGE ROLE DUA ARAH / INTERVENSI */
+.role-badge {
+  font-size: 9.5px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-weight: 700;
+  margin-left: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+
+  &.badge-admin {
+    background: #fef2f2;
+    color: #ef4444;
+    border: 1px solid #fca5a5;
+  }
+
+  &.badge-teknisi {
+    background: #f0fdf4;
+    color: #16a34a;
+    border: 1px solid #86efac;
+  }
+
+  &.badge-users {
+    background: #eff6ff;
+    color: #2563eb;
+    border: 1px solid #bfdbfe;
+  }
+}
+
+/* CHAT BUBBLE UNTUK SAYA (USER YANG LOGIN) */
 .chat-bubble.bubble-me {
   align-self: flex-end;
   background: var(--primary);
   color: #ffffff;
   border-color: var(--primary);
   border-bottom-right-radius: 4px;
+
+  .bubble-header {
+    color: rgba(255, 255, 255, 0.8);
+  }
+
+  .sender-name {
+    color: #ffffff;
+  }
+
+  .bubble-text {
+    color: #ffffff;
+  }
 }
 
-.bubble-me .bubble-header {
-  color: rgba(255, 255, 255, 0.8);
-}
+/* STYLING KHUSUS TAMPILAN INTERVENSI ADMIN (Bukan Pesan Saya) */
+.chat-bubble.bubble-admin:not(.bubble-me) {
+  background: #fff5f5;
+  border: 1px solid #fecaca;
 
-.bubble-me .sender-name {
-  color: #ffffff;
-}
-
-.bubble-me .bubble-text {
-  color: #ffffff;
+  .sender-name {
+    color: #dc2626;
+  }
 }
 
 .chat-input-area {
@@ -513,6 +564,34 @@ ion-modal.custom-myticket-modal {
   --padding-start: 0;
   --padding-end: 0;
   margin: 0;
+}
+
+.chat-preview {
+  padding: 8px 16px;
+  background: #ffffff;
+  border-top: 1px dashed var(--border-color);
+
+  .preview-wrapper {
+    position: relative;
+    display: inline-block;
+
+    img {
+      height: 60px;
+      width: 60px;
+      object-fit: cover;
+      border-radius: 6px;
+      border: 1px solid var(--border-color);
+    }
+
+    .remove-preview {
+      position: absolute;
+      top: -8px;
+      right: -8px;
+      --color: var(--danger);
+      width: 24px;
+      height: 24px;
+    }
+  }
 }
 
 .chat-messages::-webkit-scrollbar {
@@ -575,7 +654,6 @@ ion-modal.custom-myticket-modal {
   }
 }
 
-/* OVERRIDE ION-SELECT AGAR TAMPIL MODERN & RAPI */
 ion-select.form-select {
   --background: #ffffff !important;
   --color: #0f172a !important;

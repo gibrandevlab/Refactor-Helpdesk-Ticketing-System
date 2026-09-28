@@ -37,7 +37,7 @@ export interface MyTicket {
   userKonfirmasi?: number;
   isPreventive?: boolean;
   tanggalDibuatSchedule?: string | null;
-  catatanApproval?: string | null;   // 🔥 BARU: alasan reject dari Admin
+  catatanApproval?: string | null;
 }
 
 export interface ChecklistGroup {
@@ -63,11 +63,13 @@ export class MyTicketPage implements OnInit {
   activeMenu = 'my-ticket';
   private countdownInterval: any;
   private refreshInterval: any;
+  private chatPollingInterval: any;
 
-  user = {
-    nama: 'User',
-    role: 'Users',
-  };
+user = {
+  nik: '',
+  nama: 'User',
+  role: 'Users',
+};
 
   myTickets: MyTicket[] = [];
   isLoading = false;
@@ -81,7 +83,18 @@ export class MyTicketPage implements OnInit {
     if (!this.formData.idKategori) return [];
     return this.subKategoriAll.filter((s) => s.idKategori === this.formData.idKategori);
   }
-
+isMyMessage(msg: ChatMessage): boolean {
+  if (!msg) return false;
+  // Cek apakah NIK atau Sender ID sesuai dengan user yang sedang login
+  if (this.user.nik && String(msg.sender_id) === String(this.user.nik)) {
+    return true;
+  }
+  // Alternatif perbandingan berdasarkan nama jika sender_id tersimpan dalam bentuk lain
+  if (this.user.nama && msg.sender_name && msg.sender_name.toLowerCase() === this.user.nama.toLowerCase()) {
+    return true;
+  }
+  return false;
+}
   isModalOpen = false;
   isSaving = false;
   formData = {
@@ -136,15 +149,16 @@ export class MyTicketPage implements OnInit {
     public chatService: ChatService
   ) {}
 
-  ngOnInit() {
-    const storedUser = localStorage.getItem('user');
-    if (storedUser) {
-      try {
-        const parsed = JSON.parse(storedUser);
-        this.user.nama = parsed.nama || 'User';
-        const rawRole = parsed.role || 'users';
-        this.user.role = rawRole.charAt(0).toUpperCase() + rawRole.slice(1).toLowerCase();
-      } catch (e) {}
+ngOnInit() {
+  const storedUser = localStorage.getItem('user');
+  if (storedUser) {
+    try {
+      const parsed = JSON.parse(storedUser);
+      this.user.nik = parsed.nik || '';
+      this.user.nama = parsed.nama || 'User';
+      const rawRole = parsed.role || 'users';
+      this.user.role = rawRole.charAt(0).toUpperCase() + rawRole.slice(1).toLowerCase();
+    } catch (e) {}
     }
 
     this.loadMyAssets();
@@ -169,6 +183,7 @@ export class MyTicketPage implements OnInit {
   ionViewWillLeave() {
     if (this.countdownInterval) clearInterval(this.countdownInterval);
     if (this.refreshInterval) clearInterval(this.refreshInterval);
+    if (this.chatPollingInterval) clearInterval(this.chatPollingInterval);
   }
 
   startTimer() {
@@ -181,7 +196,7 @@ export class MyTicketPage implements OnInit {
 
     this.refreshInterval = setInterval(() => {
       this.loadMyTickets(true);
-    }, 1008000);
+    }, 1080000);
   }
 
   loadMyTickets(isSilent = false) {
@@ -256,7 +271,7 @@ export class MyTicketPage implements OnInit {
       userKonfirmasi: row.user_konfirmasi ?? 0,
       isPreventive: !!(row as any).deskripsi && (row as any).deskripsi.includes('[PREVENTIVE]'),
       tanggalDibuatSchedule,
-      catatanApproval: (row as any).catatan_approval || null,   // 🔥 BARU
+      catatanApproval: (row as any).catatan_approval || null,
     };
   }
 
@@ -266,10 +281,9 @@ export class MyTicketPage implements OnInit {
     let cleanPath = lampiranPath.trim().replace(/\\/g, '/');
     const parts = cleanPath.split('/');
     const fileName = parts[parts.length - 1];
-    return `${backendBase}/uploads/${fileName}`;
+    return `${backendBase}/uploads/lampiran/${fileName}`;
   }
 
-  // 🔥 FIX: 'reject' -> 'rejected' supaya cocok dengan status asli dari backend
   getStatusText(status: string): string {
     if (!status) return '-';
     const s = status.toLowerCase();
@@ -281,7 +295,6 @@ export class MyTicketPage implements OnInit {
     return status;
   }
 
-  // 🔥 FIX: sama seperti di atas
   getStatusClass(status: string): string {
     if (!status) return '';
     const s = status.toLowerCase();
@@ -293,7 +306,6 @@ export class MyTicketPage implements OnInit {
     return '';
   }
 
-  // 🔥 BARU: helper dipanggil dari HTML buat cek apakah tiket ditolak
   isRejected(status: string): boolean {
     if (!status) return false;
     const s = status.toLowerCase();
@@ -813,6 +825,9 @@ export class MyTicketPage implements OnInit {
   prevPage() { if (this.currentPage > 1) this.currentPage--; }
   nextPage() { if (this.currentPage < this.totalPages) this.currentPage++; }
 
+  // ==========================================
+  // FITUR CHAT DUA ARAH & AUTO REFRESH / POLLING
+  // ==========================================
   openChatModal(idTicket: string) {
     this.selectedTicketId = idTicket;
     this.chatMessages = [];
@@ -820,18 +835,38 @@ export class MyTicketPage implements OnInit {
     this.selectedChatFile = null;
     this.selectedChatFilePreview = '';
     this.isChatModalOpen = true;
-    this.loadChatMessages(idTicket);
+
+    // Dimuat pertama kali
+    this.loadChatMessages(idTicket, false);
+
+    // Aktifkan polling interval (refresh otomatis tiap 3 detik)
+    if (this.chatPollingInterval) clearInterval(this.chatPollingInterval);
+    this.chatPollingInterval = setInterval(() => {
+      if (this.isChatModalOpen) {
+        this.loadChatMessages(idTicket, true);
+      }
+    }, 3000);
   }
 
-  closeChatModal() { this.isChatModalOpen = false; }
+  closeChatModal() {
+    this.isChatModalOpen = false;
+    if (this.chatPollingInterval) {
+      clearInterval(this.chatPollingInterval);
+    }
+  }
 
-  loadChatMessages(idTicket: string) {
-    this.isChatLoading = true;
+  loadChatMessages(idTicket: string, isSilent = false) {
+    if (!isSilent) this.isChatLoading = true;
     this.chatService.getChats(idTicket).subscribe({
       next: (res) => {
-        this.chatMessages = res?.data || res || [];
+        const data = res?.data || res || [];
+        const hasNewMessage = data.length > this.chatMessages.length;
+        this.chatMessages = data;
         this.isChatLoading = false;
-        setTimeout(() => this.scrollToBottom(), 150);
+
+        if (hasNewMessage || !isSilent) {
+          setTimeout(() => this.scrollToBottom(), 150);
+        }
       },
       error: (err) => {
         console.error('Gagal load chat', err);
@@ -855,6 +890,7 @@ export class MyTicketPage implements OnInit {
   sendChat() {
     const messageText = this.newChatMessage.trim();
     if (!messageText && !this.selectedChatFile) return;
+
     this.chatService.sendMessage(this.selectedTicketId, messageText, this.selectedChatFile).subscribe({
       next: (res) => {
         const newMsg = res?.data || res;
@@ -874,9 +910,12 @@ export class MyTicketPage implements OnInit {
   openImagePreview(url: string | null) {
     if (url) window.open(url, '_blank');
   }
+
   scrollToBottom() {
     try {
-      this.chatContainer.nativeElement.scrollTop = this.chatContainer.nativeElement.scrollHeight;
+      if (this.chatContainer && this.chatContainer.nativeElement) {
+        this.chatContainer.nativeElement.scrollTop = this.chatContainer.nativeElement.scrollHeight;
+      }
     } catch (err) { }
   }
 
