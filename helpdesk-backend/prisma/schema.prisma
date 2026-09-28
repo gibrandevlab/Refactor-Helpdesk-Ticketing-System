@@ -1,0 +1,468 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlserver"
+  url      = env("DATABASE_URL")
+}
+
+// ==========================================
+// MASTER TABLES
+// ==========================================
+
+model Departemen {
+  id_departemen       Int                  @id @default(autoincrement())
+  nama_departemen     String               @unique @db.NVarChar(50)
+  bagian_departemen   BagianDepartemen[]
+  karyawan            Karyawan[]
+  preventive_schedule PreventiveSchedule[]
+  inventory           Inventory[]
+  list_ticket         ListTicket[]
+
+  @@map("departemen")
+}
+
+model Jabatan {
+  id_jabatan   Int        @id @default(autoincrement())
+  nama_jabatan String     @unique @db.NVarChar(50)
+  karyawan     Karyawan[]
+
+  @@map("jabatan")
+}
+
+model Kategori {
+  id_kategori         Int                  @id @default(autoincrement())
+  nama_kategori       String               @unique @db.NVarChar(50)
+  sub_kategori        SubKategori[]
+  teknisi             Teknisi[]
+  preventive_schedule PreventiveSchedule[]
+  inventory           Inventory[]
+  list_ticket         ListTicket[]
+
+  @@map("kategori")
+}
+
+model SubKategori {
+  id_sub_kategori   Int                  @id @default(autoincrement())
+  id_kategori       Int
+  nama_sub_kategori String               @db.NVarChar(100)
+  kategori          Kategori             @relation(fields: [id_kategori], references: [id_kategori], onDelete: NoAction, onUpdate: NoAction)
+  preventive_schedule PreventiveSchedule[]
+  list_ticket       ListTicket[]
+
+  @@map("sub_kategori")
+}
+
+model BagianDepartemen {
+  id_bagian     Int        @id @default(autoincrement())
+  id_departemen Int
+  nama_bagian   String     @db.NVarChar(50)
+  departemen    Departemen @relation(fields: [id_departemen], references: [id_departemen], onDelete: NoAction, onUpdate: NoAction)
+  karyawan      Karyawan[]
+
+  @@map("bagian_departemen")
+}
+
+// ==========================================
+// USERS & EMPLOYEES
+// ==========================================
+
+model Karyawan {
+  nik              String             @id @db.NVarChar(10)
+  nama             String             @db.NVarChar(100)
+  tanda_tangan     String?            @db.NVarChar(255)
+  alamat           String?            @db.NVarChar(150)
+  jenis_kelamin    String             @db.NVarChar(9)
+  id_departemen    Int
+  id_bagian        Int?
+  id_jabatan       Int
+  no_hp            String?            @db.NVarChar(15)
+  tanggal_masuk    DateTime?          @db.Date
+  departemen       Departemen         @relation(fields: [id_departemen], references: [id_departemen], onDelete: NoAction, onUpdate: NoAction)
+  bagian           BagianDepartemen?  @relation(fields: [id_bagian], references: [id_bagian], onDelete: NoAction, onUpdate: NoAction)
+  jabatan          Jabatan            @relation(fields: [id_jabatan], references: [id_jabatan], onDelete: NoAction, onUpdate: NoAction)
+  teknisi          Teknisi?
+  user             User[]
+  inventory_pegang Inventory[]
+  list_ticket      ListTicket[]
+  approval_ticket  ApprovalTicket[]
+  laporan_feedback LaporanFeedback[]
+
+  @@map("karyawan")
+}
+
+model User {
+  id_user  Int      @id @default(autoincrement())
+  username String   @unique @db.NVarChar(20)
+  password String   @db.NVarChar(255)
+  nik      String   @db.NVarChar(10)
+  level    String   @default("Users") @db.NVarChar(7)
+  status   String   @default("Aktif") @db.NVarChar(8)
+  karyawan Karyawan @relation(fields: [nik], references: [nik], onDelete: NoAction, onUpdate: NoAction)
+
+  @@map("user")
+}
+
+model Teknisi {
+  id_teknisi             String             @id @db.NVarChar(15)
+  nik                    String             @unique @db.NVarChar(10)
+  id_kategori            Int
+  status                 String             @default("Aktif") @db.NVarChar(8)
+  jumlah_tiket_ditangani Int                @default(0)
+  karyawan               Karyawan           @relation(fields: [nik], references: [nik], onDelete: NoAction, onUpdate: NoAction)
+  kategori               Kategori           @relation(fields: [id_kategori], references: [id_kategori], onDelete: NoAction, onUpdate: NoAction)
+  assignment_ticket      AssignmentTicket[]
+
+  @@map("teknisi")
+}
+
+// ==========================================
+// INVENTORY & ASSETS
+// ==========================================
+
+model Inventory {
+  kode_asset             String              @id @db.NVarChar(15)
+  nama_barang            String              @db.NVarChar(100)
+  merk_model             String?             @db.NVarChar(100)
+  computer_name          String?             @db.NVarChar(100)
+  it_priority            String?             @db.NVarChar(50)
+  tahun_perolehan        Int?                @db.SmallInt
+  user_pemakai           String?             @db.NVarChar(100)
+  email                  String?             @db.NVarChar(150)
+  extension              String?             @db.NVarChar(20)
+  divisi                 String?             @db.NVarChar(100)
+  gedung                 String?             @db.NVarChar(100)
+  ip_address             String?             @db.NVarChar(45)
+  id_departemen          Int
+  id_kategori            Int
+  nik_pemegang           String?             @db.NVarChar(10)
+  status_aset            String              @default("Aktif") @db.NVarChar(11)
+  foto                   String?             @db.NVarChar(255)
+  ram                    String?             @db.NVarChar(50)
+  prosesor               String?             @db.NVarChar(100)
+  penyimpanan            String?             @db.NVarChar(50)
+  last_maintenance       DateTime?           @db.Date
+  next_maintenance       DateTime?           @db.Date
+  id_preventive_schedule Int?
+  departemen             Departemen          @relation(fields: [id_departemen], references: [id_departemen], onDelete: NoAction, onUpdate: NoAction)
+  kategori               Kategori            @relation(fields: [id_kategori], references: [id_kategori], onDelete: NoAction, onUpdate: NoAction)
+  pemegang               Karyawan?           @relation(fields: [nik_pemegang], references: [nik], onDelete: NoAction, onUpdate: NoAction)
+  preventive_schedule   PreventiveSchedule? @relation(fields: [id_preventive_schedule], references: [id_schedule], onDelete: NoAction, onUpdate: NoAction)
+  list_ticket            ListTicket[]
+  schedule_asset         ScheduleAsset[]
+
+  @@map("inventory")
+}
+
+model AssetHardware {
+  id          Int       @id @default(autoincrement())
+  kode_asset  String    @db.NVarChar(50)
+  komponen    String    @db.NVarChar(100)
+  spesifikasi String?   @db.NVarChar(255)
+  keterangan  String?   @db.NVarChar(Max)
+  created_at  DateTime? @default(now())
+  updated_at  DateTime? @default(now())
+
+  @@map("asset_hardware")
+}
+
+model AssetHardwareDetail {
+  kode_asset    String   @id @db.NVarChar(50)
+  serial_no_pc  String?  @db.NVarChar(100)
+  mobo_type     String?  @db.NVarChar(100)
+  kelas         String?  @db.NVarChar(50)
+  processor     String?  @db.NVarChar(150)
+  hdd_size      String?  @db.NVarChar(50)
+  hdd_model     String?  @db.NVarChar(150)
+  hdd_serial_no String?  @db.NVarChar(100)
+  memory_size   String?  @db.NVarChar(50)
+  memory_type   String?  @db.NVarChar(50)
+  display       String?  @db.NVarChar(100)
+  updated_at    DateTime @default(now())
+
+  @@map("asset_hardware_detail")
+}
+
+model AssetSoftware {
+  id             Int       @id @default(autoincrement())
+  kode_asset     String    @db.NVarChar(50)
+  nama_software  String    @db.NVarChar(150)
+  versi          String?   @db.NVarChar(50)
+  lisensi        String?   @db.NVarChar(100)
+  tanggal_install DateTime? @db.Date
+  keterangan     String?   @db.NVarChar(Max)
+  created_at     DateTime? @default(now())
+  updated_at     DateTime? @default(now())
+
+  @@map("asset_software")
+}
+
+model AssetSoftwareDetail {
+  kode_asset       String   @id @db.NVarChar(50)
+  operating_system String?  @db.NVarChar(100)
+  serial_no_os     String?  @db.NVarChar(100)
+  ms_office        String?  @db.NVarChar(100)
+  ms_office_sn     String?  @db.NVarChar(100)
+  erp              String?  @default("TIDAK") @db.NVarChar(5)
+  wms              String?  @default("TIDAK") @db.NVarChar(5)
+  eris             String?  @default("TIDAK") @db.NVarChar(5)
+  cmms             String?  @default("TIDAK") @db.NVarChar(5)
+  visio            String?  @default("TIDAK") @db.NVarChar(5)
+  autocad          String?  @default("TIDAK") @db.NVarChar(5)
+  kaspersky        String?  @default("TIDAK") @db.NVarChar(5)
+  ms_project       String?  @default("TIDAK") @db.NVarChar(5)
+  acrobat          String?  @default("TIDAK") @db.NVarChar(5)
+  updated_at       DateTime @default(now())
+
+  @@map("asset_software_detail")
+}
+
+model AssetHistory {
+  id              Int       @id @default(autoincrement())
+  kode_asset      String    @db.NVarChar(50)
+  tanggal         DateTime  @db.Date
+  jenis_aktivitas String    @db.NVarChar(100)
+  deskripsi       String?   @db.NVarChar(Max)
+  dilakukan_oleh  String?   @db.NVarChar(100)
+  created_at      DateTime? @default(now())
+
+  @@map("asset_history")
+}
+
+model AssetHolderHistory {
+  id             Int      @id @default(autoincrement())
+  kode_asset     String   @db.NVarChar(50)
+  nik_lama       String?  @db.NVarChar(50)
+  nama_lama      String?  @db.NVarChar(150)
+  nik_baru       String?  @db.NVarChar(50)
+  nama_baru      String?  @db.NVarChar(150)
+  keterangan     String?  @db.NVarChar(255)
+  tanggal_pindah DateTime @default(now())
+
+  @@map("asset_holder_history")
+}
+
+model AssetDepartmentHistory {
+  id                   Int      @id @default(autoincrement())
+  kode_asset           String   @db.NVarChar(50)
+  id_departemen_lama   Int?
+  nama_departemen_lama String?  @db.NVarChar(100)
+  id_departemen_baru   Int?
+  nama_departemen_baru String?  @db.NVarChar(100)
+  keterangan           String?  @db.NVarChar(255)
+  tanggal_pindah       DateTime @default(now())
+
+  @@map("asset_department_history")
+}
+
+// ==========================================
+// PREVENTIVE MAINTENANCE & SCHEDULE
+// ==========================================
+
+model PreventiveSchedule {
+  id_schedule        Int             @id @default(autoincrement())
+  nama_schedule      String          @db.NVarChar(100)
+  id_departemen      Int
+  id_kategori        Int?
+  id_sub_kategori    Int?
+  frekuensi          Int
+  satuan             String          @db.NVarChar(6)
+  tanggal_mulai      DateTime?       @db.Date
+  tanggal_selesai    DateTime?       @db.Date
+  id_teknis          String?         @db.NVarChar(Max)
+  deskripsi          String?         @db.NVarChar(Max)
+  is_active          Int?            @default(1) @db.SmallInt
+  created_at         DateTime        @default(now())
+  updated_at         DateTime        @default(now())
+  checklist_kategori String?         @db.NVarChar(Max)
+  departemen         Departemen      @relation(fields: [id_departemen], references: [id_departemen], onDelete: NoAction, onUpdate: NoAction)
+  kategori           Kategori?       @relation(fields: [id_kategori], references: [id_kategori], onDelete: NoAction, onUpdate: NoAction)
+  sub_kategori       SubKategori?    @relation(fields: [id_sub_kategori], references: [id_sub_kategori], onDelete: NoAction, onUpdate: NoAction)
+  inventory          Inventory[]
+  list_ticket        ListTicket[]
+  schedule_asset     ScheduleAsset[]
+
+  @@map("preventive_schedule")
+}
+
+model ScheduleAsset {
+  id_schedule         Int
+  kode_asset          String             @db.NVarChar(15)
+  preventive_schedule PreventiveSchedule @relation(fields: [id_schedule], references: [id_schedule], onDelete: NoAction, onUpdate: NoAction)
+  inventory           Inventory          @relation(fields: [kode_asset], references: [kode_asset], onDelete: NoAction, onUpdate: NoAction)
+
+  @@id([id_schedule, kode_asset])
+  @@map("schedule_asset")
+}
+
+model ScheduleAssetClaim {
+  id_claim    Int       @id @default(autoincrement())
+  id_schedule Int
+  kode_asset  String    @db.NVarChar(50)
+  id_teknisi  String    @db.NVarChar(20)
+  id_ticket   String    @db.NVarChar(50)
+  claimed_at  DateTime? @default(now())
+
+  @@unique([id_schedule, kode_asset], map: "schedule_asset_claim$uniq_schedule_asset")
+  @@map("schedule_asset_claim")
+}
+
+// ==========================================
+// TICKETING SYSTEM
+// ==========================================
+
+model ListTicket {
+  id_ticket           String              @id @db.NVarChar(20)
+  nik_pelapor         String              @db.NVarChar(10)
+  id_departemen       Int
+  id_kategori         Int?
+  id_sub_kategori     Int?
+  kode_asset          String?             @db.NVarChar(15)
+  deskripsi           String?             @db.NVarChar(Max)
+  lampiran            String?             @db.NVarChar(255)
+  tanggal_lapor       DateTime            @default(now())
+  status              String              @default("Menunggu Approval") @db.NVarChar(19)
+  prioritas           String?             @default("Normal") @db.NVarChar(6)
+  deadline            DateTime?
+  id_schedule         Int?
+  pelapor             Karyawan            @relation(fields: [nik_pelapor], references: [nik], onDelete: NoAction, onUpdate: NoAction)
+  departemen          Departemen          @relation(fields: [id_departemen], references: [id_departemen], onDelete: NoAction, onUpdate: NoAction)
+  kategori            Kategori?           @relation(fields: [id_kategori], references: [id_kategori], onDelete: NoAction, onUpdate: NoAction)
+  sub_kategori        SubKategori?        @relation(fields: [id_sub_kategori], references: [id_sub_kategori], onDelete: NoAction, onUpdate: NoAction)
+  inventory           Inventory?          @relation(fields: [kode_asset], references: [kode_asset], onDelete: NoAction, onUpdate: NoAction)
+  preventive_schedule PreventiveSchedule? @relation(fields: [id_schedule], references: [id_schedule], onDelete: NoAction, onUpdate: NoAction)
+  ticket_chat         TicketChat[]
+  approval_ticket     ApprovalTicket?
+  assignment_ticket   AssignmentTicket?
+  laporan_feedback    LaporanFeedback?
+
+  @@map("list_ticket")
+}
+
+model ApprovalTicket {
+  id_approval      Int        @id @default(autoincrement())
+  id_ticket        String     @unique @db.NVarChar(20)
+  nik_admin        String?    @db.NVarChar(10)
+  tanggal_approval DateTime?
+  status_approval  String     @default("Menunggu Approval") @db.NVarChar(17)
+  catatan_approval String?    @db.NVarChar(255)
+  list_ticket      ListTicket @relation(fields: [id_ticket], references: [id_ticket], onDelete: NoAction, onUpdate: NoAction)
+  admin            Karyawan?  @relation(fields: [nik_admin], references: [nik], onDelete: NoAction, onUpdate: NoAction)
+
+  @@map("approval_ticket")
+}
+
+model AssignmentTicket {
+  id_assignment           Int                 @id @default(autoincrement())
+  id_ticket               String              @unique @db.NVarChar(20)
+  id_teknisi              String              @db.NVarChar(15)
+  tanggal_assign          DateTime            @default(now())
+  progress                Int?                @default(0) @db.SmallInt
+  catatan_penyelesaian    String?             @db.NVarChar(255)
+  status_pengerjaan       String              @default("Menunggu Diproses") @db.NVarChar(17)
+  tanggal_selesai         DateTime?
+  is_paused               Int?                @default(0) @db.SmallInt
+  paused_at               DateTime?
+  return_reason           String?             @db.NVarChar(Max)
+  return_status           String?             @default("None") @db.NVarChar(8)
+  user_konfirmasi         Int                 @default(0) @db.SmallInt
+  tanggal_konfirmasi_user DateTime?
+  admin_approve           Int?                @default(0) @db.SmallInt
+  admin_approve_by        String?             @db.NVarChar(100)
+  admin_approve_at        DateTime?
+  admin_konfirmasi        Int?                @default(0) @db.SmallInt
+  tanggal_konfirmasi_admin DateTime?
+  list_ticket             ListTicket          @relation(fields: [id_ticket], references: [id_ticket], onDelete: NoAction, onUpdate: NoAction)
+  teknisi                 Teknisi             @relation(fields: [id_teknisi], references: [id_teknisi], onDelete: NoAction, onUpdate: NoAction)
+  ticket_progress_log     TicketProgressLog[]
+
+  @@map("assignment_ticket")
+}
+
+model TicketProgressLog {
+  id_log            Int              @id @default(autoincrement())
+  id_assignment     Int
+  progress          Int              @db.SmallInt
+  catatan           String?          @db.NVarChar(Max)
+  status_pengerjaan String           @db.NVarChar(50)
+  created_at        DateTime         @default(now())
+  assignment_ticket AssignmentTicket @relation(fields: [id_assignment], references: [id_assignment], onDelete: NoAction, onUpdate: NoAction)
+
+  @@map("ticket_progress_log")
+}
+
+model TicketChat {
+  id_chat        Int        @id @default(autoincrement())
+  id_ticket      String     @db.NVarChar(20)
+  sender_id      String     @db.NVarChar(15)
+  sender_role    String     @db.NVarChar(7)
+  sender_name    String     @db.NVarChar(100)
+  message        String?    @db.NVarChar(Max)
+  attachment_url String?    @db.NVarChar(255)
+  created_at     DateTime?  @default(now())
+  is_read        Int?       @default(0) @db.SmallInt
+  list_ticket    ListTicket @relation(fields: [id_ticket], references: [id_ticket], onDelete: NoAction, onUpdate: NoAction)
+
+  @@map("ticket_chat")
+}
+
+model LaporanFeedback {
+  id_feedback Int        @id @default(autoincrement())
+  id_ticket   String     @unique @db.NVarChar(20)
+  nik_pelapor String     @db.NVarChar(10)
+  tanggal     DateTime   @default(now())
+  feedback    String     @db.NVarChar(7)
+  keterangan  String?    @db.NVarChar(255)
+  rating      Int        @default(5) @db.TinyInt
+  list_ticket ListTicket @relation(fields: [id_ticket], references: [id_ticket], onDelete: NoAction, onUpdate: NoAction)
+  pelapor     Karyawan   @relation(fields: [nik_pelapor], references: [nik], onDelete: NoAction, onUpdate: NoAction)
+
+  @@map("laporan_feedback")
+}
+
+// ==========================================
+// CHECKLIST & TEMPLATES
+// ==========================================
+
+model ChecklistTemplate {
+  id_item                 Int                    @id @default(autoincrement())
+  kategori_unit           String                 @db.NVarChar(50)
+  uraian_pekerjaan        String                 @db.NVarChar(150)
+  alat_yang_digunakan     String?                @db.NVarChar(100)
+  penerimaan_default      String?                @db.NVarChar(100)
+  urutan                  Int?                   @default(0)
+  ticket_checklist_result TicketChecklistResult[]
+
+  @@map("checklist_template")
+}
+
+model TicketChecklistResult {
+  id_result          Int               @id @default(autoincrement())
+  id_ticket          String            @db.NVarChar(50)
+  id_item            Int
+  kondisi            String?           @db.NVarChar(2)
+  kondisi_huruf      String?           @db.NVarChar(1)
+  catatan            String?           @db.NVarChar(255)
+  checked_at         DateTime?
+  checklist_template ChecklistTemplate @relation(fields: [id_item], references: [id_item], onDelete: NoAction, onUpdate: NoAction)
+
+  @@unique([id_ticket, id_item], map: "ticket_checklist_result$uniq_ticket_item")
+  @@map("ticket_checklist_result")
+}
+
+model ChecklistApproval {
+  id_ticket          String    @id @db.NVarChar(50)
+  dibuat_oleh_nik    String?   @db.NVarChar(20)
+  tanggal_dibuat     DateTime?
+  diketahui_oleh_nik String?   @db.NVarChar(20)
+  tanggal_diketahui  DateTime?
+  status_diketahui   String    @default("Menunggu") @db.NVarChar(8)
+  catatan_diketahui  String?   @db.NVarChar(Max)
+  disetujui_oleh_nik String?   @db.NVarChar(20)
+  tanggal_disetujui  DateTime?
+  status_disetujui   String    @default("Menunggu") @db.NVarChar(8)
+  catatan_disetujui  String?   @db.NVarChar(Max)
+
+  @@map("checklist_approval")
+}

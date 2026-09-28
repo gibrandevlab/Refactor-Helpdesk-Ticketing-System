@@ -73,12 +73,16 @@
           </div>
 
           <div class="toolbar-filters">
-            <select class="form-select-native" [(ngModel)]="filterDepartemen" (change)="onFilterChange()">
+            <select class="form-select-native" [(ngModel)]="filterDepartemen" (change)="onFilterDepartemenChange()">
               <option value="">Semua Departemen</option>
               <option *ngFor="let d of departemenOptions" [value]="d">{{ d }}</option>
             </select>
 
-            <select class="form-select-native" [(ngModel)]="filterBagian" (change)="onFilterChange()">
+            <select
+              class="form-select-native"
+              [(ngModel)]="filterBagian"
+              (change)="onFilterChange()"
+              [disabled]="!filterDepartemen">
               <option value="">Semua Bagian</option>
               <option *ngFor="let b of bagianOptions" [value]="b">{{ b }}</option>
             </select>

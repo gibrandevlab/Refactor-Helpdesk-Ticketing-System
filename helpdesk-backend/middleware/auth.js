@@ -1,7 +1,7 @@
 const jwt = require('jsonwebtoken');
 require('dotenv').config();
 
-// Verifikasi token JWT
+// Verifikasi token JWT, isi req.user = { nik, username, level }
 function verifyToken(req, res, next) {
   const header = req.headers['authorization'];
   const token = header && header.split(' ')[1];
@@ -19,25 +19,10 @@ function verifyToken(req, res, next) {
   });
 }
 
-// Batasi akses berdasarkan role (Mendukung req.user.level maupun req.user.role)
+// Batasi akses berdasarkan role: checkRole('Admin'), checkRole('Admin','Teknisi'), dst
 function checkRole(...allowedRoles) {
   return (req, res, next) => {
-    if (!req.user) {
-      return res.status(403).json({ success: false, message: 'Anda tidak punya akses ke fitur ini' });
-    }
-
-    // Cek req.user.level ATAU req.user.role
-    const userRole = String(req.user.level || req.user.role || '').toLowerCase();
-
-    // Normalisasi perbandingan role (case-insensitive & toleransi akhiran 's')
-    const hasAccess = allowedRoles.some(role => {
-      const targetRole = String(role).toLowerCase();
-      return userRole === targetRole ||
-             userRole === targetRole.replace(/s$/, '') ||
-             userRole + 's' === targetRole;
-    });
-
-    if (!hasAccess) {
+    if (!req.user || !allowedRoles.includes(req.user.level)) {
       return res.status(403).json({ success: false, message: 'Anda tidak punya akses ke fitur ini' });
     }
     next();

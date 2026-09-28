@@ -1,24 +1,20 @@
 const multer = require('multer');
 const path = require('path');
-const fs = require('fs');
 
-const uploadDir = path.join(__dirname, '..', 'uploads', 'lampiran');
-
-// Pastikan folder uploads/lampiran otomatis dibuat jika belum ada
-if (!fs.existsSync(uploadDir)) {
-  fs.mkdirSync(uploadDir, { recursive: true });
-}
-
+// 🔥 Simpan file ke folder 'uploads/lampiran/' agar sesuai dengan konfigurasi server.js
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, uploadDir);
+    // Path relatif dari folder middleware ke folder root backend + 'uploads/lampiran'
+    cb(null, path.join(__dirname, '..', 'uploads', 'lampiran'));
   },
   filename: (req, file, cb) => {
+    // Nama file unik: timestamp + random + ekstensi
     const unique = Date.now() + '-' + Math.round(Math.random() * 1e9);
     cb(null, unique + path.extname(file.originalname));
   }
 });
 
+// Filter file: hanya gambar
 const fileFilter = (req, file, cb) => {
   const allowed = /jpeg|jpg|png|webp/;
   const ok = allowed.test(path.extname(file.originalname).toLowerCase());
@@ -26,6 +22,7 @@ const fileFilter = (req, file, cb) => {
   else cb(new Error('Hanya file gambar (jpg, jpeg, png, webp) yang diperbolehkan'));
 };
 
+// Batas ukuran file 5MB
 const upload = multer({
   storage,
   fileFilter,

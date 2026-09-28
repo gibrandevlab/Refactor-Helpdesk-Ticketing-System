@@ -14,7 +14,7 @@ interface BagianApiRow {
   id_bagian: number;
   id_departemen: number;
   nama_bagian: string;
-  departemen: string; // nama departemen, hasil JOIN di backend
+  departemen: string;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -32,13 +32,14 @@ export class BagianDepartemenService {
     return this.http
       .get<ApiResponse<BagianApiRow[]>>(this.baseUrl, { headers: this.getHeaders() })
       .pipe(
-        map((res) =>
-          res.data.map((row): BagianDepartemen => ({
-            idBagian: row.id_bagian,
-            departemen: row.departemen,
-            bagian: row.nama_bagian,
-          }))
-        )
+        map((res: any) => {
+          const list = Array.isArray(res) ? res : (res?.data || []);
+          return list.map((row: any): BagianDepartemen => ({
+            idBagian: row.id_bagian || row.idBagian,
+            departemen: row.departemen || row.nama_departemen,
+            bagian: row.nama_bagian || row.bagian,
+          }));
+        })
       );
   }
 

@@ -58,22 +58,49 @@ export class KaryawanPage implements OnInit {
   filterBagian = '';
 
   get departemenOptions(): string[] {
-    const fromMaster = this.departemenMasterList.map(d => d.nama_departemen || d.namaDepartemen);
+    const fromMaster = this.departemenMasterList.map(d => d.nama_departemen || d.namaDepartemen || d.departemen);
     const fromKaryawan = this.karyawanList.map(k => k.departemen);
     return [...new Set([...fromMaster, ...fromKaryawan])].filter(Boolean);
   }
 
+  /** Opsi Bagian untuk Filter Toolbar (hanya aktif dan terfilter jika Departemen filter telah dipilih) */
   get bagianOptions(): string[] {
-    const fromMaster = this.bagianMasterList.map(b => b.nama_bagian || b.bagian);
-    const fromKaryawan = this.karyawanList.map(k => k.bagian);
+    if (!this.filterDepartemen) return [];
+
+    const selectedDept = this.filterDepartemen.trim().toLowerCase();
+
+    const fromMaster = this.bagianMasterList
+      .filter(b => {
+        const deptName = (b.departemen || b.nama_departemen || '').trim().toLowerCase();
+        return deptName === selectedDept;
+      })
+      .map(b => b.bagian || b.nama_bagian);
+
+    const fromKaryawan = this.karyawanList
+      .filter(k => k.departemen && k.departemen.trim().toLowerCase() === selectedDept)
+      .map(k => k.bagian);
+
     return [...new Set([...fromMaster, ...fromKaryawan])].filter(Boolean);
   }
 
+  /** Opsi Bagian untuk Modal Form (hanya terfilter sesuai departemen di modal) */
   get filteredBagianOptions(): string[] {
     if (!this.formData.departemen) return [];
-    return this.bagianMasterList
-      .filter(b => (b.departemen || b.nama_departemen) === this.formData.departemen)
-      .map(b => b.nama_bagian || b.bagian);
+
+    const selectedDept = this.formData.departemen.trim().toLowerCase();
+
+    const fromMaster = this.bagianMasterList
+      .filter(b => {
+        const deptName = (b.departemen || b.nama_departemen || '').trim().toLowerCase();
+        return deptName === selectedDept;
+      })
+      .map(b => b.bagian || b.nama_bagian);
+
+    const fromKaryawan = this.karyawanList
+      .filter(k => k.departemen && k.departemen.trim().toLowerCase() === selectedDept)
+      .map(k => k.bagian);
+
+    return [...new Set([...fromMaster, ...fromKaryawan])].filter(Boolean);
   }
 
   get jabatanOptions(): string[] {
@@ -160,7 +187,6 @@ export class KaryawanPage implements OnInit {
 
     this.bagianDepartemenService.getAll().subscribe({
       next: (res: any) => {
-        // Menerima array langsung atau objek res.data dengan safe navigation
         this.bagianMasterList = Array.isArray(res) ? res : (res?.data || []);
       },
       error: (err) => console.error('Gagal memuat master bagian departemen:', err)
@@ -198,7 +224,15 @@ export class KaryawanPage implements OnInit {
     return this.filteredKaryawan.slice(start, start + this.pageSize);
   }
 
-  onFilterChange() { this.currentPage = 1; }
+  onFilterChange() {
+    this.currentPage = 1;
+  }
+
+  onFilterDepartemenChange() {
+    this.filterBagian = '';
+    this.onFilterChange();
+  }
+
   goToPage(page: number) { this.currentPage = page; }
   prevPage() { if (this.currentPage > 1) this.currentPage--; }
   nextPage() { if (this.currentPage < this.totalPages) this.currentPage++; }
@@ -295,6 +329,7 @@ export class KaryawanPage implements OnInit {
     this.activeMenu = menu;
     if (window.innerWidth < 1024) this.isSidebarOpen = false;
   }
+
   logout() {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
