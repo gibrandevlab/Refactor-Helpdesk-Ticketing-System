@@ -7,7 +7,6 @@ import { environment } from '../../environments/environment';
   providedIn: 'root',
 })
 export class UserService {
-  // Mengarah ke endpoint backend users (sesuaikan dengan environment Anda)
   private apiUrl = `${environment.apiUrl}/users`;
 
   constructor(private http: HttpClient) {}
@@ -20,12 +19,10 @@ export class UserService {
     });
   }
 
-  // Mengambil daftar semua user (yang sudah di-JOIN dengan tabel karyawan di backend)
   getUsers(): Observable<any> {
     return this.http.get<any>(this.apiUrl, { headers: this.getHeaders() });
   }
 
-  // Method tambahan jika diperlukan nanti
   createUser(data: any): Observable<any> {
     return this.http.post<any>(this.apiUrl, data, { headers: this.getHeaders() });
   }

@@ -138,12 +138,16 @@ exports.getMyTickets = async (req, res) => {
 // ==========================================
 // USERS / ADMIN: New Ticket
 // ==========================================
+const PRIORITAS_VALID = ['Low', 'Normal', 'Urgent'];
+
 exports.createTicket = async (req, res) => {
   const conn = await pool.getConnection();
   try {
     let { id_kategori, id_sub_kategori, kode_asset, deskripsi, prioritas, id_departemen } = req.body;
 
-    prioritas = prioritas || 'Normal';
+    // ✅ validasi ketat, bukan cuma `prioritas || 'Normal'`
+    // ini juga nangkep kasus FormData ngirim literal string "undefined"
+    prioritas = PRIORITAS_VALID.includes(prioritas) ? prioritas : 'Normal';
 
     if (!id_kategori || !deskripsi) {
       return fail(res, 'Kategori dan deskripsi keluhan wajib diisi.', 400);

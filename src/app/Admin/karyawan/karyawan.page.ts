@@ -2,7 +2,7 @@ import { Component, OnInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpErrorResponse } from '@angular/common/http';
 import {
   IonicModule, ToastController, AlertController, IonicSafeString, IonModal
 } from '@ionic/angular';
@@ -13,6 +13,9 @@ import {
   closeOutline, saveOutline
 } from 'ionicons/icons';
 
+import { KaryawanService } from '../../services/karyawan.service';
+import { DepartemenService } from '../../services/departemen.services';
+import { BagianDepartemenService } from '../../services/bagian-departemen.service';
 import { JabatanService } from '../../services/Jabatan.service';
 import { SidebarComponent } from '../shared/components/sidebar/sidebar.component';
 
@@ -40,10 +43,6 @@ export class KaryawanPage implements OnInit {
   isSidebarOpen = false;
   activeMenu = 'karyawan';
 
-  private apiUrl = 'http://localhost:5000/api/karyawan';
-  private apiDepartemenUrl = 'http://localhost:5000/api/master/departemen';
-  private apiBagianUrl = 'http://localhost:5000/api/master/bagian-departemen';
-
   karyawanList: Karyawan[] = [];
 
   departemenMasterList: any[] = [];
@@ -59,13 +58,13 @@ export class KaryawanPage implements OnInit {
   filterBagian = '';
 
   get departemenOptions(): string[] {
-    const fromMaster = this.departemenMasterList.map(d => d.nama_departemen);
+    const fromMaster = this.departemenMasterList.map(d => d.nama_departemen || d.namaDepartemen);
     const fromKaryawan = this.karyawanList.map(k => k.departemen);
     return [...new Set([...fromMaster, ...fromKaryawan])].filter(Boolean);
   }
 
   get bagianOptions(): string[] {
-    const fromMaster = this.bagianMasterList.map(b => b.nama_bagian);
+    const fromMaster = this.bagianMasterList.map(b => b.nama_bagian || b.bagian);
     const fromKaryawan = this.karyawanList.map(k => k.bagian);
     return [...new Set([...fromMaster, ...fromKaryawan])].filter(Boolean);
   }
@@ -73,12 +72,12 @@ export class KaryawanPage implements OnInit {
   get filteredBagianOptions(): string[] {
     if (!this.formData.departemen) return [];
     return this.bagianMasterList
-      .filter(b => b.departemen === this.formData.departemen)
-      .map(b => b.nama_bagian);
+      .filter(b => (b.departemen || b.nama_departemen) === this.formData.departemen)
+      .map(b => b.nama_bagian || b.bagian);
   }
 
   get jabatanOptions(): string[] {
-    const fromMaster = this.jabatanMasterList.map(j => j.nama_jabatan);
+    const fromMaster = this.jabatanMasterList.map(j => j.nama_jabatan || j.namaJabatan);
     const fromKaryawan = this.karyawanList.map(k => k.jabatan);
     return [...new Set([...fromMaster, ...fromKaryawan])].filter(Boolean);
   }
@@ -105,7 +104,9 @@ export class KaryawanPage implements OnInit {
 
   constructor(
     private router: Router,
-    private http: HttpClient,
+    private karyawanService: KaryawanService,
+    private departemenService: DepartemenService,
+    private bagianDepartemenService: BagianDepartemenService,
     private jabatanService: JabatanService,
     private toastCtrl: ToastController,
     private alertCtrl: AlertController
@@ -137,12 +138,9 @@ export class KaryawanPage implements OnInit {
 
   loadDataKaryawan() {
     this.isLoading = true;
-    const token = localStorage.getItem('token');
-    const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
-
-    this.http.get<any>(this.apiUrl, { headers }).subscribe({
-      next: (res) => {
-        this.karyawanList = Array.isArray(res) ? res : (res.data || []);
+    this.karyawanService.getAll().subscribe({
+      next: (res: any) => {
+        this.karyawanList = Array.isArray(res) ? res : (res?.data || []);
         this.isLoading = false;
       },
       error: (err) => {
@@ -153,26 +151,24 @@ export class KaryawanPage implements OnInit {
   }
 
   loadMasterData() {
-    const token = localStorage.getItem('token');
-    const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
-
-    this.http.get<any>(this.apiDepartemenUrl, { headers }).subscribe({
-      next: (res) => {
-        this.departemenMasterList = Array.isArray(res) ? res : (res.data || []);
+    this.departemenService.getAll().subscribe({
+      next: (res: any) => {
+        this.departemenMasterList = Array.isArray(res) ? res : (res?.data || []);
       },
       error: (err) => console.error('Gagal memuat master departemen:', err)
     });
 
-    this.http.get<any>(this.apiBagianUrl, { headers }).subscribe({
-      next: (res) => {
-        this.bagianMasterList = Array.isArray(res) ? res : (res.data || []);
+    this.bagianDepartemenService.getAll().subscribe({
+      next: (res: any) => {
+        // Menerima array langsung atau objek res.data dengan safe navigation
+        this.bagianMasterList = Array.isArray(res) ? res : (res?.data || []);
       },
       error: (err) => console.error('Gagal memuat master bagian departemen:', err)
     });
 
     this.jabatanService.getAll().subscribe({
-      next: (res) => {
-        this.jabatanMasterList = Array.isArray(res) ? res : (res.data || []);
+      next: (res: any) => {
+        this.jabatanMasterList = Array.isArray(res) ? res : (res?.data || []);
       },
       error: (err) => console.error('Gagal memuat master jabatan:', err)
     });
@@ -244,26 +240,23 @@ export class KaryawanPage implements OnInit {
       return;
     }
 
-    const token = localStorage.getItem('token');
-    const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
-
     if (this.isEditing) {
-      this.http.put(`${this.apiUrl}/${this.formData.id}`, this.formData, { headers }).subscribe({
+      this.karyawanService.update(this.formData.id, this.formData).subscribe({
         next: () => {
           this.showToast('Data karyawan berhasil diperbarui!', 'success');
           this.loadDataKaryawan();
           this.closeModal();
         },
-        error: (err) => this.showToast('Gagal memperbarui data: ' + (err.error?.error || err.error?.message || err.message), 'danger')
+        error: (err: HttpErrorResponse) => this.showToast('Gagal memperbarui data: ' + (err.error?.error || err.error?.message || err.message), 'danger')
       });
     } else {
-      this.http.post(this.apiUrl, this.formData, { headers }).subscribe({
+      this.karyawanService.create(this.formData).subscribe({
         next: () => {
           this.showToast('Karyawan berhasil ditambahkan!', 'success');
           this.loadDataKaryawan();
           this.closeModal();
         },
-        error: (err) => this.showToast('Gagal menambah data: ' + (err.error?.error || err.error?.message || err.message), 'danger')
+        error: (err: HttpErrorResponse) => this.showToast('Gagal menambah data: ' + (err.error?.error || err.error?.message || err.message), 'danger')
       });
     }
   }
@@ -279,15 +272,12 @@ export class KaryawanPage implements OnInit {
           text: 'Hapus',
           role: 'destructive',
           handler: () => {
-            const token = localStorage.getItem('token');
-            const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
-
-            this.http.delete(`${this.apiUrl}/${karyawan.id}`, { headers }).subscribe({
+            this.karyawanService.delete(karyawan.id).subscribe({
               next: () => {
                 this.showToast('Karyawan berhasil dihapus.', 'success');
                 this.loadDataKaryawan();
               },
-              error: (err) => this.showToast(err.error?.error || err.error?.message || 'Gagal menghapus data.', 'danger')
+              error: (err: HttpErrorResponse) => this.showToast(err.error?.error || err.error?.message || 'Gagal menghapus data.', 'danger')
             });
           }
         }

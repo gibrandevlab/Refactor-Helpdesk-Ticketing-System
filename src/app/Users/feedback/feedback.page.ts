@@ -2,8 +2,9 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpErrorResponse } from '@angular/common/http';
 import { IonicModule, ToastController } from '@ionic/angular';
+import { FeedbackService } from '../../services/feedback.service';
 import { SidebarComponent } from '../shared/components/sidebar/sidebar.component';
 
 @Component({
@@ -31,11 +32,9 @@ export class FeedbackPage implements OnInit {
   keterangan = '';
   isSubmitting = false;
 
-  private apiUrl = 'http://localhost:5000/api/feedback'; // Sesuaikan port/URL backend Anda
-
   constructor(
     private router: Router,
-    private http: HttpClient,
+    private feedbackService: FeedbackService,
     private toastCtrl: ToastController
   ) { }
 
@@ -53,28 +52,19 @@ export class FeedbackPage implements OnInit {
     this.loadMyFeedbacks();
   }
 
-  getHeaders() {
-    const token = localStorage.getItem('token');
-    return {
-      headers: new HttpHeaders({
-        'Authorization': `Bearer ${token}`
-      })
-    };
-  }
-
   loadSolvedTickets() {
-    this.http.get<any>(`${this.apiUrl}/my-tickets`, this.getHeaders()).subscribe({
-      next: (res) => {
-        this.solvedTickets = res.data || [];
+    this.feedbackService.getMyTickets().subscribe({
+      next: (res: any) => {
+        this.solvedTickets = res?.data || [];
       },
       error: (err) => console.error(err)
     });
   }
 
   loadMyFeedbacks() {
-    this.http.get<any>(`${this.apiUrl}/my-feedbacks`, this.getHeaders()).subscribe({
-      next: (res) => {
-        this.myFeedbacks = res.data || [];
+    this.feedbackService.getMyFeedbacks().subscribe({
+      next: (res: any) => {
+        this.myFeedbacks = res?.data || [];
       },
       error: (err) => console.error(err)
     });
@@ -102,10 +92,10 @@ export class FeedbackPage implements OnInit {
       keterangan: this.keterangan
     };
 
-    this.http.post<any>(this.apiUrl, body, this.getHeaders()).subscribe({
-      next: async (res) => {
+    this.feedbackService.submitFeedback(body).subscribe({
+      next: async (res: any) => {
         this.isSubmitting = false;
-        await this.showToast(res.message || 'Feedback berhasil dikirim!', 'success');
+        await this.showToast(res?.message || 'Feedback berhasil dikirim!', 'success');
 
         // Reset Form
         this.selectedTicketId = '';
@@ -116,7 +106,7 @@ export class FeedbackPage implements OnInit {
         this.loadSolvedTickets();
         this.loadMyFeedbacks();
       },
-      error: async (err) => {
+      error: async (err: HttpErrorResponse) => {
         this.isSubmitting = false;
         const msg = err.error?.message || 'Gagal mengirim feedback';
         await this.showToast(msg, 'danger');

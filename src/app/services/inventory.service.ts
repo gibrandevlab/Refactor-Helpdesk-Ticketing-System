@@ -54,7 +54,6 @@ export interface AssetSoftware {
   keterangan: string | null;
 }
 
-// Detail software fixed-field, 1 objek per asset
 export interface AssetSoftwareDetail {
   operating_system: string;
   serial_no_os: string;
@@ -71,7 +70,6 @@ export interface AssetSoftwareDetail {
   acrobat: 'ADA' | 'TIDAK';
 }
 
-// History tiket = rekap tiket yang pernah dibuat untuk asset ini (read-only dari list_ticket)
 export interface AssetTicketHistory {
   id_ticket: string;
   tanggal: string;
@@ -84,8 +82,6 @@ export interface AssetTicketHistory {
   teknisi: string | null;
 }
 
-// Riwayat perpindahan pemegang asset (read-only, otomatis di-log backend
-// setiap kali nik_pemegang berubah lewat update aset)
 export interface AssetHolderHistory {
   id?: number;
   kode_asset?: string;
@@ -97,9 +93,6 @@ export interface AssetHolderHistory {
   tanggal_pindah: string;
 }
 
-// Riwayat perpindahan departemen asset (read-only, otomatis
-// di-log backend setiap kali id_departemen berubah lewat update aset —
-// baik diubah langsung maupun tidak langsung lewat perubahan pemegang)
 export interface AssetDepartmentHistory {
   id?: number;
   kode_asset?: string;
@@ -111,13 +104,11 @@ export interface AssetDepartmentHistory {
   tanggal_pindah: string;
 }
 
-// Satu kelompok periode pemegang beserta tiket-tiket yang
-// terjadi selama periode itu berlangsung
 export interface AssetHolderTicketGroup {
   nik_pemegang: string | null;
   nama_pemegang: string;
   periode_mulai: string | null;
-  periode_selesai: string | null; // null = masih berlangsung (pemegang saat ini)
+  periode_selesai: string | null;
   tickets: AssetTicketHistory[];
 }
 
@@ -150,6 +141,7 @@ export class InventoryService {
     return new HttpHeaders({ Authorization: `Bearer ${token || ''}` });
   }
 
+  // ===== CRUD ASSET =====
   getAll(): Observable<InventoryItem[]> {
     return this.http
       .get<ApiResponse<InventoryItem[]>>(this.apiUrl, { headers: this.getHeaders() })
@@ -162,9 +154,24 @@ export class InventoryService {
       );
   }
 
+  createAsset(data: any): Observable<any> {
+    return this.http.post(this.apiUrl, data, { headers: this.getHeaders() });
+  }
+
+  updateAsset(kode: string, data: any): Observable<any> {
+    return this.http.put(`${this.apiUrl}/${kode}`, data, { headers: this.getHeaders() });
+  }
+
+  deleteAsset(kode: string): Observable<any> {
+    return this.http.delete(`${this.apiUrl}/${kode}`, { headers: this.getHeaders() });
+  }
+
+  // ===== MASTER DATA =====
+  getKategoriList(): Observable<any> {
+    return this.http.get<any>(`${environment.apiUrl}/master/kategori`, { headers: this.getHeaders() });
+  }
+
   // ===== STATISTIK UNTUK DASHBOARD CHART =====
-  // jenis dikirim sebagai query param ?jenis=..., trim dulu supaya spasi
-  // nyasar (misal dari ngModel) tidak bikin mismatch dengan nama_barang di DB
   getStats(jenis?: string): Observable<InventoryStat[]> {
     const cleanJenis = jenis ? jenis.trim() : '';
     const params = cleanJenis ? `?jenis=${encodeURIComponent(cleanJenis)}` : '';

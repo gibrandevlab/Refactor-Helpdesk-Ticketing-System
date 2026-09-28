@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { IonicModule, ToastController, AlertController, IonicSafeString } from '@ionic/angular';
-import { HttpClient, HttpHeaders, HttpErrorResponse } from '@angular/common/http';
+import { HttpErrorResponse } from '@angular/common/http';
 import * as XLSX from 'xlsx';
 import { forkJoin } from 'rxjs';
 import { addIcons } from 'ionicons';
@@ -153,7 +153,6 @@ export class InventoryPage implements OnInit {
   constructor(
     private router: Router,
     private route: ActivatedRoute,
-    private http: HttpClient,
     private departemenService: DepartemenService,
     private karyawanService: KaryawanService,
     private inventoryService: InventoryService,
@@ -238,14 +237,10 @@ export class InventoryPage implements OnInit {
   }
 
   loadInventory() {
-    const token = localStorage.getItem('token');
-    const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
-
-    this.http.get<any>('http://localhost:5000/api/inventory', { headers }).subscribe({
-      next: (res) => {
-        const rawData = res.data || res;
-        if (Array.isArray(rawData)) {
-          this.inventoryList = rawData.map((item: any) => ({
+    this.inventoryService.getAll().subscribe({
+      next: (data) => {
+        if (Array.isArray(data)) {
+          this.inventoryList = data.map((item: any) => ({
             kodeAsset: item.kode_asset || item.kodeAsset,
             namaBarang: item.nama_barang || item.namaBarang,
             merkModel: item.merk_model || item.merkModel,
@@ -261,7 +256,7 @@ export class InventoryPage implements OnInit {
           this.tryOpenAssetFromQuery();
         }
       },
-      error: (err: HttpErrorResponse) => {
+      error: (err) => {
         console.error('Gagal memuat data inventory:', err);
         this.showToast('Gagal memuat data inventory.', 'danger');
       }
@@ -353,10 +348,7 @@ export class InventoryPage implements OnInit {
   }
 
   private loadKategoriList() {
-    const token = localStorage.getItem('token');
-    const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
-
-    this.http.get<any>('http://localhost:5000/api/master/kategori', { headers }).subscribe({
+    this.inventoryService.getKategoriList().subscribe({
       next: (res: any) => {
         const rows = res?.data ?? res ?? [];
         this.kategoriList = rows.map((k: any) => ({
@@ -662,11 +654,8 @@ export class InventoryPage implements OnInit {
       return;
     }
 
-    const token = localStorage.getItem('token');
-    const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
-
     if (this.isEditing && this.selectedKode !== null) {
-      this.http.put(`http://localhost:5000/api/inventory/${this.selectedKode}`, this.formData, { headers }).subscribe({
+      this.inventoryService.updateAsset(this.selectedKode, this.formData).subscribe({
         next: () => {
           this.showToast('Data asset berhasil diperbarui!', 'success');
           this.closeModal();
@@ -676,7 +665,7 @@ export class InventoryPage implements OnInit {
         error: (err: HttpErrorResponse) => this.showToast('Gagal memperbarui: ' + (err.error?.message || err.message), 'danger')
       });
     } else {
-      this.http.post('http://localhost:5000/api/inventory', this.formData, { headers }).subscribe({
+      this.inventoryService.createAsset(this.formData).subscribe({
         next: () => {
           this.showToast('Asset berhasil ditambahkan!', 'success');
           this.closeModal();
@@ -700,10 +689,7 @@ export class InventoryPage implements OnInit {
           text: 'Hapus',
           role: 'destructive',
           handler: () => {
-            const token = localStorage.getItem('token');
-            const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
-
-            this.http.delete(`http://localhost:5000/api/inventory/${item.kodeAsset}`, { headers }).subscribe({
+            this.inventoryService.deleteAsset(item.kodeAsset).subscribe({
               next: () => {
                 this.showToast('Asset berhasil dihapus!', 'success');
                 this.loadInventory();

@@ -3,7 +3,8 @@
     <!-- ===== SIDEBAR ===== -->
     <app-sidebar
       [isSidebarOpen]="isSidebarOpen"
-      (closeSidebar)="isSidebarOpen = false">
+      (closeSidebar)="isSidebarOpen = false"
+    >
     </app-sidebar>
 
     <!-- ===== MAIN CONTENT ===== -->
@@ -11,7 +12,11 @@
       <!-- HEADER -->
       <div class="main-header">
         <div class="header-left">
-          <ion-button class="menu-toggle" fill="clear" (click)="toggleSidebar()">
+          <ion-button
+            class="menu-toggle"
+            fill="clear"
+            (click)="toggleSidebar()"
+          >
             <ion-icon name="menu-outline"></ion-icon>
           </ion-button>
           <span class="page-title-inline">List Ticket</span>
@@ -31,7 +36,9 @@
       <div class="content-area">
         <div class="page-heading">
           <h1 class="page-title">List Ticket</h1>
-          <p class="page-subtitle">Kelola dan pantau seluruh ticket yang masuk</p>
+          <p class="page-subtitle">
+            Kelola dan pantau seluruh ticket yang masuk
+          </p>
         </div>
 
         <!-- ========================================== -->
@@ -41,15 +48,27 @@
           <div class="stats-header">
             <div>
               <h3>Statistik Ticket per Bulan</h3>
-              <p class="stats-sub">Total {{ totalTicketChart }} ticket pada tahun {{ filterTahun }}</p>
+              <p class="stats-sub">
+                Total {{ totalTicketChart }} ticket pada tahun {{ filterTahun }}
+              </p>
             </div>
             <div class="stats-header-right">
-              <select class="stats-filter" [(ngModel)]="filterTahun" (ngModelChange)="onTahunChange()">
-                <option *ngFor="let th of tahunOptions" [ngValue]="th">Tahun {{ th }}</option>
+              <select
+                class="stats-filter"
+                [(ngModel)]="filterTahun"
+                (ngModelChange)="onTahunChange()"
+              >
+                <option *ngFor="let th of tahunOptions" [ngValue]="th">
+                  Tahun {{ th }}
+                </option>
               </select>
-              <ion-button fill="clear" size="small" class="reset-btn"
+              <ion-button
+                fill="clear"
+                size="small"
+                class="reset-btn"
                 *ngIf="selectedBulan !== null || selectedDeptChart || filterStatusChart"
-                (click)="resetChartFilter()">
+                (click)="resetChartFilter()"
+              >
                 <ion-icon name="refresh-outline" slot="start"></ion-icon> Reset
               </ion-button>
             </div>
@@ -57,27 +76,43 @@
 
           <!-- FILTER STATUS CHIPS -->
           <div class="status-chips">
-            <div class="status-chip" [class.active]="filterStatusChart === ''" (click)="selectStatusGroup('')">
+            <div
+              class="status-chip"
+              [class.active]="filterStatusChart === ''"
+              (click)="selectStatusGroup('')"
+            >
               Semua <span class="chip-count">{{ tickets.length }}</span>
             </div>
-            <div class="status-chip" *ngFor="let g of statusGroups"
-                 [class.active]="filterStatusChart === g.key"
-                 [ngClass]="'chip-' + g.key"
-                 (click)="selectStatusGroup(g.key)">
-              {{ g.label }} <span class="chip-count">{{ statusCounts[g.key] || 0 }}</span>
+            <div
+              class="status-chip"
+              *ngFor="let g of statusGroups"
+              [class.active]="filterStatusChart === g.key"
+              [ngClass]="'chip-' + g.key"
+              (click)="selectStatusGroup(g.key)"
+            >
+              {{ g.label }}
+              <span class="chip-count">{{ statusCounts[g.key] || 0 }}</span>
             </div>
           </div>
 
           <!-- LEVEL 1: CHART PER BULAN -->
           <div class="bar-chart" *ngIf="chartBulan.length > 0">
-            <div class="bar-item" *ngFor="let b of chartBulan"
-                 [class.active]="selectedBulan === b.bulan"
-                 [class.empty]="b.jumlah === 0"
-                 (click)="selectBulan(b.bulan)"
-                 [title]="'Klik untuk lihat departemen di bulan ' + b.label">
+            <div
+              class="bar-item"
+              *ngFor="let b of chartBulan"
+              [class.active]="selectedBulan === b.bulan"
+              [class.empty]="b.jumlah === 0"
+              (click)="selectBulan(b.bulan)"
+              [title]="'Klik untuk lihat departemen di bulan ' + b.label"
+            >
               <div class="bar-track">
-                <div class="bar-fill" [style.height.%]="(b.jumlah / maxBulanValue) * 100">
-                  <span class="bar-value" *ngIf="b.jumlah > 0">{{ b.jumlah }}</span>
+                <div
+                  class="bar-fill"
+                  [style.height.%]="(b.jumlah / maxBulanValue) * 100"
+                >
+                  <span class="bar-value" *ngIf="b.jumlah > 0"
+                    >{{ b.jumlah }}</span
+                  >
                 </div>
               </div>
               <div class="bar-label">{{ b.label }}</div>
@@ -88,7 +123,8 @@
           </div>
           <div class="stats-hint" *ngIf="totalTicketChart > 0">
             <ion-icon name="information-circle-outline"></ion-icon>
-            Klik salah satu bulan untuk melihat departemen yang melakukan ticketing
+            Klik salah satu bulan untuk melihat departemen yang melakukan
+            ticketing
           </div>
         </div>
 
@@ -96,18 +132,29 @@
         <div class="stats-card" *ngIf="selectedBulan !== null">
           <div class="stats-header">
             <div>
-              <h3>Departemen yang Ticketing — {{ namaBulan[selectedBulan] }} {{ filterTahun }}</h3>
-              <p class="stats-sub">{{ chartDepartemen.length }} departemen terlibat</p>
+              <h3>
+                Departemen yang Ticketing — {{ namaBulan[selectedBulan] }} {{
+                filterTahun }}
+              </h3>
+              <p class="stats-sub">
+                {{ chartDepartemen.length }} departemen terlibat
+              </p>
             </div>
           </div>
 
           <div class="bar-chart" *ngIf="chartDepartemen.length > 0">
-            <div class="bar-item" *ngFor="let d of chartDepartemen"
-                 [class.active]="selectedDeptChart === d.departemen"
-                 (click)="selectDeptChart(d.departemen)"
-                 [title]="'Klik untuk lihat asset departemen ' + d.departemen">
+            <div
+              class="bar-item"
+              *ngFor="let d of chartDepartemen"
+              [class.active]="selectedDeptChart === d.departemen"
+              (click)="selectDeptChart(d.departemen)"
+              [title]="'Klik untuk lihat asset departemen ' + d.departemen"
+            >
               <div class="bar-track">
-                <div class="bar-fill dept" [style.height.%]="(d.jumlah / maxDeptValue) * 100">
+                <div
+                  class="bar-fill dept"
+                  [style.height.%]="(d.jumlah / maxDeptValue) * 100"
+                >
                   <span class="bar-value">{{ d.jumlah }}</span>
                 </div>
               </div>
@@ -124,11 +171,16 @@
         </div>
 
         <!-- LEVEL 3: DAFTAR ASSET -->
-        <div class="stats-card asset-breakdown" *ngIf="selectedDeptChart && chartAssets.length > 0">
+        <div
+          class="stats-card asset-breakdown"
+          *ngIf="selectedDeptChart && chartAssets.length > 0"
+        >
           <div class="stats-header">
             <div>
               <h3>Asset Bermasalah — {{ selectedDeptChart }}</h3>
-              <p class="stats-sub">{{ namaBulan[selectedBulan!] }} {{ filterTahun }}</p>
+              <p class="stats-sub">
+                {{ namaBulan[selectedBulan!] }} {{ filterTahun }}
+              </p>
             </div>
           </div>
 
@@ -141,8 +193,11 @@
                 <span class="asset-count">{{ a.jumlah }} ticket</span>
               </div>
               <div class="asset-tickets">
-                <span class="asset-ticket-chip" *ngFor="let t of a.tickets"
-                      [ngClass]="getStatusClass(t.status)">
+                <span
+                  class="asset-ticket-chip"
+                  *ngFor="let t of a.tickets"
+                  [ngClass]="getStatusClass(t.status)"
+                >
                   {{ t.id_ticket }} · {{ t.status }}
                 </span>
               </div>
@@ -165,17 +220,23 @@
           <div class="toolbar-filters">
             <select [(ngModel)]="filterStatus" (change)="onFilterChange()">
               <option value="">Semua Status</option>
-              <option *ngFor="let s of statusOptions" [value]="s">{{ s }}</option>
+              <option *ngFor="let s of statusOptions" [value]="s">
+                {{ s }}
+              </option>
             </select>
 
             <select [(ngModel)]="filterDepartemen" (change)="onFilterChange()">
               <option value="">Semua Departemen</option>
-              <option *ngFor="let d of departemenOptions" [value]="d">{{ d }}</option>
+              <option *ngFor="let d of departemenOptions" [value]="d">
+                {{ d }}
+              </option>
             </select>
 
             <select [(ngModel)]="filterKategori" (change)="onFilterChange()">
               <option value="">Semua Kategori</option>
-              <option *ngFor="let k of kategoriOptions" [value]="k">{{ k }}</option>
+              <option *ngFor="let k of kategoriOptions" [value]="k">
+                {{ k }}
+              </option>
             </select>
           </div>
 
@@ -202,7 +263,7 @@
                   <th>Lampiran</th>
                   <th>Teknisi</th>
                   <th>Status</th>
-                  <th style="min-width: 110px;">Deadline</th>
+                  <th style="min-width: 110px">Deadline</th>
                   <th>Aksi</th>
                 </tr>
               </thead>
@@ -217,30 +278,58 @@
                   <td>{{ t.nama_sub_kategori }}</td>
                   <td>{{ t.aset || '-' }}</td>
                   <td>
-                    <a *ngIf="t.lampiran" [href]="t.lampiranUrl" target="_blank" class="lampiran-badge">
+                    <a
+                      *ngIf="t.lampiran"
+                      [href]="t.lampiranUrl"
+                      target="_blank"
+                      class="lampiran-badge"
+                    >
                       Lihat Foto
                     </a>
                     <span *ngIf="!t.lampiran">-</span>
                   </td>
                   <td>{{ t.teknisi || '-' }}</td>
                   <td>
-                    <span class="status-badge" [ngClass]="t.statusClass">{{ t.status }}</span>
+                    <span class="status-badge" [ngClass]="t.statusClass"
+                      >{{ t.status }}</span
+                    >
                   </td>
                   <td>
-                    <div *ngIf="t.deadline && t.status !== 'Solved'" class="countdown-timer" [ngClass]="{'is-late': t.isLate}">
-                      <ion-icon name="timer-outline"></ion-icon> {{ t.countdownText }}
+                    <div
+                      *ngIf="t.deadline && t.status !== 'Solved'"
+                      class="countdown-timer"
+                      [ngClass]="{'is-late': t.isLate}"
+                    >
+                      <ion-icon name="timer-outline"></ion-icon> {{
+                      t.countdownText }}
                     </div>
                     <span *ngIf="!t.deadline || t.status === 'Solved'">-</span>
                   </td>
                   <td>
                     <div class="action-buttons">
-                      <ion-button fill="clear" size="small" (click)="onViewDetail(t)" title="Detail">
+                      <ion-button
+                        fill="clear"
+                        size="small"
+                        (click)="onViewDetail(t)"
+                        title="Detail"
+                      >
                         <ion-icon name="eye-outline"></ion-icon>
                       </ion-button>
-                      <ion-button fill="clear" size="small" (click)="openEditModal(t)" title="Edit">
+                      <ion-button
+                        fill="clear"
+                        size="small"
+                        (click)="openEditModal(t)"
+                        title="Edit"
+                      >
                         <ion-icon name="create-outline"></ion-icon>
                       </ion-button>
-                      <ion-button fill="clear" size="small" color="danger" (click)="hapusTicket(t)" title="Hapus">
+                      <ion-button
+                        fill="clear"
+                        size="small"
+                        color="danger"
+                        (click)="hapusTicket(t)"
+                        title="Hapus"
+                      >
                         <ion-icon name="trash-outline"></ion-icon>
                       </ion-button>
                     </div>
@@ -248,7 +337,9 @@
                 </tr>
 
                 <tr *ngIf="filteredTickets.length === 0">
-                  <td colspan="13" class="empty-row">Tidak ada data ticket yang cocok</td>
+                  <td colspan="13" class="empty-row">
+                    Tidak ada data ticket yang cocok
+                  </td>
                 </tr>
               </tbody>
             </table>
@@ -256,10 +347,16 @@
 
           <div class="table-footer">
             <span class="table-info">
-              Menampilkan {{ pagedTickets.length }} dari {{ filteredTickets.length }} data
+              Menampilkan {{ pagedTickets.length }} dari {{
+              filteredTickets.length }} data
             </span>
             <div class="pagination" *ngIf="totalPages > 1">
-              <ion-button fill="clear" size="small" [disabled]="currentPage === 1" (click)="prevPage()">
+              <ion-button
+                fill="clear"
+                size="small"
+                [disabled]="currentPage === 1"
+                (click)="prevPage()"
+              >
                 <ion-icon name="chevron-back-outline"></ion-icon>
               </ion-button>
               <span
@@ -267,8 +364,14 @@
                 *ngFor="let p of totalPagesArray"
                 [class.active]="p === currentPage"
                 (click)="goToPage(p)"
-              >{{ p }}</span>
-              <ion-button fill="clear" size="small" [disabled]="currentPage === totalPages" (click)="nextPage()">
+                >{{ p }}</span
+              >
+              <ion-button
+                fill="clear"
+                size="small"
+                [disabled]="currentPage === totalPages"
+                (click)="nextPage()"
+              >
                 <ion-icon name="chevron-forward-outline"></ion-icon>
               </ion-button>
             </div>
@@ -282,7 +385,11 @@
 <!-- ========================================== -->
 <!-- MODAL TAMBAH / EDIT TICKET                 -->
 <!-- ========================================== -->
-<ion-modal [isOpen]="isModalOpen" (didDismiss)="closeModal()" class="custom-modal">
+<ion-modal
+  [isOpen]="isModalOpen"
+  (didDismiss)="closeModal()"
+  class="custom-modal"
+>
   <ng-template>
     <ion-header class="modal-header">
       <ion-toolbar>
@@ -297,17 +404,21 @@
 
     <ion-content class="modal-content">
       <div class="modal-body">
-
         <!-- DEPARTEMEN -->
         <div class="form-group">
-          <label class="form-label">Departemen <span class="required">*</span></label>
+          <label class="form-label"
+            >Departemen <span class="required">*</span></label
+          >
           <select
             class="form-select-native"
             [(ngModel)]="formData.id_departemen"
             (ngModelChange)="onDepartemenChange()"
           >
             <option value="" disabled selected hidden>Pilih Departemen</option>
-            <option *ngFor="let d of departemenOptionsForModal" [value]="d.id_departemen ?? d.id">
+            <option
+              *ngFor="let d of departemenOptionsForModal"
+              [value]="d.id_departemen ?? d.id"
+            >
               {{ d.nama_departemen ?? d.nama }}
             </option>
           </select>
@@ -315,14 +426,19 @@
 
         <!-- KATEGORI -->
         <div class="form-group">
-          <label class="form-label">Kategori <span class="required">*</span></label>
+          <label class="form-label"
+            >Kategori <span class="required">*</span></label
+          >
           <select
             class="form-select-native"
             [(ngModel)]="formData.id_kategori"
             (ngModelChange)="onKategoriChange()"
           >
             <option value="" disabled selected hidden>Pilih Kategori</option>
-            <option *ngFor="let k of kategoriOptionsForModal" [value]="k.id ?? k.id_kategori">
+            <option
+              *ngFor="let k of kategoriOptionsForModal"
+              [value]="k.id ?? k.id_kategori"
+            >
               {{ k.nama ?? k.nama_kategori }}
             </option>
           </select>
@@ -336,7 +452,10 @@
             [(ngModel)]="formData.id_sub_kategori"
           >
             <option value="">Pilih Sub Kategori</option>
-            <option *ngFor="let sub of filteredSubKategoriOptions" [value]="sub.id ?? sub.id_sub_kategori">
+            <option
+              *ngFor="let sub of filteredSubKategoriOptions"
+              [value]="sub.id ?? sub.id_sub_kategori"
+            >
               {{ sub.namaSubKategori ?? sub.nama_sub_kategori }}
             </option>
           </select>
@@ -345,12 +464,12 @@
         <!-- ASET -->
         <div class="form-group">
           <label class="form-label">Aset</label>
-          <select
-            class="form-select-native"
-            [(ngModel)]="formData.kode_asset"
-          >
+          <select class="form-select-native" [(ngModel)]="formData.kode_asset">
             <option value="">Pilih Aset</option>
-            <option *ngFor="let item of filteredAssetOptions" [value]="item.kode_asset">
+            <option
+              *ngFor="let item of filteredAssetOptions"
+              [value]="item.kode_asset"
+            >
               {{ item.kode_asset }} - {{ item.nama_barang }}
             </option>
           </select>
@@ -360,20 +479,50 @@
         <div class="form-group">
           <label class="form-label">Lampiran (Foto)</label>
           <div class="upload-wrapper">
-            <input type="file" (change)="onFileSelected($event)" accept="image/*" style="display: none;" #fileInput>
-            <ion-button fill="outline" size="small" class="btn-upload" (click)="fileInput.click()">
+            <input
+              type="file"
+              (change)="onFileSelected($event)"
+              accept="image/*"
+              style="display: none"
+              #fileInput
+            />
+            <ion-button
+              fill="outline"
+              size="small"
+              class="btn-upload"
+              (click)="fileInput.click()"
+            >
               <ion-icon name="cloud-upload-outline" slot="start"></ion-icon>
               {{ selectedFile ? selectedFile.name : 'Pilih Foto' }}
             </ion-button>
-            <ion-button *ngIf="selectedFile" fill="clear" color="danger" size="small" (click)="selectedFile = null">
+            <ion-button
+              *ngIf="selectedFile"
+              fill="clear"
+              color="danger"
+              size="small"
+              (click)="selectedFile = null"
+            >
               <ion-icon name="close-circle-outline" slot="icon-only"></ion-icon>
             </ion-button>
           </div>
         </div>
 
+        <div class="form-group">
+          <label class="form-label"
+            >Prioritas <span class="required">*</span></label
+          >
+          <select class="form-select-native" [(ngModel)]="formData.prioritas">
+            <option value="Low">Low</option>
+            <option value="Normal" selected>Normal</option>
+            <option value="Urgent">Urgent</option>
+          </select>
+        </div>
+
         <!-- DESKRIPSI -->
         <div class="form-group">
-          <label class="form-label">Deskripsi Keluhan <span class="required">*</span></label>
+          <label class="form-label"
+            >Deskripsi Keluhan <span class="required">*</span></label
+          >
           <ion-textarea
             placeholder="Tuliskan detail keluhan..."
             [(ngModel)]="formData.deskripsi"
@@ -384,7 +533,12 @@
 
         <!-- ACTIONS -->
         <div class="modal-actions">
-          <ion-button class="cancel-btn" fill="outline" color="medium" (click)="closeModal()">
+          <ion-button
+            class="cancel-btn"
+            fill="outline"
+            color="medium"
+            (click)="closeModal()"
+          >
             Batal
           </ion-button>
           <ion-button
@@ -396,7 +550,6 @@
             {{ isEditing ? 'Update' : 'Simpan' }}
           </ion-button>
         </div>
-
       </div>
     </ion-content>
   </ng-template>

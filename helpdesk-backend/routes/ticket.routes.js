@@ -6,7 +6,11 @@ const c = require('../controllers/ticketController');
 // ==========================================
 // ADMIN: Lihat semua tiket
 // ==========================================
+// ADMIN: Lihat semua tiket
 router.get('/', verifyToken, checkRole('Admin'), c.getAllTickets);
+
+// USERS & ADMIN: Buat tiket baru
+router.post('/', verifyToken, checkRole('Users', 'Admin'), upload.single('lampiran'), c.createTicket);
 
 // 🔥 Rute Approval Tiket (Baru ditambahkan)
 router.put('/:id/approval', verifyToken, checkRole('Admin'), c.approveTicket);

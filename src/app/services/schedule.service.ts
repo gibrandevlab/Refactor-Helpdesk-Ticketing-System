@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from '../../environments/environment';
 import { AuthService } from '../services/auth.service';
 
 export interface Schedule {
@@ -50,12 +51,25 @@ export interface AvailableSchedule {
 
 @Injectable({ providedIn: 'root' })
 export class ScheduleService {
-  private apiUrl = 'http://localhost:5000/api/schedule';
+  private apiUrl = `${environment.apiUrl}/schedule`;
 
   constructor(private http: HttpClient, private auth: AuthService) {}
 
   private getHeaders(): HttpHeaders {
-    return new HttpHeaders().set('Authorization', `Bearer ${this.auth.getToken()}`);
+    return new HttpHeaders().set('Authorization', `Bearer ${this.auth.getToken() || ''}`);
+  }
+
+  private buildHttpParams(params: Record<string, any>): HttpParams {
+    let httpParams = new HttpParams();
+    if (!params) return httpParams;
+
+    for (const key of Object.keys(params)) {
+      const val = params[key];
+      if (val !== undefined && val !== null && val !== '') {
+        httpParams = httpParams.set(key, val);
+      }
+    }
+    return httpParams;
   }
 
   getDepartmentsWithSchedules(): Observable<DepartmentSchedule[]> {
@@ -77,28 +91,16 @@ export class ScheduleService {
   }
 
   checkTeknisiAvailability(params: any): Observable<any> {
-    let httpParams = new HttpParams();
-    for (const key of Object.keys(params)) {
-      if (params[key] !== undefined && params[key] !== null && params[key] !== '') {
-        httpParams = httpParams.set(key, params[key]);
-      }
-    }
     return this.http.get(`${this.apiUrl}/check-teknisi`, {
       headers: this.getHeaders(),
-      params: httpParams
+      params: this.buildHttpParams(params),
     });
   }
 
   getAvailableTeknisi(params: any): Observable<any> {
-    let httpParams = new HttpParams();
-    for (const key of Object.keys(params)) {
-      if (params[key] !== undefined && params[key] !== null && params[key] !== '') {
-        httpParams = httpParams.set(key, params[key]);
-      }
-    }
     return this.http.get(`${this.apiUrl}/available-teknisi`, {
       headers: this.getHeaders(),
-      params: httpParams
+      params: this.buildHttpParams(params),
     });
   }
 
@@ -136,7 +138,7 @@ export class ScheduleService {
     });
   }
 
-  // 🔥 BARU — klaim SATU asset spesifik dalam schedule
+  // Klaim SATU asset spesifik dalam schedule
   claimAsset(scheduleId: number, kodeAsset: string): Observable<any> {
     return this.http.patch(
       `${this.apiUrl}/${scheduleId}/claim-asset`,

@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { IonicModule, ToastController, AlertController, IonicSafeString } from '@ionic/angular';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpErrorResponse } from '@angular/common/http';
 import { addIcons } from 'ionicons';
 import {
   menuOutline, peopleOutline, shieldCheckmarkOutline, constructOutline,
@@ -11,6 +11,8 @@ import {
   chevronForwardOutline, closeOutline, saveOutline
 } from 'ionicons/icons';
 
+import { UserService } from '../../services/user.service';
+import { DepartemenService } from '../../services/departemen.services';
 import { KaryawanService, AvailableKaryawan } from '../../services/karyawan.service';
 import { SidebarComponent } from '../shared/components/sidebar/sidebar.component';
 
@@ -52,7 +54,7 @@ export class UsersPage implements OnInit {
   levelOptions: string[] = ['Admin', 'Teknisi', 'Users'];
 
   get departemenOptions(): string[] {
-    const fromMaster = this.departemenMasterList.map(d => d.nama_departemen);
+    const fromMaster = this.departemenMasterList.map(d => d.nama_departemen || d.namaDepartemen);
     const fromUsers = this.userList.map(u => u.departemen);
     return [...new Set([...fromMaster, ...fromUsers])].filter(Boolean);
   }
@@ -74,7 +76,8 @@ export class UsersPage implements OnInit {
 
   constructor(
     private router: Router,
-    private http: HttpClient,
+    private userService: UserService,
+    private departemenService: DepartemenService,
     private karyawanService: KaryawanService,
     private toastCtrl: ToastController,
     private alertCtrl: AlertController
@@ -105,12 +108,9 @@ export class UsersPage implements OnInit {
   }
 
   loadUsers() {
-    const token = localStorage.getItem('token');
-    const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
-
-    this.http.get<any>('http://localhost:5000/api/users', { headers }).subscribe({
-      next: (res) => {
-        if (res.success || Array.isArray(res.data) || Array.isArray(res)) {
+    this.userService.getUsers().subscribe({
+      next: (res: any) => {
+        if (res?.success || Array.isArray(res?.data) || Array.isArray(res)) {
           const rawData = res.success ? res.data : (res.data || res);
           this.userList = rawData.map((u: any) => ({
             ...u,
@@ -118,7 +118,7 @@ export class UsersPage implements OnInit {
           }));
         }
       },
-      error: (err) => {
+      error: (err: HttpErrorResponse) => {
         console.error('Gagal memuat data user:', err);
         if (err.status === 403 || err.status === 401) {
           this.showToast('Akses ditolak. Pastikan Anda login sebagai Admin!', 'danger');
@@ -128,12 +128,9 @@ export class UsersPage implements OnInit {
   }
 
   loadDepartemenMaster() {
-    const token = localStorage.getItem('token');
-    const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
-
-    this.http.get<any>('http://localhost:5000/api/departemen', { headers }).subscribe({
-      next: (res) => {
-        this.departemenMasterList = Array.isArray(res) ? res : (res.data || []);
+    this.departemenService.getAll().subscribe({
+      next: (res: any) => {
+        this.departemenMasterList = Array.isArray(res) ? res : (res?.data || []);
       },
       error: (err) => console.error('Gagal memuat master departemen untuk user:', err)
     });
@@ -216,36 +213,35 @@ export class UsersPage implements OnInit {
   }
 
   simpanUser() {
-    const token = localStorage.getItem('token');
-    const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
-
     if (this.isEditing && this.selectedId !== null) {
-      this.http.put(`http://localhost:5000/api/users/${this.selectedId}`, this.formData, { headers }).subscribe({
+      this.userService.updateUser(this.selectedId, this.formData).subscribe({
         next: () => {
           this.showToast('Data user berhasil diperbarui!', 'success');
           this.closeModal();
           this.loadUsers();
         },
-        error: (err) => this.showToast('Gagal memperbarui: ' + (err.error?.message || err.message), 'danger')
+        error: (err: HttpErrorResponse) => this.showToast('Gagal memperbarui: ' + (err.error?.message || err.message), 'danger')
       });
     } else {
       if (!this.formData.nik) {
         this.showToast('Silakan pilih NIK Karyawan terlebih dahulu!', 'warning');
         return;
       }
-      this.http.post('http://localhost:5000/api/users', this.formData, { headers }).subscribe({
+      this.userService.createUser(this.formData).subscribe({
         next: () => {
           this.showToast('User berhasil ditambahkan!', 'success');
           this.closeModal();
           this.loadUsers();
         },
-        error: (err) => this.showToast('Gagal menambah user: ' + (err.error?.message || err.message), 'danger')
+        error: (err: HttpErrorResponse) => this.showToast('Gagal menambah user: ' + (err.error?.message || err.message), 'danger')
       });
     }
   }
 
   async hapusUser(u: User) {
     const targetId = u.id_user || u.id;
+    if (!targetId) return;
+
     const alertEl = await this.alertCtrl.create({
       header: 'Hapus User',
       message: new IonicSafeString(`Apakah Anda yakin ingin menghapus user <strong>${u.username}</strong>?`),
@@ -256,15 +252,12 @@ export class UsersPage implements OnInit {
           text: 'Hapus',
           role: 'destructive',
           handler: () => {
-            const token = localStorage.getItem('token');
-            const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
-
-            this.http.delete(`http://localhost:5000/api/users/${targetId}`, { headers }).subscribe({
+            this.userService.deleteUser(targetId).subscribe({
               next: () => {
                 this.showToast('User berhasil dihapus!', 'success');
                 this.loadUsers();
               },
-              error: (err) => this.showToast('Gagal menghapus: ' + (err.error?.message || err.message), 'danger')
+              error: (err: HttpErrorResponse) => this.showToast('Gagal menghapus: ' + (err.error?.message || err.message), 'danger')
             });
           }
         }

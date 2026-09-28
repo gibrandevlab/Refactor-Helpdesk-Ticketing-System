@@ -1,4 +1,5 @@
 import { Component, OnInit, OnDestroy, NgZone, ChangeDetectorRef } from '@angular/core';
+import { environment } from 'src/environments/environment';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -88,7 +89,8 @@ export class ListTicketPage implements OnInit, OnDestroy {
     id_kategori: '',
     id_sub_kategori: '',
     kode_asset: '',
-    deskripsi: '',
+    prioritas: 'Normal',
+    deskripsi: ''
   };
 
   departemenOptionsForModal: any[] = [];
@@ -252,16 +254,17 @@ export class ListTicketPage implements OnInit, OnDestroy {
     t.isLate = false;
   }
 
-  getLampiranUrl(lampiranPath: string): string {
-    if (!lampiranPath) return '';
-    if (lampiranPath.startsWith('http')) {
-      return lampiranPath;
-    }
-    const baseUrl = 'http://localhost:5000';
-    let cleanPath = lampiranPath.replace(/^\/?uploads\/?/, '');
-    cleanPath = cleanPath.replace(/^\/?lampiran\/?/, '');
-    return `${baseUrl}/uploads/${cleanPath}`;
+getLampiranUrl(lampiranPath: string): string {
+  if (!lampiranPath) return '';
+  if (lampiranPath.startsWith('http')) {
+    return lampiranPath;
   }
+
+  let cleanPath = lampiranPath.replace(/^\/?uploads\/?/, '');
+  cleanPath = cleanPath.replace(/^\/?lampiran\/?/, '');
+
+  return `${environment.storageUrl}/${cleanPath}`;
+}
 
   loadTickets() {
     this.isLoading = true;
@@ -574,6 +577,7 @@ export class ListTicketPage implements OnInit, OnDestroy {
       id_sub_kategori: '',
       kode_asset: '',
       deskripsi: '',
+      prioritas: 'Normal',
     };
     this.filteredSubKategoriOptions = [];
     this.filteredAssetOptions = this.inventoryList;
