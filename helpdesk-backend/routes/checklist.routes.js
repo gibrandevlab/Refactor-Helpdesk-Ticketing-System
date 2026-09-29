@@ -20,7 +20,7 @@ router.patch('/item/:idResult', verifyToken, checkRole('Teknisi'), checklistCont
 router.get('/ticket/:idTicket/approval', verifyToken, checklistController.getApprovalStatus);
 router.post('/ticket/:idTicket/ajukan', verifyToken, checkRole('Teknisi'), checklistController.ajukanApproval);
 router.put('/ticket/:idTicket/user-approve', verifyToken, checkRole('Users'), checklistController.approveByUser);
-router.put('/ticket/:idTicket/itservice-approve', verifyToken, checkRole('IT Service'), checklistController.approveByItService);
+router.put('/ticket/:idTicket/itservice-approve', verifyToken, checkRole('Admin', 'IT Service'), checklistController.approveByItService);
 
 // Export PDF (hanya bisa setelah disetujui User + IT Service)
 router.get('/ticket/:idTicket/pdf', verifyToken, checklistController.downloadPdf);

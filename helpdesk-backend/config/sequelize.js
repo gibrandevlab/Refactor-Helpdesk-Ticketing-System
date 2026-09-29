@@ -9,14 +9,19 @@ const sequelize = new Sequelize(
     host: process.env.DB_HOST,
     port: process.env.DB_PORT,
     dialect: 'mssql',
-    define: {timestamps: false,      // Default: matikan createdAt & updatedAt untuk semua tabel
-    freezeTableName: true,  // Default: gunakan nama tabel persis seperti di DB (tanpa pluralisasi)
-    underscored: true       // Default: gunakan snake_case untuk kolom asing
+    useUTC: false,
+    timezone: '+07:00',
+    define: {
+      timestamps: false,      // Default: matikan createdAt & updatedAt untuk semua tabel
+      freezeTableName: true,  // Default: gunakan nama tabel persis seperti di DB (tanpa pluralisasi)
+      underscored: true       // Default: gunakan snake_case untuk kolom asing
     },
     dialectOptions: {
+      useUTC: false,
       options: {
         encrypt: process.env.DB_ENCRYPT === 'true',
-        trustServerCertificate: process.env.DB_TRUST_SERVER_CERT === 'true'
+        trustServerCertificate: process.env.DB_TRUST_SERVER_CERT === 'true',
+        useUTC: false
       }
     },
     logging: false

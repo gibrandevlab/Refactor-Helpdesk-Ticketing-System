@@ -31,7 +31,7 @@ module.exports = function(sequelize, DataTypes) {
     status_approval: {
       type: DataTypes.STRING(17),
       allowNull: false,
-      defaultValue: "(NMenunggu Approval"
+      defaultValue: "Menunggu Approval"
     },
     catatan_approval: {
       type: DataTypes.STRING(255),

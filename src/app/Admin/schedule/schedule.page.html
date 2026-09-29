@@ -407,20 +407,24 @@
           </div>
         </div>
 
-        <div class="form-group" *ngIf="isEditing">
-          <label class="form-label">Status Teknisi</label>
+        <div class="form-group">
+          <label class="form-label">Assign Teknisi (Opsional)</label>
+          <select [(ngModel)]="formData.id_teknis_single" (change)="onTeknisiSelectChange()" class="form-select-native">
+            <option [ngValue]="null">-- Belum Diklaim (Teknisi Self-Claim) --</option>
+            <option *ngFor="let t of teknisiOptions" [value]="t.idTeknisi || t.id_teknisi || t.nik">
+              {{ t.nama || t.nik }}
+            </option>
+          </select>
+        </div>
+
+        <div class="form-group" *ngIf="isEditing && formData.id_teknis && formData.id_teknis.length > 0">
+          <label class="form-label">Status Klaim</label>
           <div class="teknisi-status-box">
-            <ng-container *ngIf="formData.id_teknis && formData.id_teknis.length > 0; else belumDiklaim">
-              <ion-icon name="person-circle-outline" color="success"></ion-icon>
-              Sudah diklaim oleh: <strong>{{ formData.teknisi_list || 'Teknisi' }}</strong>
-              <ion-button size="small" fill="clear" color="danger" (click)="batalkanKlaim()">
-                <ion-icon name="close-circle-outline" slot="start"></ion-icon> Batalkan Klaim
-              </ion-button>
-            </ng-container>
-            <ng-template #belumDiklaim>
-              <ion-icon name="time-outline" color="medium"></ion-icon>
-              Menunggu diklaim oleh teknisi
-            </ng-template>
+            <ion-icon name="person-circle-outline" color="success"></ion-icon>
+            Sudah diklaim/assigned: <strong>{{ formData.teknisi_list || 'Teknisi' }}</strong>
+            <ion-button size="small" fill="clear" color="danger" (click)="batalkanKlaim()">
+              <ion-icon name="close-circle-outline" slot="start"></ion-icon> Batalkan Klaim
+            </ion-button>
           </div>
         </div>
 

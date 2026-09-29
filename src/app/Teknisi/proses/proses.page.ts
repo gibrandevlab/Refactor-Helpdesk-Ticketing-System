@@ -82,6 +82,7 @@ export class ProsesTiketPage implements OnInit, OnDestroy {
 
   isChatModalOpen = false;
   selectedTicketId = '';
+  selectedTicket: ProsesTicket | null = null;
   chatMessages: ChatMessage[] = [];
   newChatMessage = '';
   isChatLoading = false;
@@ -550,6 +551,13 @@ export class ProsesTiketPage implements OnInit, OnDestroy {
   // ==========================================
 
   /**
+   * Helper untuk mengecek apakah tiket yang sedang dibuka di modal chat bernilai 'Selesai'
+   */
+  isTicketClosed(): boolean {
+    return this.selectedTicket?.status === 'Selesai';
+  }
+
+  /**
    * Pengecekan presisi apakah pesan milik teknisi yang sedang login
    */
   isMyMessage(msg: ChatMessage): boolean {
@@ -584,6 +592,7 @@ export class ProsesTiketPage implements OnInit, OnDestroy {
 
   openChatModal(idTicket: string) {
     this.selectedTicketId = idTicket;
+    this.selectedTicket = this.tickets.find(t => t.idTicket === idTicket) || null;
     this.chatMessages = [];
     this.newChatMessage = '';
     this.selectedChatFile = null;
@@ -602,6 +611,7 @@ export class ProsesTiketPage implements OnInit, OnDestroy {
 
   closeChatModal() {
     this.isChatModalOpen = false;
+    this.selectedTicket = null;
     if (this.chatPollingInterval) {
       clearInterval(this.chatPollingInterval);
     }
@@ -640,6 +650,11 @@ export class ProsesTiketPage implements OnInit, OnDestroy {
   }
 
   sendChat() {
+    if (this.isTicketClosed()) {
+      alert('Tiket telah selesai. Percakapan ini sudah ditutup.');
+      return;
+    }
+
     const messageText = this.newChatMessage.trim();
     if (!messageText && !this.selectedChatFile) return;
 

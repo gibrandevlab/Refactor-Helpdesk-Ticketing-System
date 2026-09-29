@@ -416,25 +416,28 @@ exports.getDetail = async (req, res) => {
       ms_project: 'TIDAK', acrobat: 'TIDAK',
     };
 
+    // PERBAIKAN PADA QUERY RAW TICKETS
     const rawTickets = await list_ticket.findAll({
       where: { kode_asset: kode },
+      order: [['tanggal_lapor', 'DESC']],
       include: [
-        { model: karyawan, as: 'nik_pelapor_karyawan' },
-        { model: kategori, as: 'id_kategori_kategori' },
-        { model: sub_kategori, as: 'id_sub_kategori_sub_kategori' },
+        { model: karyawan, as: 'nik_pelapor_karyawan', required: false },
+        { model: kategori, as: 'id_kategori_kategori', required: false },
+        { model: sub_kategori, as: 'id_sub_kategori_sub_kategori', required: false },
         {
           model: assignment_ticket,
           as: 'assignment_ticket',
+          required: false,
           include: [
             {
               model: teknisi,
               as: 'id_teknisi_teknisi',
-              include: [{ model: karyawan, as: 'nik_karyawan' }]
+              required: false,
+              include: [{ model: karyawan, as: 'nik_karyawan', required: false }]
             }
           ]
         }
-      ],
-      order: [['tanggal_lapor', 'DESC']]
+      ]
     });
 
     const history = rawTickets.map((lt) => {

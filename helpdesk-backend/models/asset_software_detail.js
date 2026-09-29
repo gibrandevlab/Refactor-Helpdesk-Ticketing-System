@@ -25,53 +25,58 @@ module.exports = function(sequelize, DataTypes) {
     erp: {
       type: DataTypes.STRING(5),
       allowNull: true,
-      defaultValue: "(NTIDAK"
+      defaultValue: "TIDAK"
     },
     wms: {
       type: DataTypes.STRING(5),
       allowNull: true,
-      defaultValue: "(NTIDAK"
+      defaultValue: "TIDAK"
     },
     eris: {
       type: DataTypes.STRING(5),
       allowNull: true,
-      defaultValue: "(NTIDAK"
+      defaultValue: "TIDAK"
     },
     cmms: {
       type: DataTypes.STRING(5),
       allowNull: true,
-      defaultValue: "(NTIDAK"
+      defaultValue: "TIDAK"
     },
     visio: {
       type: DataTypes.STRING(5),
       allowNull: true,
-      defaultValue: "(NTIDAK"
+      defaultValue: "TIDAK"
     },
     autocad: {
       type: DataTypes.STRING(5),
       allowNull: true,
-      defaultValue: "(NTIDAK"
+      defaultValue: "TIDAK"
     },
     kaspersky: {
       type: DataTypes.STRING(5),
       allowNull: true,
-      defaultValue: "(NTIDAK"
+      defaultValue: "TIDAK"
     },
     ms_project: {
       type: DataTypes.STRING(5),
       allowNull: true,
-      defaultValue: "(NTIDAK"
+      defaultValue: "TIDAK"
     },
     acrobat: {
       type: DataTypes.STRING(5),
       allowNull: true,
-      defaultValue: "(NTIDAK"
+      defaultValue: "TIDAK"
+    },
+    updated_at: {
+      type: DataTypes.DATE,
+      allowNull: true,
+      defaultValue: Sequelize.Sequelize.fn('getdate')
     }
   }, {
     sequelize,
     tableName: 'asset_software_detail',
     schema: 'project_sistem_magang_test',
-    timestamps: true,
+    timestamps: false,
     indexes: [
       {
         name: "PK_asset_software_detail_kode_asset",

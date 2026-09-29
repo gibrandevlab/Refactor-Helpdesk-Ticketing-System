@@ -378,7 +378,10 @@ export class ScheduleTersediaPage implements OnInit, OnDestroy {
           }
         }
 
-        const isClaimed = teknisiKlaim.length > 0 || teknisiNames.length > 0;
+        const claimedAsetCount = teknisiKlaim.reduce((acc, curr) => acc + curr.jumlah, 0);
+        const isFullyClaimed = (totalAset > 0 && claimedAsetCount >= totalAset) || (s.id_teknis && teknisiKlaim.length === 0);
+        const isPartiallyClaimed = claimedAsetCount > 0 && claimedAsetCount < totalAset;
+        const isClaimed = isFullyClaimed || isPartiallyClaimed || teknisiNames.length > 0;
         const teknisi = teknisiNames.length > 0 ? teknisiNames.join(', ') : 'Belum diklaim';
 
         const rekItem = {
@@ -390,8 +393,11 @@ export class ScheduleTersediaPage implements OnInit, OnDestroy {
           startDate,
           endDate,
           teknisi,
-          teknisiKlaim, // 🔥 BARU — dipakai HTML untuk render per-teknisi
+          teknisiKlaim,
           isClaimed,
+          isFullyClaimed,
+          isPartiallyClaimed,
+          claimedAsetCount,
         };
 
         rekapanItems.push(rekItem);
@@ -533,6 +539,8 @@ export class ScheduleTersediaPage implements OnInit, OnDestroy {
 
     const start = new Date(startDate);
     const end = new Date(endDate);
+    start.setHours(0, 0, 0, 0);
+    end.setHours(23, 59, 59, 999);
 
     if (isNaN(start.getTime()) || isNaN(end.getTime())) {
       return { display: 'none' };

@@ -265,7 +265,7 @@
         </div>
 
         <!-- PREVIEW FOTO SEBELUM DIKIRIM -->
-        <div class="chat-preview" *ngIf="selectedChatFile">
+        <div class="chat-preview" *ngIf="selectedChatFile && !isTicketClosed()">
           <div class="preview-wrapper">
             <img [src]="selectedChatFilePreview" alt="Preview Lampiran" />
             <ion-button fill="clear" size="small" (click)="selectedChatFile = null; selectedChatFilePreview = ''" class="remove-preview">
@@ -274,8 +274,8 @@
           </div>
         </div>
 
-        <!-- INPUT CHAT & LAMPIRAN FOTO -->
-        <div class="chat-input-area">
+        <!-- INPUT CHAT & LAMPIRAN FOTO (JIKA TIKET BELUM SELESAI) -->
+        <div class="chat-input-area" *ngIf="!isTicketClosed()">
           <input type="file" #chatFileInput accept="image/*" style="display:none" (change)="onChatFileSelected($event)" />
           <ion-button fill="clear" size="small" (click)="chatFileInput.click()" class="attach-btn" title="Unggah Lampiran Gambar">
             <ion-icon name="attach-outline" slot="icon-only"></ion-icon>
@@ -286,6 +286,12 @@
           <ion-button fill="solid" color="primary" (click)="sendChat()" [disabled]="!newChatMessage.trim() && !selectedChatFile" class="send-btn">
             <ion-icon name="send-outline" slot="icon-only"></ion-icon>
           </ion-button>
+        </div>
+
+        <!-- INFORMASI JIKA CHAT DITUTUP (JIKA TIKET SELESAI) -->
+        <div class="chat-closed-notice" *ngIf="isTicketClosed()">
+          <ion-icon name="lock-closed-outline"></ion-icon>
+          <span>Tiket ini telah selesai. Sesi diskusi/chat telah ditutup secara otomatis.</span>
         </div>
 
       </div>

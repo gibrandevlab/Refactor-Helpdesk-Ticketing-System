@@ -337,6 +337,27 @@ exports.approveByItService = async (req, res) => {
       { where: { id_ticket: idTicket } }
     );
 
+    if (action === 'Approve') {
+      await assignment_ticket.update(
+        {
+          admin_approve: 1,
+          admin_approve_by: req.user.nama || req.user.nik,
+          admin_approve_at: new Date(),
+          admin_konfirmasi: 1,
+          tanggal_konfirmasi_admin: new Date()
+        },
+        { where: { id_ticket: idTicket } }
+      );
+    } else {
+      await assignment_ticket.update(
+        {
+          admin_approve: 0,
+          admin_konfirmasi: 0
+        },
+        { where: { id_ticket: idTicket } }
+      );
+    }
+
     return res.json({ message: `Check Sheet berhasil di-${action === 'Approve' ? 'setujui' : 'tolak'} IT Service` });
   } catch (error) {
     console.error('approveByItService error (Sequelize):', error);

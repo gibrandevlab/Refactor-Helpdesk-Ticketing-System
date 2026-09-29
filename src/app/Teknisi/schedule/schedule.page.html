@@ -243,7 +243,7 @@
 
                   <td>
                     <ion-button
-                      *ngIf="!item.isClaimed"
+                      *ngIf="!item.isFullyClaimed"
                       size="small"
                       fill="solid"
                       color="primary"
@@ -251,9 +251,9 @@
                       (click)="ambilTugas(item)"
                     >
                       <ion-icon name="hand-left-outline" slot="start"></ion-icon>
-                      {{ claimingId === item.id_schedule ? 'Memproses...' : 'Ambil Tugas' }}
+                      {{ claimingId === item.id_schedule ? 'Memproses...' : (item.isPartiallyClaimed ? 'Ambil Sisa Assets' : 'Ambil Tugas') }}
                     </ion-button>
-                    <ion-badge *ngIf="item.isClaimed" color="success">Sudah diklaim</ion-badge>
+                    <ion-badge *ngIf="item.isFullyClaimed" color="success">Sudah diklaim semua</ion-badge>
                   </td>
                 </tr>
                 <tr *ngIf="filteredRekapanData.length === 0">

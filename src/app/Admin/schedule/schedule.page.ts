@@ -214,6 +214,8 @@ export class SchedulePage implements OnInit, OnDestroy {
     id: null,
     nama: '',
     id_departemen: null,
+    id_kategori: null,
+    id_sub_kategori: null,
     tanggal_mulai: todayDateStr(),
     tanggal_selesai: '',
     deskripsi: '',
@@ -221,6 +223,7 @@ export class SchedulePage implements OnInit, OnDestroy {
     checklist_kategori: [],
     id_teknis: [] as string[],
     teknisi_list: '',
+    is_active: true
   };
 
   // ===== MODAL ASET =====
@@ -262,6 +265,15 @@ export class SchedulePage implements OnInit, OnDestroy {
   statusModalStartDate: Date | null = null;
   statusModalEndDate: Date | null = null;
   statusModalDurationDays = 0;
+
+  // ===== MODAL CEK CHECKLIST / CHECK SHEET PREVIEW =====
+  isChecklistModalOpen = false;
+  selectedChecklistTicketId = '';
+  selectedChecklistAsset: any = null;
+  isLoadingChecklist = false;
+  checklistItems: any[] = [];
+  selectedChecklistApproval: any = null;
+  isLoadingApproval = false;
 
   private refreshInterval: any;
   private subscriptions: Subscription = new Subscription();
@@ -405,37 +417,19 @@ export class SchedulePage implements OnInit, OnDestroy {
 
   // ===== DETERMINE STATUS =====
   private determineStatus(sched: any): 'plan' | 'progress' | 'approve' | 'userapprove' {
-    const rawStatus = (
-      sched.status ||
-      sched.status_pengerjaan ||
-      sched.status_schedule ||
-      sched.state ||
-      ''
-    )
-      .toString()
-      .toLowerCase()
-      .trim();
-
+    const s = (sched.status || '').toString().toLowerCase().trim();
+    if (s === 'plan' || s === 'progress' || s === 'approve' || s === 'userapprove') {
+      return s as 'plan' | 'progress' | 'approve' | 'userapprove';
+    }
     if (sched.user_confirmed === 1 || sched.user_confirmed === true) {
       return 'userapprove';
     }
-
-    if (
-      ['approve', 'approved', 'complete', 'completed', 'selesai', 'solved', 'done'].includes(rawStatus) ||
-      sched.is_approved === true ||
-      sched.is_approved === 1
-    ) {
+    if (sched.completed_aset > 0 && sched.completed_aset >= (sched.total_aset || 1)) {
       return 'approve';
     }
-
-    if (
-      ['progress', 'inprogress', 'in progress', 'in_progress', 'proses', 'on process', 'on_process', 'working', 'pending'].includes(rawStatus) ||
-      (sched.completed_aset > 0 && sched.completed_aset < (sched.total_aset || 1)) ||
-      (sched.progress_percent > 0 && sched.progress_percent < 100)
-    ) {
+    if (sched.started_aset > 0 || (sched.completed_aset > 0 && sched.completed_aset < (sched.total_aset || 1))) {
       return 'progress';
     }
-
     return 'plan';
   }
 
@@ -743,6 +737,8 @@ export class SchedulePage implements OnInit, OnDestroy {
 
     const start = new Date(startDate);
     const end = new Date(endDate);
+    start.setHours(0, 0, 0, 0);
+    end.setHours(23, 59, 59, 999);
 
     if (isNaN(start.getTime()) || isNaN(end.getTime())) {
       return { display: 'none' };
@@ -1074,17 +1070,29 @@ export class SchedulePage implements OnInit, OnDestroy {
       id: null,
       nama: '',
       id_departemen: deptId || null,
+      id_kategori: null,
+      id_sub_kategori: null,
       tanggal_mulai: todayDateStr(),
       tanggal_selesai: '',
       deskripsi: '',
       aset_list: [],
       checklist_kategori: [...this.checklistKategoriOptions],
-      id_teknis: [],
+      id_teknis: [] as string[],
+      id_teknis_single: null,
       teknisi_list: '',
+      is_active: true
     };
     this.availableAssets = [];
     if (deptId) setTimeout(() => this.onDepartemenChange(), 300);
     this.isModalOpen = true;
+  }
+
+  onTeknisiSelectChange() {
+    if (this.formData.id_teknis_single) {
+      this.formData.id_teknis = [String(this.formData.id_teknis_single)];
+    } else {
+      this.formData.id_teknis = [];
+    }
   }
 
   onTanggalMulaiChange(event: any) {
@@ -1126,17 +1134,25 @@ export class SchedulePage implements OnInit, OnDestroy {
       checklistKategori = [];
     }
 
+    const idTeknisArr: string[] = Array.isArray(sched.id_teknis)
+      ? sched.id_teknis
+      : (sched.id_teknis ? String(sched.id_teknis).split(',').map(x => x.trim()).filter(Boolean) : []);
+
     this.formData = {
       id: sId,
       nama: schedule.nama_schedule || schedule.nama || '',
       id_departemen: schedule.id_departemen,
+      id_kategori: schedule.id_kategori || null,
+      id_sub_kategori: schedule.id_sub_kategori || null,
       tanggal_mulai: toLocalDateStr(sched.tanggal_mulai),
       tanggal_selesai: toLocalDateStr(sched.tanggal_selesai),
       deskripsi: schedule.deskripsi || '',
       aset_list: [],
       checklist_kategori: checklistKategori,
-      id_teknis: Array.isArray(sched.id_teknis) ? sched.id_teknis : [],
+      id_teknis: idTeknisArr,
+      id_teknis_single: idTeknisArr.length > 0 ? idTeknisArr[0] : null,
       teknisi_list: sched.teknisi_list || '',
+      is_active: schedule.is_active ?? true
     };
 
     setTimeout(() => {
@@ -1249,14 +1265,18 @@ export class SchedulePage implements OnInit, OnDestroy {
       return;
     }
 
-    const payload = {
+    const payload: any = {
       nama_schedule: this.formData.nama,
-      id_departemen: this.formData.id_departemen,
+      id_departemen: Number(this.formData.id_departemen),
+      id_kategori: this.formData.id_kategori ? Number(this.formData.id_kategori) : null,
+      id_sub_kategori: this.formData.id_sub_kategori ? Number(this.formData.id_sub_kategori) : null,
       tanggal_mulai: tglMulai,
       tanggal_selesai: tglSelesai,
       deskripsi: this.formData.deskripsi,
-      aset_list: this.formData.aset_list,
-      checklist_kategori: [...this.checklistKategoriOptions],
+      aset_list: this.formData.aset_list || [],
+      checklist_kategori: this.formData.checklist_kategori || [...this.checklistKategoriOptions],
+      id_teknis: this.formData.id_teknis || [],
+      is_active: this.formData.is_active ? 1 : 0
     };
 
     if (this.isEditing) {

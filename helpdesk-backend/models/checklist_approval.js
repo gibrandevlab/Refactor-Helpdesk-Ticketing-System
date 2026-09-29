@@ -25,7 +25,7 @@ module.exports = function(sequelize, DataTypes) {
     status_diketahui: {
       type: DataTypes.STRING(8),
       allowNull: false,
-      defaultValue: "(NMenunggu"
+      defaultValue: "Menunggu"
     },
     catatan_diketahui: {
       type: DataTypes.TEXT,
@@ -42,7 +42,7 @@ module.exports = function(sequelize, DataTypes) {
     status_disetujui: {
       type: DataTypes.STRING(8),
       allowNull: false,
-      defaultValue: "(NMenunggu"
+      defaultValue: "Menunggu"
     },
     catatan_disetujui: {
       type: DataTypes.TEXT,

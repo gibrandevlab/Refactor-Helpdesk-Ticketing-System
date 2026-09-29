@@ -97,6 +97,7 @@ export class MyTicketPage implements OnInit {
 
   isChatModalOpen = false;
   selectedTicketId = '';
+  selectedTicket: MyTicket | null = null;
   chatMessages: ChatMessage[] = [];
   newChatMessage = '';
   isChatLoading = false;
@@ -819,6 +820,15 @@ export class MyTicketPage implements OnInit {
   // ==========================================
 
   /**
+   * Helper untuk mengecek apakah tiket yang sedang dibuka di modal chat bernilai 'Selesai' / 'Solved'
+   */
+  isTicketClosed(): boolean {
+    if (!this.selectedTicket) return false;
+    const status = (this.selectedTicket.status || '').toLowerCase();
+    return status === 'selesai' || status === 'solved';
+  }
+
+  /**
    * Pengecekan presisi apakah pesan milik user yang sedang login
    */
   isMyMessage(msg: ChatMessage): boolean {
@@ -853,6 +863,7 @@ export class MyTicketPage implements OnInit {
 
   openChatModal(idTicket: string) {
     this.selectedTicketId = idTicket;
+    this.selectedTicket = this.myTickets.find(t => t.id === idTicket) || null;
     this.chatMessages = [];
     this.newChatMessage = '';
     this.selectedChatFile = null;
@@ -871,6 +882,7 @@ export class MyTicketPage implements OnInit {
 
   closeChatModal() {
     this.isChatModalOpen = false;
+    this.selectedTicket = null;
     if (this.chatPollingInterval) {
       clearInterval(this.chatPollingInterval);
     }
@@ -909,6 +921,11 @@ export class MyTicketPage implements OnInit {
   }
 
   sendChat() {
+    if (this.isTicketClosed()) {
+      alert('Tiket telah selesai. Percakapan ini sudah ditutup.');
+      return;
+    }
+
     const messageText = this.newChatMessage.trim();
     if (!messageText && !this.selectedChatFile) return;
 

@@ -20,6 +20,41 @@ const {
 const { Op } = require('sequelize');
 
 // ============================================================
+// HELPER FORMAT DATE UNTUK SQL SERVER
+// ============================================================
+
+// Khusus Kolom Tipe 'date' (YYYY-MM-DD) -> tanggal_mulai, tanggal_selesai, next_maintenance
+function formatDateOnly(val) {
+  if (!val) return null;
+  if (typeof val === 'string') {
+    const trimmed = val.trim();
+    if (!trimmed) return null;
+    if (/^\d{4}-\d{2}-\d{2}$/.test(trimmed)) return trimmed;
+    if (trimmed.includes('T')) return trimmed.split('T')[0];
+  }
+  const d = new Date(val);
+  if (isNaN(d.getTime())) return null;
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
+// Khusus Kolom Tipe 'datetime' / 'datetime2' (YYYY-MM-DD HH:mm:ss) -> created_at, updated_at, tanggal_lapor
+function formatDateTime(val) {
+  if (!val) return null;
+  const d = new Date(val);
+  if (isNaN(d.getTime())) return null;
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  const hours = String(d.getHours()).padStart(2, '0');
+  const minutes = String(d.getMinutes()).padStart(2, '0');
+  const seconds = String(d.getSeconds()).padStart(2, '0');
+  return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+}
+
+// ============================================================
 // AUTO-CREATE TICKET (UNTUK SATU SCHEDULE)
 // ============================================================
 async function autoCreateTicketsForSchedule(scheduleId) {
@@ -60,7 +95,7 @@ async function autoCreateTicketsForSchedule(scheduleId) {
         const parsed = JSON.parse(rawTeknis);
         teknisList = Array.isArray(parsed) ? parsed : [parsed];
       } catch {
-        teknisList = rawTeknis.split(',').map(s => s.trim()).filter(Boolean);
+        teknisList = String(rawTeknis).split(',').map(s => s.trim()).filter(Boolean);
       }
     }
 
@@ -70,27 +105,21 @@ async function autoCreateTicketsForSchedule(scheduleId) {
     }
 
     const adminUser = await user.findOne({
-      where: { level: 'Admin', status: 'Aktif' }
-    });
-    const adminNik = adminUser?.nik;
-
-    if (!adminNik) {
-      console.log(`❌ Tidak ada admin ditemukan, skip auto-create`);
-      return;
-    }
+      where: { level: { [Op.in]: ['Admin', 'IT Service', 'admin'] } }
+    }) || await user.findOne();
+    const adminNik = adminUser?.nik || 'ADMIN';
 
     const teknisiIds = [];
     for (const item of teknisList) {
       let idTeknisi = null;
 
       const byId = await teknisi.findOne({
-        where: { id_teknisi: item, status: 'Aktif' }
+        where: { id_teknisi: item }
       });
       if (byId) idTeknisi = byId.id_teknisi;
 
       if (!idTeknisi) {
         const byNama = await teknisi.findOne({
-          where: { status: 'Aktif' },
           include: [{ model: karyawan, as: 'nik_karyawan', where: { nama: item } }]
         });
         if (byNama) idTeknisi = byNama.id_teknisi;
@@ -98,15 +127,13 @@ async function autoCreateTicketsForSchedule(scheduleId) {
 
       if (!idTeknisi) {
         const byNik = await teknisi.findOne({
-          where: { nik: item, status: 'Aktif' }
+          where: { nik: item }
         });
         if (byNik) idTeknisi = byNik.id_teknisi;
       }
 
-      if (idTeknisi) {
+      if (idTeknisi && !teknisiIds.includes(idTeknisi)) {
         teknisiIds.push(idTeknisi);
-      } else {
-        console.log(`⚠️ Gagal resolve teknisi untuk item: "${item}" (schedule ${numericScheduleId})`);
       }
     }
 
@@ -124,20 +151,23 @@ async function autoCreateTicketsForSchedule(scheduleId) {
       });
     }
 
-    const now = new Date();
-    let nextMaintenanceDate = schedule.tanggal_selesai ? new Date(schedule.tanggal_selesai) : null;
+    let nextMaintenanceDate = formatDateOnly(schedule.tanggal_selesai);
 
     if (!nextMaintenanceDate) {
-      const nextDate = new Date(now);
-      const { frekuensi, satuan } = schedule;
+      const nextDate = new Date();
+      const frekuensi = Number(schedule.frekuensi) || 1;
+      const satuan = schedule.satuan || 'hari';
       if (satuan === 'hari') nextDate.setDate(nextDate.getDate() + frekuensi);
       else if (satuan === 'minggu') nextDate.setDate(nextDate.getDate() + (frekuensi * 7));
       else if (satuan === 'bulan') nextDate.setMonth(nextDate.getMonth() + frekuensi);
       else if (satuan === 'tahun') nextDate.setFullYear(nextDate.getFullYear() + frekuensi);
-      nextMaintenanceDate = nextDate;
+      nextMaintenanceDate = formatDateOnly(nextDate);
     }
 
-    for (const asset of assets) {
+    for (let i = 0; i < assets.length; i++) {
+      const asset = assets[i];
+      const assignedTeknisiId = teknisiIds[i % teknisiIds.length];
+
       const existing = await list_ticket.findOne({
         where: {
           id_schedule: numericScheduleId,
@@ -146,11 +176,23 @@ async function autoCreateTicketsForSchedule(scheduleId) {
       });
 
       if (existing) {
-        console.log(`⏭️ Skip ${asset.kode_asset}, tiket untuk schedule ${numericScheduleId} sudah ada`);
+        const existingAsg = await assignment_ticket.findOne({
+          where: { id_ticket: existing.id_ticket }
+        });
+
+        if (existingAsg) {
+          if (existingAsg.status_pengerjaan === 'Menunggu Diproses' && existingAsg.id_teknisi !== assignedTeknisiId) {
+            await assignment_ticket.update(
+              { id_teknisi: assignedTeknisiId, tanggal_assign: sequelize.fn('getdate') },
+              { where: { id_assignment: existingAsg.id_assignment } }
+            );
+            console.log(`🔄 Re-assign tiket ${existing.id_ticket} ke teknisi ${assignedTeknisiId}`);
+          }
+        }
         continue;
       }
 
-      const idTicket = `T${Date.now()}${Math.floor(Math.random() * 1000)}`;
+      const idTicket = `T${Date.now()}${Math.floor(Math.random() * 1000)}`.substring(0, 20);
 
       const transaction = await sequelize.transaction();
       try {
@@ -158,20 +200,20 @@ async function autoCreateTicketsForSchedule(scheduleId) {
           id_ticket: idTicket,
           nik_pelapor: adminNik,
           id_departemen: schedule.id_departemen,
-          id_kategori: schedule.id_kategori,
-          id_sub_kategori: schedule.id_sub_kategori,
+          id_kategori: schedule.id_kategori || null,
+          id_sub_kategori: schedule.id_sub_kategori || null,
           kode_asset: asset.kode_asset,
           deskripsi: `[PREVENTIVE] ${schedule.nama_schedule}${schedule.deskripsi ? ' - ' + schedule.deskripsi : ''}`,
           lampiran: null,
-          tanggal_lapor: now,
+          tanggal_lapor: sequelize.fn('getdate'),
           status: 'On Process',
           id_schedule: numericScheduleId
         }, { transaction });
 
         await assignment_ticket.create({
           id_ticket: idTicket,
-          id_teknisi: teknisiIds[0],
-          tanggal_assign: now,
+          id_teknisi: assignedTeknisiId,
+          tanggal_assign: sequelize.fn('getdate'),
           progress: 0,
           status_pengerjaan: 'Menunggu Diproses'
         }, { transaction });
@@ -200,10 +242,10 @@ async function autoCreateTicketsForSchedule(scheduleId) {
         });
 
         await transaction.commit();
-        console.log(`✅ Tiket ${idTicket} dibuat untuk aset ${asset.kode_asset} -> teknisi ${teknisiIds[0]}`);
+        console.log(`✅ Tiket ${idTicket} dibuat untuk aset ${asset.kode_asset} (Teknisi: ${assignedTeknisiId})`);
       } catch (txErr) {
         await transaction.rollback();
-        throw txErr;
+        console.error(`❌ Error pembuatan tiket untuk aset ${asset.kode_asset}:`, txErr);
       }
     }
 
@@ -214,13 +256,32 @@ async function autoCreateTicketsForSchedule(scheduleId) {
 }
 
 // ============================================================
-// BUAT TICKET UNTUK SATU ASSET SAJA
+// CREATE TICKET FOR SINGLE ASSET
 // ============================================================
 async function createTicketForSingleAsset(scheduleId, kodeAsset, idTeknisi) {
   const numericScheduleId = parseInt(scheduleId);
   const schedule = await preventive_schedule.findByPk(numericScheduleId);
 
   if (!schedule) throw new Error('Schedule tidak ditemukan');
+
+  const existingTicket = await list_ticket.findOne({
+    where: { id_schedule: numericScheduleId, kode_asset: kodeAsset }
+  });
+
+  if (existingTicket) {
+    const existingAsg = await assignment_ticket.findOne({
+      where: { id_ticket: existingTicket.id_ticket }
+    });
+    if (existingAsg) {
+      if (existingAsg.status_pengerjaan === 'Menunggu Diproses') {
+        await assignment_ticket.update(
+          { id_teknisi: idTeknisi, status_pengerjaan: 'Proses', tanggal_assign: sequelize.fn('getdate') },
+          { where: { id_assignment: existingAsg.id_assignment } }
+        );
+      }
+      return existingTicket.id_ticket;
+    }
+  }
 
   let checklistKategoriList = [];
   if (schedule.checklist_kategori) {
@@ -233,13 +294,11 @@ async function createTicketForSingleAsset(scheduleId, kodeAsset, idTeknisi) {
   }
 
   const adminUser = await user.findOne({
-    where: { level: 'Admin', status: 'Aktif' }
-  });
-  if (!adminUser) throw new Error('Tidak ada admin ditemukan');
-  const adminNik = adminUser.nik;
+    where: { level: { [Op.in]: ['Admin', 'IT Service', 'admin'] } }
+  }) || await user.findOne();
+  const adminNik = adminUser?.nik || 'ADMIN';
 
-  const now = new Date();
-  const idTicket = `T${Date.now()}${Math.floor(Math.random() * 1000)}`;
+  const idTicket = `T${Date.now()}${Math.floor(Math.random() * 1000)}`.substring(0, 20);
 
   let checklistItems = [];
   if (checklistKategoriList.length > 0) {
@@ -256,12 +315,12 @@ async function createTicketForSingleAsset(scheduleId, kodeAsset, idTeknisi) {
       id_ticket: idTicket,
       nik_pelapor: adminNik,
       id_departemen: schedule.id_departemen,
-      id_kategori: schedule.id_kategori,
-      id_sub_kategori: schedule.id_sub_kategori,
+      id_kategori: schedule.id_kategori || null,
+      id_sub_kategori: schedule.id_sub_kategori || null,
       kode_asset: kodeAsset,
       deskripsi: `[PREVENTIVE] ${schedule.nama_schedule}${schedule.deskripsi ? ' - ' + schedule.deskripsi : ''}`,
       lampiran: null,
-      tanggal_lapor: now,
+      tanggal_lapor: sequelize.fn('getdate'),
       status: 'On Process',
       id_schedule: numericScheduleId
     }, { transaction });
@@ -269,7 +328,7 @@ async function createTicketForSingleAsset(scheduleId, kodeAsset, idTeknisi) {
     await assignment_ticket.create({
       id_ticket: idTicket,
       id_teknisi: idTeknisi,
-      tanggal_assign: now,
+      tanggal_assign: sequelize.fn('getdate'),
       progress: 0,
       status_pengerjaan: 'Proses'
     }, { transaction });
@@ -291,7 +350,7 @@ async function createTicketForSingleAsset(scheduleId, kodeAsset, idTeknisi) {
 
     await inventory.update({
       id_preventive_schedule: currentInv?.id_preventive_schedule ?? numericScheduleId,
-      next_maintenance: schedule.tanggal_selesai ? new Date(schedule.tanggal_selesai) : null
+      next_maintenance: formatDateOnly(schedule.tanggal_selesai)
     }, {
       where: { kode_asset: kodeAsset },
       transaction
@@ -347,7 +406,7 @@ function attachStatus(schedule) {
 }
 
 // ============================================================
-// HELPER AGREGASI SCHEDULES (SEQUELIZE ENGINE)
+// HELPER ENRICH SCHEDULES
 // ============================================================
 async function enrichSchedules(scheduleList) {
   if (!scheduleList || scheduleList.length === 0) return [];
@@ -355,7 +414,7 @@ async function enrichSchedules(scheduleList) {
   const allTeknisiIds = new Set();
   scheduleList.forEach(s => {
     if (s.id_teknis) {
-      s.id_teknis.split(',').forEach(id => {
+      String(s.id_teknis).split(',').forEach(id => {
         const trimmed = id.trim();
         if (trimmed) allTeknisiIds.add(trimmed);
       });
@@ -425,7 +484,7 @@ async function enrichSchedules(scheduleList) {
 
     let teknisi_list = null;
     if (s.id_teknis) {
-      const names = s.id_teknis.split(',')
+      const names = String(s.id_teknis).split(',')
         .map(id => id.trim())
         .map(id => teknisiMap[id])
         .filter(Boolean);
@@ -438,13 +497,15 @@ async function enrichSchedules(scheduleList) {
 
     sInvs.forEach(i => {
       if (i.last_maintenance) {
-        if (!last_maintenance || new Date(i.last_maintenance) > new Date(last_maintenance)) {
-          last_maintenance = i.last_maintenance;
+        const formattedLast = formatDateOnly(i.last_maintenance);
+        if (!last_maintenance || formattedLast > last_maintenance) {
+          last_maintenance = formattedLast;
         }
       }
       if (i.next_maintenance) {
-        if (!next_maintenance || new Date(i.next_maintenance) < new Date(next_maintenance)) {
-          next_maintenance = i.next_maintenance;
+        const formattedNext = formatDateOnly(i.next_maintenance);
+        if (!next_maintenance || formattedNext < next_maintenance) {
+          next_maintenance = formattedNext;
         }
       }
     });
@@ -453,10 +514,14 @@ async function enrichSchedules(scheduleList) {
     const total_aset = sAssets.length;
 
     const sClaims = claims.filter(c => c.id_schedule === sId);
-    const started_aset = new Set(sClaims.map(c => c.kode_asset)).size;
-    const teknisi_klaim_raw = sClaims.map(c => claimTeknisiMap[c.id_teknisi]).filter(Boolean).join(',');
-
     const sTickets = tickets.filter(t => t.id_schedule === sId);
+
+    const startedAssetSet = new Set([
+      ...sClaims.map(c => c.kode_asset),
+      ...sTickets.map(t => t.kode_asset)
+    ]);
+    const started_aset = startedAssetSet.size;
+    const teknisi_klaim_raw = sClaims.map(c => claimTeknisiMap[c.id_teknisi]).filter(Boolean).join(',');
 
     const completedAssetSet = new Set();
     const confirmedAssetSet = new Set();
@@ -487,8 +552,8 @@ async function enrichSchedules(scheduleList) {
         if (logs) {
           logs.forEach(log => {
             if (log.created_at) {
-              const dStr = new Date(log.created_at).toISOString().split('T')[0];
-              progressDatesArr.push(dStr);
+              const dStr = formatDateOnly(log.created_at);
+              if (dStr) progressDatesArr.push(dStr);
             }
           });
         }
@@ -505,11 +570,11 @@ async function enrichSchedules(scheduleList) {
       nama_schedule: s.nama_schedule,
       frekuensi: s.frekuensi,
       satuan: s.satuan,
-      tanggal_mulai: s.tanggal_mulai,
-      tanggal_selesai: s.tanggal_selesai,
+      tanggal_mulai: formatDateOnly(s.tanggal_mulai),
+      tanggal_selesai: formatDateOnly(s.tanggal_selesai),
       deskripsi: s.deskripsi,
       is_active: s.is_active,
-      created_at: s.created_at,
+      created_at: formatDateTime(s.created_at),
       checklist_kategori: s.checklist_kategori,
       nama_kategori: s.id_kategori_kategori?.nama_kategori || null,
       nama_sub_kategori: s.id_sub_kategori_sub_kategori?.nama_sub_kategori || null,
@@ -672,16 +737,18 @@ exports.getAssetsBySchedule = async (req, res) => {
         const asg = t.assignment_ticket;
         if (asg) {
           if (asg.tanggal_assign) {
-            if (!tanggal_mulai_progress || new Date(asg.tanggal_assign) < new Date(tanggal_mulai_progress)) {
-              tanggal_mulai_progress = asg.tanggal_assign;
+            const formattedAssign = formatDateOnly(asg.tanggal_assign);
+            if (!tanggal_mulai_progress || formattedAssign < tanggal_mulai_progress) {
+              tanggal_mulai_progress = formattedAssign;
             }
           }
           const logs = asg.ticket_progress_logs;
           if (logs) {
             logs.forEach(log => {
               if (log.created_at) {
-                if (!tanggal_selesai_progress || new Date(log.created_at) > new Date(tanggal_selesai_progress)) {
-                  tanggal_selesai_progress = log.created_at;
+                const formattedLog = formatDateOnly(log.created_at);
+                if (!tanggal_selesai_progress || formattedLog > tanggal_selesai_progress) {
+                  tanggal_selesai_progress = formattedLog;
                 }
               }
             });
@@ -693,17 +760,18 @@ exports.getAssetsBySchedule = async (req, res) => {
         kode_asset: inv?.kode_asset || sa.kode_asset,
         nama_barang: inv?.nama_barang || null,
         merk_model: inv?.merk_model || null,
-        last_maintenance: inv?.last_maintenance || null,
-        next_maintenance: inv?.next_maintenance || null,
+        last_maintenance: formatDateOnly(inv?.last_maintenance),
+        next_maintenance: formatDateOnly(inv?.next_maintenance),
         nama_departemen: inv?.id_departemen_departemen?.nama_departemen || null,
         nama_kategori: inv?.id_kategori_kategori?.nama_kategori || null,
         pemegang: inv?.nik_pemegang_karyawan?.nama || null,
-        tanggal_dibuat: sa.id_schedule_preventive_schedule?.created_at || null,
+        tanggal_dibuat: formatDateOnly(sa.id_schedule_preventive_schedule?.created_at),
         tanggal_mulai_progress,
         tanggal_selesai_progress,
         status_pengerjaan_asset: latestAsg?.status_pengerjaan || null,
         user_konfirmasi: latestAsg?.user_konfirmasi ?? null,
-        tanggal_konfirmasi_user: latestAsg?.tanggal_konfirmasi_user || null,
+        admin_konfirmasi: (latestAsg?.admin_konfirmasi === 1 || latestAsg?.admin_approve === 1) ? 1 : 0,
+        tanggal_konfirmasi_user: formatDateOnly(latestAsg?.tanggal_konfirmasi_user),
         catatan_penyelesaian: latestAsg?.catatan_penyelesaian || null,
         id_ticket: latestTicket?.id_ticket || null,
         claimed_by_id_teknisi: claim?.id_teknisi || null,
@@ -778,11 +846,16 @@ exports.createSchedule = async (req, res) => {
       return res.status(400).json({ message: 'Field wajib: nama_schedule, id_departemen, tanggal_mulai, tanggal_selesai' });
     }
 
-    const start = new Date(tanggal_mulai);
-    const end = new Date(tanggal_selesai);
-    if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+    const tglMulaiStr = formatDateOnly(tanggal_mulai);
+    const tglSelesaiStr = formatDateOnly(tanggal_selesai);
+
+    if (!tglMulaiStr || !tglSelesaiStr) {
       return res.status(400).json({ message: 'Format tanggal_mulai / tanggal_selesai tidak valid' });
     }
+
+    const start = new Date(tglMulaiStr);
+    const end = new Date(tglSelesaiStr);
+
     if (end < start) {
       return res.status(400).json({ message: 'tanggal_selesai tidak boleh lebih awal dari tanggal_mulai' });
     }
@@ -794,10 +867,11 @@ exports.createSchedule = async (req, res) => {
     if (Array.isArray(id_teknis) && id_teknis.length > 0) {
       idTeknisStr = id_teknis.join(',');
     } else if (typeof id_teknis === 'string' && id_teknis.trim()) {
-      idTeknisStr = id_teknis;
+      idTeknisStr = id_teknis.trim();
     }
 
     const checklistKategoriStr = JSON.stringify(Array.isArray(checklist_kategori) ? checklist_kategori : []);
+    const nowTimestamp = formatDateTime(new Date());
 
     const newSchedule = await preventive_schedule.create({
       nama_schedule,
@@ -806,17 +880,19 @@ exports.createSchedule = async (req, res) => {
       id_sub_kategori: id_sub_kategori ? parseInt(id_sub_kategori) : null,
       frekuensi,
       satuan,
-      tanggal_mulai: start,
-      tanggal_selesai: end,
+      tanggal_mulai: tglMulaiStr,
+      tanggal_selesai: tglSelesaiStr,
       id_teknis: idTeknisStr,
       deskripsi: deskripsi || null,
       checklist_kategori: checklistKategoriStr,
-      is_active: 1
+      is_active: 1,
+      created_at: sequelize.fn('getdate'),
+      updated_at: sequelize.fn('getdate')
     });
 
     const id_schedule = newSchedule.id_schedule;
 
-    if (aset_list && aset_list.length > 0) {
+    if (aset_list && Array.isArray(aset_list) && aset_list.length > 0) {
       for (const kode of aset_list) {
         await schedule_asset.create({
           id_schedule,
@@ -826,14 +902,16 @@ exports.createSchedule = async (req, res) => {
         await inventory.update(
           {
             id_preventive_schedule: id_schedule,
-            next_maintenance: end
+            next_maintenance: tglSelesaiStr
           },
           { where: { kode_asset: kode } }
         );
       }
     }
 
-    await autoCreateTicketsForSchedule(id_schedule);
+    if (idTeknisStr) {
+      await autoCreateTicketsForSchedule(id_schedule);
+    }
 
     return res.status(201).json({
       message: idTeknisStr
@@ -843,7 +921,7 @@ exports.createSchedule = async (req, res) => {
     });
   } catch (error) {
     console.error('createSchedule error (Sequelize):', error);
-    return res.status(500).json({ message: 'Gagal membuat schedule' });
+    return res.status(500).json({ message: error?.message || 'Gagal membuat schedule' });
   }
 };
 
@@ -870,11 +948,11 @@ exports.updateSchedule = async (req, res) => {
     const check = await preventive_schedule.findByPk(idSchedule);
     if (!check) return res.status(404).json({ message: 'Schedule tidak ditemukan' });
 
-    let idTeknisStr = null;
-    if (Array.isArray(id_teknis) && id_teknis.length > 0) {
-      idTeknisStr = id_teknis.join(',');
-    } else if (typeof id_teknis === 'string' && id_teknis.trim()) {
-      idTeknisStr = id_teknis;
+    let idTeknisStr = check.id_teknis;
+    if (Array.isArray(id_teknis)) {
+      idTeknisStr = id_teknis.length > 0 ? id_teknis.join(',') : null;
+    } else if (typeof id_teknis === 'string') {
+      idTeknisStr = id_teknis.trim() || null;
     }
 
     let checklistKategoriStr = check.checklist_kategori;
@@ -884,23 +962,31 @@ exports.updateSchedule = async (req, res) => {
 
     let frekuensi = check.frekuensi;
     let satuan = check.satuan;
-    let tanggalMulaiFinal = check.tanggal_mulai;
-    let tanggalSelesaiFinal = check.tanggal_selesai;
+    let tglMulaiStr = formatDateOnly(check.tanggal_mulai);
+    let tglSelesaiStr = formatDateOnly(check.tanggal_selesai);
 
     if (tanggal_mulai && tanggal_selesai) {
-      const start = new Date(tanggal_mulai);
-      const end = new Date(tanggal_selesai);
-      if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+      const parsedMulai = formatDateOnly(tanggal_mulai);
+      const parsedSelesai = formatDateOnly(tanggal_selesai);
+
+      if (!parsedMulai || !parsedSelesai) {
         return res.status(400).json({ message: 'Format tanggal_mulai / tanggal_selesai tidak valid' });
       }
+
+      const start = new Date(parsedMulai);
+      const end = new Date(parsedSelesai);
+
       if (end < start) {
         return res.status(400).json({ message: 'tanggal_selesai tidak boleh lebih awal dari tanggal_mulai' });
       }
+
       frekuensi = Math.max(1, Math.ceil((end - start) / (1000 * 60 * 60 * 24)));
       satuan = 'hari';
-      tanggalMulaiFinal = start;
-      tanggalSelesaiFinal = end;
+      tglMulaiStr = parsedMulai;
+      tglSelesaiStr = parsedSelesai;
     }
+
+    const nowTimestamp = formatDateTime(new Date());
 
     await preventive_schedule.update(
       {
@@ -910,17 +996,18 @@ exports.updateSchedule = async (req, res) => {
         id_sub_kategori: id_sub_kategori !== undefined ? (id_sub_kategori ? parseInt(id_sub_kategori) : null) : check.id_sub_kategori,
         frekuensi,
         satuan,
-        tanggal_mulai: tanggalMulaiFinal,
-        tanggal_selesai: tanggalSelesaiFinal,
-        id_teknis: idTeknisStr || check.id_teknis,
+        tanggal_mulai: tglMulaiStr,
+        tanggal_selesai: tglSelesaiStr,
+        id_teknis: idTeknisStr,
         deskripsi: deskripsi !== undefined ? deskripsi : check.deskripsi,
         checklist_kategori: checklistKategoriStr,
-        is_active: is_active !== undefined ? (is_active ? 1 : 0) : check.is_active
+        is_active: is_active !== undefined ? (is_active ? 1 : 0) : check.is_active,
+        updated_at: sequelize.fn('getdate')
       },
       { where: { id_schedule: idSchedule } }
     );
 
-    if (aset_list !== undefined) {
+    if (aset_list !== undefined && Array.isArray(aset_list)) {
       await schedule_asset.destroy({ where: { id_schedule: idSchedule } });
       await inventory.update(
         { id_preventive_schedule: null, next_maintenance: null },
@@ -931,7 +1018,7 @@ exports.updateSchedule = async (req, res) => {
         for (const kode of aset_list) {
           await schedule_asset.create({ id_schedule: idSchedule, kode_asset: kode });
           await inventory.update(
-            { id_preventive_schedule: idSchedule, next_maintenance: tanggalSelesaiFinal },
+            { id_preventive_schedule: idSchedule, next_maintenance: tglSelesaiStr },
             { where: { kode_asset: kode } }
           );
         }
@@ -939,15 +1026,14 @@ exports.updateSchedule = async (req, res) => {
     }
 
     const isActive = is_active !== undefined ? (is_active ? 1 : 0) : check.is_active;
-    const finalIdTeknis = idTeknisStr || check.id_teknis;
-    if (isActive === 1 && finalIdTeknis) {
+    if (isActive === 1 && idTeknisStr) {
       await autoCreateTicketsForSchedule(idSchedule);
     }
 
     return res.json({ message: 'Schedule berhasil diupdate' });
   } catch (error) {
     console.error('updateSchedule error (Sequelize):', error);
-    return res.status(500).json({ message: 'Gagal update schedule' });
+    return res.status(500).json({ message: error?.message || 'Gagal update schedule' });
   }
 };
 
@@ -1044,7 +1130,7 @@ exports.toggleActive = async (req, res) => {
     const newStatus = schedule.is_active ? 0 : 1;
 
     await preventive_schedule.update(
-      { is_active: newStatus },
+      { is_active: newStatus, updated_at: sequelize.fn('getdate') },
       { where: { id_schedule: idSchedule } }
     );
 
@@ -1087,13 +1173,13 @@ exports.getScheduleById = async (req, res) => {
     enrichedSchedule.aset_list = assets.map(a => a.kode_asset);
 
     if (enrichedSchedule.id_teknis) {
-      enrichedSchedule.id_teknis = enrichedSchedule.id_teknis.split(',').map(s => s.trim()).filter(Boolean);
+      enrichedSchedule.id_teknis = String(enrichedSchedule.id_teknis).split(',').map(s => s.trim()).filter(Boolean);
     } else {
       enrichedSchedule.id_teknis = [];
     }
 
     if (enrichedSchedule.progress_dates) {
-      enrichedSchedule.progress_dates = enrichedSchedule.progress_dates.split(',').map(s => s.trim());
+      enrichedSchedule.progress_dates = String(enrichedSchedule.progress_dates).split(',').map(s => s.trim());
     } else {
       enrichedSchedule.progress_dates = [];
     }
@@ -1129,8 +1215,8 @@ exports.getAvailableSchedules = async (req, res) => {
       id_schedule: s.id_schedule,
       nama_schedule: s.nama_schedule,
       deskripsi: s.deskripsi,
-      tanggal_mulai: s.tanggal_mulai,
-      tanggal_selesai: s.tanggal_selesai,
+      tanggal_mulai: formatDateOnly(s.tanggal_mulai),
+      tanggal_selesai: formatDateOnly(s.tanggal_selesai),
       departemen: s.id_departemen_departemen?.nama_departemen || null,
       total_aset: s.schedule_assets ? s.schedule_assets.length : 0
     }));
@@ -1145,12 +1231,21 @@ exports.getAvailableSchedules = async (req, res) => {
 // ============================================================
 // TEKNISI: KLAIM SCHEDULE
 // ============================================================
+// ============================================================
+// TEKNISI: KLAIM SCHEDULE
+// ============================================================
 exports.claimSchedule = async (req, res) => {
   try {
     const idSchedule = parseInt(req.params.id);
 
+    const userNik = req.user?.nik;
     const dataTeknisi = await teknisi.findOne({
-      where: { nik: req.user.nik, status: 'Aktif' }
+      where: {
+        [Op.or]: [
+          { nik: userNik },
+          { id_teknisi: userNik }
+        ]
+      }
     });
     if (!dataTeknisi) {
       return res.status(403).json({ message: 'Anda tidak terdaftar sebagai teknisi aktif' });
@@ -1160,10 +1255,12 @@ exports.claimSchedule = async (req, res) => {
 
     if (!check) return res.status(404).json({ message: 'Schedule tidak ditemukan' });
     if (!check.is_active) return res.status(400).json({ message: 'Schedule ini sudah nonaktif' });
-    if (check.id_teknis) return res.status(409).json({ message: 'Schedule ini baru saja diklaim teknisi lain' });
+    if (check.id_teknis && check.id_teknis !== dataTeknisi.id_teknisi) {
+      return res.status(409).json({ message: 'Schedule ini baru saja diklaim teknisi lain' });
+    }
 
     await preventive_schedule.update(
-      { id_teknis: dataTeknisi.id_teknisi },
+      { id_teknis: dataTeknisi.id_teknisi, updated_at: sequelize.fn('getdate') },
       { where: { id_schedule: idSchedule } }
     );
 
@@ -1187,8 +1284,14 @@ exports.claimAssetToMe = async (req, res) => {
       return res.status(400).json({ message: 'kode_asset wajib diisi' });
     }
 
+    const userNik = req.user?.nik;
     const dataTeknisi = await teknisi.findOne({
-      where: { nik: req.user.nik, status: 'Aktif' }
+      where: {
+        [Op.or]: [
+          { nik: userNik },
+          { id_teknisi: userNik }
+        ]
+      }
     });
     if (!dataTeknisi) {
       return res.status(403).json({ message: 'Anda tidak terdaftar sebagai teknisi aktif' });
@@ -1210,14 +1313,12 @@ exports.claimAssetToMe = async (req, res) => {
         id_schedule: idSchedule,
         kode_asset,
         id_teknisi: dataTeknisi.id_teknisi,
-        id_ticket: idTicket
+        id_ticket: idTicket,
+        claimed_at: sequelize.fn('getdate')
       });
     } catch (dupErr) {
       if (dupErr.name === 'SequelizeUniqueConstraintError') {
-        await ticket_checklist_result.destroy({ where: { id_ticket: idTicket } });
-        await assignment_ticket.destroy({ where: { id_ticket: idTicket } });
-        await list_ticket.destroy({ where: { id_ticket: idTicket } });
-        return res.status(409).json({ message: 'Asset ini baru saja diklaim teknisi lain' });
+        return res.json({ message: 'Asset berhasil diklaim', id_ticket: idTicket });
       }
       throw dupErr;
     }
@@ -1237,9 +1338,41 @@ exports.unclaimSchedule = async (req, res) => {
     const idSchedule = parseInt(req.params.id);
 
     await preventive_schedule.update(
-      { id_teknis: null },
+      { id_teknis: null, updated_at: sequelize.fn('getdate') },
       { where: { id_schedule: idSchedule } }
     );
+
+    const tickets = await list_ticket.findAll({
+      where: { id_schedule: idSchedule },
+      attributes: ['id_ticket'],
+      raw: true
+    });
+    const ticketIds = tickets.map(t => t.id_ticket);
+
+    if (ticketIds.length > 0) {
+      const unstartedAssignments = await assignment_ticket.findAll({
+        where: {
+          id_ticket: { [Op.in]: ticketIds },
+          status_pengerjaan: 'Menunggu Diproses'
+        },
+        attributes: ['id_ticket'],
+        raw: true
+      });
+      const unstartedTicketIds = unstartedAssignments.map(a => a.id_ticket);
+
+      if (unstartedTicketIds.length > 0) {
+        await ticket_checklist_result.destroy({
+          where: { id_ticket: { [Op.in]: unstartedTicketIds } }
+        });
+        await assignment_ticket.destroy({
+          where: { id_ticket: { [Op.in]: unstartedTicketIds } }
+        });
+        await list_ticket.destroy({
+          where: { id_ticket: { [Op.in]: unstartedTicketIds } }
+        });
+        console.log(`🗑️ Tiket belum diproses (${unstartedTicketIds.length}) dibersihkan dari schedule ${idSchedule}`);
+      }
+    }
 
     return res.json({ message: 'Klaim teknisi berhasil dibatalkan' });
   } catch (error) {

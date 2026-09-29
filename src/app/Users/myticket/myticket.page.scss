@@ -670,6 +670,26 @@ ion-modal.custom-myticket-modal {
   border-radius: 4px;
 }
 
+/* NOTICE CHAT DITUTUP JIKA TIKET SELESAI */
+.chat-closed-notice {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 14px 16px;
+  background: #f1f5f9;
+  border-top: 1px solid var(--border-color);
+  color: #64748b;
+  font-size: 13px;
+  font-weight: 600;
+  text-align: center;
+
+  ion-icon {
+    font-size: 18px;
+    color: var(--danger);
+  }
+}
+
 /* ========================================== */
 /* STYLING COUNTDOWN TIMER                   */
 /* ========================================== */

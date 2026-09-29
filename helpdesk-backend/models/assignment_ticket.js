@@ -41,7 +41,7 @@ module.exports = function(sequelize, DataTypes) {
     status_pengerjaan: {
       type: DataTypes.STRING(17),
       allowNull: false,
-      defaultValue: "(NMenunggu Diproses"
+      defaultValue: "Menunggu Diproses"
     },
     tanggal_selesai: {
       type: DataTypes.DATE,
@@ -63,7 +63,7 @@ module.exports = function(sequelize, DataTypes) {
     return_status: {
       type: DataTypes.STRING(8),
       allowNull: true,
-      defaultValue: "(NNone"
+      defaultValue: "None"
     },
     user_konfirmasi: {
       type: DataTypes.SMALLINT,

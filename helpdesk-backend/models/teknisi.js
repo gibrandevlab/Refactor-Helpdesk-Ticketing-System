@@ -26,7 +26,7 @@ module.exports = function(sequelize, DataTypes) {
     status: {
       type: DataTypes.STRING(8),
       allowNull: false,
-      defaultValue: "(NAktif"
+      defaultValue: "Aktif"
     },
     jumlah_tiket_ditangani: {
       type: DataTypes.INTEGER,

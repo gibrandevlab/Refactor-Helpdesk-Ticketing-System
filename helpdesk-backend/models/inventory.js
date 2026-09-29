@@ -77,7 +77,7 @@ module.exports = function(sequelize, DataTypes) {
     status_aset: {
       type: DataTypes.STRING(11),
       allowNull: false,
-      defaultValue: "(NAktif"
+      defaultValue: "Aktif"
     },
     foto: {
       type: DataTypes.STRING(255),

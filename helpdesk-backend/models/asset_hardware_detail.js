@@ -45,12 +45,17 @@ module.exports = function(sequelize, DataTypes) {
     display: {
       type: DataTypes.STRING(100),
       allowNull: true
+    },
+    updated_at: {
+      type: DataTypes.DATE,
+      allowNull: true,
+      defaultValue: Sequelize.Sequelize.fn('getdate')
     }
   }, {
     sequelize,
     tableName: 'asset_hardware_detail',
     schema: 'project_sistem_magang_test',
-    timestamps: true,
+    timestamps: false,
     indexes: [
       {
         name: "PK_asset_hardware_detail_kode_asset",

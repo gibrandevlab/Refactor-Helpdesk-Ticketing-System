@@ -22,12 +22,22 @@ module.exports = function(sequelize, DataTypes) {
     keterangan: {
       type: DataTypes.TEXT,
       allowNull: true
+    },
+    created_at: {
+      type: DataTypes.DATE,
+      allowNull: true,
+      defaultValue: Sequelize.Sequelize.fn('getdate')
+    },
+    updated_at: {
+      type: DataTypes.DATE,
+      allowNull: true,
+      defaultValue: Sequelize.Sequelize.fn('getdate')
     }
   }, {
     sequelize,
     tableName: 'asset_hardware',
     schema: 'project_sistem_magang_test',
-    timestamps: true,
+    timestamps: false,
     indexes: [
       {
         name: "idx_hardware_kode",

@@ -62,12 +62,12 @@ module.exports = function(sequelize, DataTypes) {
     status: {
       type: DataTypes.STRING(19),
       allowNull: false,
-      defaultValue: "(NMenunggu Approval"
+      defaultValue: "Menunggu Approval"
     },
     prioritas: {
       type: DataTypes.STRING(6),
       allowNull: true,
-      defaultValue: "(NNormal"
+      defaultValue: "Normal"
     },
     deadline: {
       type: DataTypes.DATE,

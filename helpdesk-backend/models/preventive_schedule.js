@@ -67,12 +67,22 @@ module.exports = function(sequelize, DataTypes) {
     checklist_kategori: {
       type: DataTypes.TEXT,
       allowNull: true
+    },
+    created_at: {
+      type: DataTypes.DATE,
+      allowNull: true,
+      defaultValue: Sequelize.Sequelize.fn('getdate')
+    },
+    updated_at: {
+      type: DataTypes.DATE,
+      allowNull: true,
+      defaultValue: Sequelize.Sequelize.fn('getdate')
     }
   }, {
     sequelize,
     tableName: 'preventive_schedule',
     schema: 'project_sistem_magang_test',
-    timestamps: true,
+    timestamps: false,
     indexes: [
       {
         name: "id_departemen",

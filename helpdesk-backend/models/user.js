@@ -27,12 +27,12 @@ module.exports = function(sequelize, DataTypes) {
     level: {
       type: DataTypes.STRING(7),
       allowNull: false,
-      defaultValue: "(NUsers"
+      defaultValue: "Users"
     },
     status: {
       type: DataTypes.STRING(8),
       allowNull: false,
-      defaultValue: "(NAktif"
+      defaultValue: "Aktif"
     }
   }, {
     sequelize,
