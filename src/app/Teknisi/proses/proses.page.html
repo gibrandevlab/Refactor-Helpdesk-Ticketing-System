@@ -225,7 +225,7 @@
 </ion-modal>
 
 <!-- ========================================== -->
-<!-- MODAL CHAT TEKNISI                          -->
+<!-- MODAL CHAT TEKNISI                         -->
 <!-- ========================================== -->
 <ion-modal [isOpen]="isChatModalOpen" (didDismiss)="closeChatModal()" class="custom-proses-modal">
   <ng-template>
@@ -244,35 +244,61 @@
         <div class="chat-messages">
           <div *ngIf="isChatLoading" class="chat-loading">Memuat percakapan...</div>
           <div *ngIf="!isChatLoading && chatMessages.length === 0" class="chat-empty">Belum ada pesan. Mulai diskusi!</div>
-          <div *ngFor="let msg of chatMessages" class="chat-bubble" [class.bubble-me]="msg.sender_role?.toLowerCase() === user.role?.toLowerCase()">
+
+          <div *ngFor="let msg of chatMessages"
+               class="chat-bubble"
+               [class.bubble-me]="isMyMessage(msg)"
+               [class.bubble-other]="!isMyMessage(msg)"
+               [class.bubble-role-admin]="!isMyMessage(msg) && msg.sender_role?.toLowerCase() === 'admin'"
+               [class.bubble-role-teknisi]="!isMyMessage(msg) && msg.sender_role?.toLowerCase() === 'teknisi'"
+               [class.bubble-role-users]="!isMyMessage(msg) && msg.sender_role?.toLowerCase() === 'users'">
+
             <div class="bubble-header">
-              <span class="sender-name">{{ msg.sender_name }}</span>
-              <span class="time">{{ msg.created_at | date:'shortTime' }}</span>
+              <span class="sender-name">
+                {{ msg.sender_name }}
+                <span class="role-badge" [ngClass]="'badge-' + (msg.sender_role?.toLowerCase() || 'users')">
+                  {{ msg.sender_role }}
+                </span>
+              </span>
+              <span class="time">{{ msg.created_at | date:'HH:mm' }}</span>
             </div>
-            <div *ngIf="msg.attachment_url" class="bubble-image">
-              <img [src]="chatService.getAttachmentUrl(msg.attachment_url)" alt="Lampiran" (click)="openImagePreview(chatService.getAttachmentUrl(msg.attachment_url))" />
+
+            <!-- LAMPIRAN FOTO DALAM CHAT -->
+            <div *ngIf="msg.attachment_url || msg.lampiran" class="bubble-image">
+              <img [src]="chatService.getAttachmentUrl(msg.attachment_url || msg.lampiran || '')"
+                   alt="Lampiran Chat"
+                   (click)="openImagePreview(chatService.getAttachmentUrl(msg.attachment_url || msg.lampiran || ''))" />
             </div>
+
+            <!-- TEKS PESAN -->
             <div class="bubble-text" *ngIf="msg.message">{{ msg.message }}</div>
           </div>
         </div>
-        <div class="chat-input-area">
-          <input type="file" #chatFileInput accept="image/*" style="display:none" (change)="onChatFileSelected($event)" />
-          <ion-button fill="clear" size="small" (click)="chatFileInput.click()" class="attach-btn">
-            <ion-icon name="attach-outline" slot="icon-only"></ion-icon>
-          </ion-button>
-          <ion-input type="text" [(ngModel)]="newChatMessage" placeholder="Tulis pesan..." class="chat-input"></ion-input>
-          <ion-button fill="solid" color="primary" (click)="sendChat()" [disabled]="!newChatMessage.trim() && !selectedChatFile" class="send-btn">
-            <ion-icon name="send-outline" slot="icon-only"></ion-icon>
-          </ion-button>
-        </div>
+
+        <!-- PREVIEW FOTO SEBELUM DIKIRIM -->
         <div class="chat-preview" *ngIf="selectedChatFile">
           <div class="preview-wrapper">
-            <img [src]="selectedChatFilePreview" alt="Preview" />
+            <img [src]="selectedChatFilePreview" alt="Preview Lampiran" />
             <ion-button fill="clear" size="small" (click)="selectedChatFile = null; selectedChatFilePreview = ''" class="remove-preview">
               <ion-icon name="close-circle-outline" slot="icon-only"></ion-icon>
             </ion-button>
           </div>
         </div>
+
+        <!-- INPUT CHAT & LAMPIRAN FOTO -->
+        <div class="chat-input-area">
+          <input type="file" #chatFileInput accept="image/*" style="display:none" (change)="onChatFileSelected($event)" />
+          <ion-button fill="clear" size="small" (click)="chatFileInput.click()" class="attach-btn" title="Unggah Gambar">
+            <ion-icon name="attach-outline" slot="icon-only"></ion-icon>
+          </ion-button>
+
+          <ion-input type="text" [(ngModel)]="newChatMessage" (keyup.enter)="sendChat()" placeholder="Tulis pesan..." class="chat-input"></ion-input>
+
+          <ion-button fill="solid" color="primary" (click)="sendChat()" [disabled]="!newChatMessage.trim() && !selectedChatFile" class="send-btn">
+            <ion-icon name="send-outline" slot="icon-only"></ion-icon>
+          </ion-button>
+        </div>
+
       </div>
     </ion-content>
   </ng-template>

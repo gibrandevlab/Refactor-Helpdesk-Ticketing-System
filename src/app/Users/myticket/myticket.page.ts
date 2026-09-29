@@ -65,11 +65,11 @@ export class MyTicketPage implements OnInit {
   private refreshInterval: any;
   private chatPollingInterval: any;
 
-user = {
-  nik: '',
-  nama: 'User',
-  role: 'Users',
-};
+  user = {
+    nik: '',
+    nama: 'User',
+    role: 'Users',
+  };
 
   myTickets: MyTicket[] = [];
   isLoading = false;
@@ -83,18 +83,7 @@ user = {
     if (!this.formData.idKategori) return [];
     return this.subKategoriAll.filter((s) => s.idKategori === this.formData.idKategori);
   }
-isMyMessage(msg: ChatMessage): boolean {
-  if (!msg) return false;
-  // Cek apakah NIK atau Sender ID sesuai dengan user yang sedang login
-  if (this.user.nik && String(msg.sender_id) === String(this.user.nik)) {
-    return true;
-  }
-  // Alternatif perbandingan berdasarkan nama jika sender_id tersimpan dalam bentuk lain
-  if (this.user.nama && msg.sender_name && msg.sender_name.toLowerCase() === this.user.nama.toLowerCase()) {
-    return true;
-  }
-  return false;
-}
+
   isModalOpen = false;
   isSaving = false;
   formData = {
@@ -149,16 +138,16 @@ isMyMessage(msg: ChatMessage): boolean {
     public chatService: ChatService
   ) {}
 
-ngOnInit() {
-  const storedUser = localStorage.getItem('user');
-  if (storedUser) {
-    try {
-      const parsed = JSON.parse(storedUser);
-      this.user.nik = parsed.nik || '';
-      this.user.nama = parsed.nama || 'User';
-      const rawRole = parsed.role || 'users';
-      this.user.role = rawRole.charAt(0).toUpperCase() + rawRole.slice(1).toLowerCase();
-    } catch (e) {}
+  ngOnInit() {
+    const storedUser = localStorage.getItem('user');
+    if (storedUser) {
+      try {
+        const parsed = JSON.parse(storedUser);
+        this.user.nik = parsed.nik || parsed.id || '';
+        this.user.nama = parsed.nama || 'User';
+        const rawRole = parsed.role || 'users';
+        this.user.role = rawRole.charAt(0).toUpperCase() + rawRole.slice(1).toLowerCase();
+      } catch (e) {}
     }
 
     this.loadMyAssets();
@@ -828,6 +817,40 @@ ngOnInit() {
   // ==========================================
   // FITUR CHAT DUA ARAH & AUTO REFRESH / POLLING
   // ==========================================
+
+  /**
+   * Pengecekan presisi apakah pesan milik user yang sedang login
+   */
+  isMyMessage(msg: ChatMessage): boolean {
+    if (!msg) return false;
+
+    const currentNik = String(this.user.nik || '').trim().toLowerCase();
+    const msgSenderId = String(msg.sender_id || '').trim().toLowerCase();
+    const currentName = String(this.user.nama || '').trim().toLowerCase();
+    const msgSenderName = String(msg.sender_name || '').trim().toLowerCase();
+
+    // 1. Pencocokan NIK / Sender ID
+    if (currentNik && msgSenderId && currentNik === msgSenderId) {
+      return true;
+    }
+
+    // 2. Pencocokan Nama Pengirim
+    if (currentName && msgSenderName && currentName === msgSenderName) {
+      return true;
+    }
+
+    // 3. Pencocokan Role Users + Nama Pengirim
+    if (
+      msg.sender_role?.toLowerCase() === 'users' &&
+      currentName &&
+      msgSenderName === currentName
+    ) {
+      return true;
+    }
+
+    return false;
+  }
+
   openChatModal(idTicket: string) {
     this.selectedTicketId = idTicket;
     this.chatMessages = [];
@@ -836,10 +859,8 @@ ngOnInit() {
     this.selectedChatFilePreview = '';
     this.isChatModalOpen = true;
 
-    // Dimuat pertama kali
     this.loadChatMessages(idTicket, false);
 
-    // Aktifkan polling interval (refresh otomatis tiap 3 detik)
     if (this.chatPollingInterval) clearInterval(this.chatPollingInterval);
     this.chatPollingInterval = setInterval(() => {
       if (this.isChatModalOpen) {
@@ -894,7 +915,11 @@ ngOnInit() {
     this.chatService.sendMessage(this.selectedTicketId, messageText, this.selectedChatFile).subscribe({
       next: (res) => {
         const newMsg = res?.data || res;
-        this.chatMessages.push(newMsg);
+        if (newMsg) {
+          this.chatMessages.push(newMsg);
+        } else {
+          this.loadChatMessages(this.selectedTicketId, true);
+        }
         this.newChatMessage = '';
         this.selectedChatFile = null;
         this.selectedChatFilePreview = '';
@@ -925,7 +950,7 @@ ngOnInit() {
       idSubKategori: null,
       asset: '',
       deskripsi: '',
-      prioritas: '' as any,
+      prioritas: 'Normal',
       lampiranFile: null
     };
     this.isModalOpen = true;

@@ -70,7 +70,7 @@ export class ProsesTiketPage implements OnInit, OnDestroy {
   isSidebarOpen = false;
   activeMenu = 'proses-tiket';
 
-  user = { nama: 'Teknisi', role: 'Teknisi' };
+  user = { nik: '', nama: 'Teknisi', role: 'Teknisi' };
 
   tickets: ProsesTicket[] = [];
   isLoading = false;
@@ -113,10 +113,11 @@ export class ProsesTiketPage implements OnInit, OnDestroy {
 
   private tickInterval: any;
   private refreshInterval: any;
+  private chatPollingInterval: any;
 
   constructor(
     private router: Router,
-    private route: ActivatedRoute, // 🔥 BARU
+    private route: ActivatedRoute,
     private ticketService: TicketService,
     public chatService: ChatService
   ) {}
@@ -126,6 +127,7 @@ export class ProsesTiketPage implements OnInit, OnDestroy {
     if (storedUser) {
       try {
         const parsed = JSON.parse(storedUser);
+        this.user.nik = parsed.nik || parsed.id_teknisi || parsed.id || '';
         this.user.nama = parsed.nama || 'Teknisi';
         this.user.role = parsed.role || 'Teknisi';
       } catch (e) {}
@@ -137,6 +139,7 @@ export class ProsesTiketPage implements OnInit, OnDestroy {
   ngOnDestroy() {
     this.stopTicking();
     if (this.refreshInterval) clearInterval(this.refreshInterval);
+    if (this.chatPollingInterval) clearInterval(this.chatPollingInterval);
   }
 
   private startTicking() {
@@ -186,7 +189,7 @@ export class ProsesTiketPage implements OnInit, OnDestroy {
           });
         } else {
           this.tickets = freshTickets;
-          this.openTicketFromQueryParam(); // 🔥 BARU — hanya jalan saat load awal (non-silent)
+          this.openTicketFromQueryParam();
         }
 
         this.isLoading = false;
@@ -201,13 +204,10 @@ export class ProsesTiketPage implements OnInit, OnDestroy {
     });
   }
 
-  // 🔥 BARU — auto-buka modal Check Sheet kalau datang dari klaim asset
-  // (schedule.page.ts Teknisi mengirim ?openTicket=<id_ticket>)
   private openTicketFromQueryParam() {
     const targetTicketId = this.route.snapshot.queryParamMap.get('openTicket');
     if (!targetTicketId) return;
 
-    // hilangkan query param dari URL biar refresh/reload gak buka modal lagi
     this.router.navigate([], { relativeTo: this.route, queryParams: {}, replaceUrl: true });
 
     const target = this.tickets.find((t) => t.idTicket === targetTicketId);
@@ -545,6 +545,43 @@ export class ProsesTiketPage implements OnInit, OnDestroy {
     return h.id_log;
   }
 
+  // ==========================================
+  // FITUR CHAT DUA ARAH & AUTO REFRESH / POLLING
+  // ==========================================
+
+  /**
+   * Pengecekan presisi apakah pesan milik teknisi yang sedang login
+   */
+  isMyMessage(msg: ChatMessage): boolean {
+    if (!msg) return false;
+
+    const currentNik = String(this.user.nik || '').trim().toLowerCase();
+    const msgSenderId = String(msg.sender_id || '').trim().toLowerCase();
+    const currentName = String(this.user.nama || '').trim().toLowerCase();
+    const msgSenderName = String(msg.sender_name || '').trim().toLowerCase();
+
+    // 1. Pencocokan NIK / Sender ID
+    if (currentNik && msgSenderId && currentNik === msgSenderId) {
+      return true;
+    }
+
+    // 2. Pencocokan Nama Pengirim
+    if (currentName && msgSenderName && currentName === msgSenderName) {
+      return true;
+    }
+
+    // 3. Pencocokan Role Teknisi + Nama Pengirim
+    if (
+      msg.sender_role?.toLowerCase() === 'teknisi' &&
+      currentName &&
+      msgSenderName === currentName
+    ) {
+      return true;
+    }
+
+    return false;
+  }
+
   openChatModal(idTicket: string) {
     this.selectedTicketId = idTicket;
     this.chatMessages = [];
@@ -552,20 +589,44 @@ export class ProsesTiketPage implements OnInit, OnDestroy {
     this.selectedChatFile = null;
     this.selectedChatFilePreview = '';
     this.isChatModalOpen = true;
-    this.loadChatMessages(idTicket);
+
+    this.loadChatMessages(idTicket, false);
+
+    if (this.chatPollingInterval) clearInterval(this.chatPollingInterval);
+    this.chatPollingInterval = setInterval(() => {
+      if (this.isChatModalOpen) {
+        this.loadChatMessages(idTicket, true);
+      }
+    }, 3000);
   }
-  closeChatModal() { this.isChatModalOpen = false; }
-  loadChatMessages(idTicket: string) {
-    this.isChatLoading = true;
+
+  closeChatModal() {
+    this.isChatModalOpen = false;
+    if (this.chatPollingInterval) {
+      clearInterval(this.chatPollingInterval);
+    }
+  }
+
+  loadChatMessages(idTicket: string, isSilent = false) {
+    if (!isSilent) this.isChatLoading = true;
     this.chatService.getChats(idTicket).subscribe({
       next: (res: any) => {
-        this.chatMessages = res?.data || res || [];
+        const data = res?.data || res || [];
+        const hasNewMessage = data.length > this.chatMessages.length;
+        this.chatMessages = data;
         this.isChatLoading = false;
-        setTimeout(() => this.scrollToBottom(), 150);
+
+        if (hasNewMessage || !isSilent) {
+          setTimeout(() => this.scrollToBottom(), 150);
+        }
       },
-      error: (err: any) => { console.error('Gagal load chat', err); this.isChatLoading = false; }
+      error: (err: any) => {
+        console.error('Gagal load chat', err);
+        this.isChatLoading = false;
+      }
     });
   }
+
   onChatFileSelected(event: any) {
     const file = event.target.files[0];
     if (file) {
@@ -577,13 +638,19 @@ export class ProsesTiketPage implements OnInit, OnDestroy {
       reader.readAsDataURL(file);
     }
   }
+
   sendChat() {
     const messageText = this.newChatMessage.trim();
     if (!messageText && !this.selectedChatFile) return;
+
     this.chatService.sendMessage(this.selectedTicketId, messageText, this.selectedChatFile).subscribe({
       next: (res: any) => {
         const newMsg = res?.data || res;
-        this.chatMessages.push(newMsg);
+        if (newMsg) {
+          this.chatMessages.push(newMsg);
+        } else {
+          this.loadChatMessages(this.selectedTicketId, true);
+        }
         this.newChatMessage = '';
         this.selectedChatFile = null;
         this.selectedChatFilePreview = '';
@@ -595,10 +662,16 @@ export class ProsesTiketPage implements OnInit, OnDestroy {
       }
     });
   }
-  openImagePreview(url: string | null) { if (url) window.open(url, '_blank'); }
+
+  openImagePreview(url: string | null) {
+    if (url) window.open(url, '_blank');
+  }
+
   scrollToBottom() {
     try {
-      this.chatContainer.nativeElement.scrollTop = this.chatContainer.nativeElement.scrollHeight;
+      if (this.chatContainer && this.chatContainer.nativeElement) {
+        this.chatContainer.nativeElement.scrollTop = this.chatContainer.nativeElement.scrollHeight;
+      }
     } catch (err) { }
   }
 

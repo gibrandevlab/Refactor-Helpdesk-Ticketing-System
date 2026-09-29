@@ -357,14 +357,22 @@
 }
 
 /* ========================================== */
-/* OVERRIDE OVERLAY MODAL                    */
+/* OVERRIDE OVERLAY MODAL (3/4 UKURAN LAYAR)  */
 /* ========================================== */
 ion-modal.custom-myticket-modal {
-  --width: 90%;
-  --max-width: 500px;
+  /* Ukuran 3/4 layar (75% viewport) yang dinamis untuk HP & Laptop */
+  --width: 75vw;
+  --height: 75vh;
+  --max-width: 1000px;
+  --max-height: 85vh;
   --border-radius: 16px;
   --box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.15);
   --background: #ffffff !important;
+
+  @media (max-width: 576px) {
+    --width: 92vw;
+    --height: 82vh;
+  }
 
   &::part(content) {
     background: #ffffff !important;
@@ -403,17 +411,17 @@ ion-modal.custom-myticket-modal {
 }
 
 /* ========================================== */
-/* STYLING MODAL CHAT DUA ARAH & INTERVENSI  */
+/* STYLING CHAT DUA ARAH (KIRI VS KANAN)      */
 /* ========================================== */
 .modal-content {
-  --background: #f2f5f8;
+  --background: #f8fafc;
 }
 
 .chat-container {
   display: flex;
   flex-direction: column;
   height: 100%;
-  background: #f2f5f8;
+  background: #f8fafc;
 }
 
 .chat-messages {
@@ -433,51 +441,138 @@ ion-modal.custom-myticket-modal {
   font-size: 14px;
 }
 
+/* BASE CHAT BUBBLE */
 .chat-bubble {
-  max-width: 80%;
-  padding: 10px 16px;
-  border-radius: 18px;
+  max-width: 72%;
+  padding: 10px 14px;
+  border-radius: 14px;
   position: relative;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
-  align-self: flex-start;
-  background: #ffffff;
-  border: 1px solid #e5e7eb;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  display: flex;
+  flex-direction: column;
 }
 
 .bubble-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
   font-size: 11px;
-  color: var(--text-muted);
   margin-bottom: 4px;
 }
 
 .sender-name {
   font-weight: 600;
-  color: var(--primary);
   display: inline-flex;
   align-items: center;
 }
 
 .bubble-text {
-  font-size: 14px;
-  color: var(--text-dark);
-  line-height: 1.5;
+  font-size: 13.5px;
+  line-height: 1.45;
   word-break: break-word;
 }
 
 .bubble-image img {
-  max-width: 200px;
-  max-height: 200px;
+  max-width: 100%;
+  max-height: 220px;
   border-radius: 8px;
   margin-bottom: 6px;
   cursor: pointer;
   object-fit: cover;
+  display: block;
 }
 
-/* BADGE ROLE DUA ARAH / INTERVENSI */
+/* ========================================== */
+/* 1. CHAT DIRI SENDIRI (SELALU DI KANAN)     */
+/* ========================================== */
+.chat-bubble.bubble-me {
+  align-self: flex-end !important;
+  background: #2563eb !important; /* Warna Biru Utama */
+  border: 1px solid #1d4ed8;
+  border-bottom-right-radius: 2px;
+
+  .bubble-header {
+    color: #e0e7ff;
+
+    .sender-name {
+      color: #ffffff;
+      font-weight: 700;
+    }
+
+    .time {
+      color: #cbd5e1;
+    }
+  }
+
+  .bubble-text {
+    color: #ffffff !important; /* Teks Putih Kontras */
+  }
+
+  .role-badge {
+    background: #1e40af;
+    color: #ffffff;
+    border: 1px solid #60a5fa;
+  }
+}
+
+/* ========================================== */
+/* 2. CHAT ORANG LAIN (SELALU DI KIRI)       */
+/* ========================================== */
+.chat-bubble.bubble-other {
+  align-self: flex-start !important;
+  border-bottom-left-radius: 2px;
+
+  .bubble-header {
+    .time {
+      color: #64748b;
+    }
+  }
+}
+
+/* A. CHAT ORANG LAIN: ROLE ADMIN (MERAH) */
+.chat-bubble.bubble-other.bubble-role-admin {
+  background: #fef2f2 !important;
+  border: 1px solid #fecdd3 !important;
+
+  .sender-name {
+    color: #dc2626;
+  }
+
+  .bubble-text {
+    color: #7f1d1d !important;
+  }
+}
+
+/* B. CHAT ORANG LAIN: ROLE TEKNISI (HIJAU) */
+.chat-bubble.bubble-other.bubble-role-teknisi {
+  background: #f0fdf4 !important;
+  border: 1px solid #bbf7d0 !important;
+
+  .sender-name {
+    color: #16a34a;
+  }
+
+  .bubble-text {
+    color: #14532d !important;
+  }
+}
+
+/* C. CHAT ORANG LAIN: ROLE USERS (BIRU MUDA) */
+.chat-bubble.bubble-other.bubble-role-users {
+  background: #eff6ff !important;
+  border: 1px solid #bfdbfe !important;
+
+  .sender-name {
+    color: #2563eb;
+  }
+
+  .bubble-text {
+    color: #1e3a8a !important;
+  }
+}
+
+/* BADGE ROLE WARNA-WARNI */
 .role-badge {
   font-size: 9.5px;
   padding: 2px 6px;
@@ -487,56 +582,29 @@ ion-modal.custom-myticket-modal {
   text-transform: uppercase;
   letter-spacing: 0.3px;
 
+  /* Admin = Merah */
   &.badge-admin {
-    background: #fef2f2;
-    color: #ef4444;
+    background: #fee2e2;
+    color: #dc2626;
     border: 1px solid #fca5a5;
   }
 
+  /* Teknisi = Hijau */
   &.badge-teknisi {
-    background: #f0fdf4;
-    color: #16a34a;
+    background: #dcfce7;
+    color: #15803d;
     border: 1px solid #86efac;
   }
 
+  /* Users = Biru */
   &.badge-users {
-    background: #eff6ff;
-    color: #2563eb;
-    border: 1px solid #bfdbfe;
+    background: #dbeafe;
+    color: #1d4ed8;
+    border: 1px solid #93c5fd;
   }
 }
 
-/* CHAT BUBBLE UNTUK SAYA (USER YANG LOGIN) */
-.chat-bubble.bubble-me {
-  align-self: flex-end;
-  background: var(--primary);
-  color: #ffffff;
-  border-color: var(--primary);
-  border-bottom-right-radius: 4px;
-
-  .bubble-header {
-    color: rgba(255, 255, 255, 0.8);
-  }
-
-  .sender-name {
-    color: #ffffff;
-  }
-
-  .bubble-text {
-    color: #ffffff;
-  }
-}
-
-/* STYLING KHUSUS TAMPILAN INTERVENSI ADMIN (Bukan Pesan Saya) */
-.chat-bubble.bubble-admin:not(.bubble-me) {
-  background: #fff5f5;
-  border: 1px solid #fecaca;
-
-  .sender-name {
-    color: #dc2626;
-  }
-}
-
+/* INPUT AREA CHAT */
 .chat-input-area {
   display: flex;
   align-items: center;
@@ -595,7 +663,7 @@ ion-modal.custom-myticket-modal {
 }
 
 .chat-messages::-webkit-scrollbar {
-  width: 4px;
+  width: 5px;
 }
 .chat-messages::-webkit-scrollbar-thumb {
   background: #cbd5e1;

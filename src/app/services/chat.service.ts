@@ -11,6 +11,7 @@ export interface ChatMessage {
   sender_name: string;
   message: string | null;
   attachment_url: string | null;
+  lampiran?: string;
   created_at: string;
   is_read: boolean;
 }

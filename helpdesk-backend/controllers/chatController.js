@@ -158,7 +158,7 @@ exports.sendChat = async (req, res) => {
       senderId = String(info.id_teknisi);
     }
 
-    const attachmentUrl = hasFile ? `/uploads/${req.file.filename}` : null;
+    const attachmentUrl = hasFile ? `/uploads/lampiran/${req.file.filename}` : null;
 
     const newChat = await ticket_chat.create({
       id_ticket,
