@@ -1,0 +1,658 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1920" height="1080" viewBox="0 0 1920 1080" font-family="Arial,Liberation Sans,Helvetica,sans-serif">
+  <rect width="1920" height="1080" fill="#ffffff"/>
+  <rect width="14" height="1080" fill="#0f766e"/>
+  <text x="64" y="70" font-size="42" font-weight="700" fill="#0f172a">Manajemen Aset</text>
+  <text x="64" y="106" font-size="20" fill="#64748b">Inventaris dan riwayat aset  ·  8 tabel  ·  16 relasi  ·  dipakai oleh: Tiket &amp; Helpdesk, Preventive Maintenance &amp; Checklist</text>
+  <g transform="translate(64.00 159.70) scale(0.9451)">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(18 845.6)">
+<title>ERD</title>
+<!-- asset_department_history -->
+<g id="node1" class="node">
+<title>asset_department_history</title>
+<polygon fill="#0f766e" stroke="none" points="1304.25,-238 1304.25,-274.4 1591.93,-274.4 1591.93,-238 1304.25,-238"/>
+<polygon fill="none" stroke="#cbd5e1" points="1304.25,-238 1304.25,-274.4 1591.93,-274.4 1591.93,-238 1304.25,-238"/>
+<text xml:space="preserve" text-anchor="start" x="1342.27" y="-252.1" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-weight="bold" font-size="17.00" fill="#ffffff">asset_department_history</text>
+<polygon fill="#fef2f2" stroke="none" points="1304.25,-210 1304.25,-238 1591.93,-238 1591.93,-210 1304.25,-210"/>
+<polygon fill="none" stroke="#cbd5e1" points="1304.25,-210 1304.25,-238 1591.93,-238 1591.93,-210 1304.25,-210"/>
+<text xml:space="preserve" text-anchor="start" x="1309.25" y="-220.5" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-weight="bold" font-size="11.00" fill="#b91c1c">PK</text>
+<text xml:space="preserve" text-anchor="start" x="1324.53" y="-220.5" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="14.00">  </text>
+<text xml:space="preserve" text-anchor="start" x="1340.09" y="-220.5" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-weight="bold" font-size="15.00" fill="#b91c1c">id</text>
+<text xml:space="preserve" text-anchor="start" x="1353.42" y="-220.5" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="14.00">  </text>
+<text xml:space="preserve" text-anchor="start" x="1368.97" y="-220.5" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="12.00" fill="#94a3b8">INTEGER</text>
+<polygon fill="#eff6ff" stroke="none" points="1304.25,-182 1304.25,-210 1591.93,-210 1591.93,-182 1304.25,-182"/>
+<polygon fill="none" stroke="#cbd5e1" points="1304.25,-182 1304.25,-210 1591.93,-210 1591.93,-182 1304.25,-182"/>
+<text xml:space="preserve" text-anchor="start" x="1309.25" y="-192.5" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-weight="bold" font-size="11.00" fill="#0369a1">FK</text>
+<text xml:space="preserve" text-anchor="start" x="1323.91" y="-192.5" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="14.00">  </text>
+<text xml:space="preserve" text-anchor="start" x="1339.47" y="-192.5" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-weight="bold" font-size="15.00" fill="#0369a1">kode_asset</text>
+<text xml:space="preserve" text-anchor="start" x="1421.18" y="-192.5" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="14.00">  </text>
+<text xml:space="preserve" text-anchor="start" x="1436.74" y="-192.5" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="12.00" fill="#94a3b8">NVARCHAR(50)</text>
+<polygon fill="#eff6ff" stroke="none" points="1304.25,-154 1304.25,-182 1591.93,-182 1591.93,-154 1304.25,-154"/>
+<polygon fill="none" stroke="#cbd5e1" points="1304.25,-154 1304.25,-182 1591.93,-182 1591.93,-154 1304.25,-154"/>
+<text xml:space="preserve" text-anchor="start" x="1309.25" y="-164.5" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-weight="bold" font-size="11.00" fill="#0369a1">FK</text>
+<text xml:space="preserve" text-anchor="start" x="1323.91" y="-164.5" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="14.00">  </text>
+<text xml:space="preserve" text-anchor="start" x="1339.47" y="-164.5" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-weight="bold" font-size="15.00" fill="#0369a1">id_departemen_lama</text>
+<text xml:space="preserve" text-anchor="start" x="1488.7" y="-164.5" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="14.00">  </text>
+<text xml:space="preserve" text-anchor="start" x="1504.26" y="-164.5" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="12.00" fill="#94a3b8">INTEGER</text>
+<polygon fill="#ffffff" stroke="none" points="1304.25,-126 1304.25,-154 1591.93,-154 1591.93,-126 1304.25,-126"/>
+<polygon fill="none" stroke="#cbd5e1" points="1304.25,-126 1304.25,-154 1591.93,-154 1591.93,-126 1304.25,-126"/>
+<text xml:space="preserve" text-anchor="start" x="1309.25" y="-136.5" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="15.00" fill="#334155">nama_departemen_lama</text>
+<text xml:space="preserve" text-anchor="start" x="1476.02" y="-136.5" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="14.00">  </text>
+<text xml:space="preserve" text-anchor="start" x="1491.58" y="-136.5" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="12.00" fill="#94a3b8">NVARCHAR(100)</text>
+<polygon fill="#eff6ff" stroke="none" points="1304.25,-98 1304.25,-126 1591.93,-126 1591.93,-98 1304.25,-98"/>
+<polygon fill="none" stroke="#cbd5e1" points="1304.25,-98 1304.25,-126 1591.93,-126 1591.93,-98 1304.25,-98"/>
+<text xml:space="preserve" text-anchor="start" x="1309.25" y="-108.5" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-weight="bold" font-size="11.00" fill="#0369a1">FK</text>
+<text xml:space="preserve" text-anchor="start" x="1323.91" y="-108.5" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="14.00">  </text>
+<text xml:space="preserve" text-anchor="start" x="1339.47" y="-108.5" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-weight="bold" font-size="15.00" fill="#0369a1">id_departemen_baru</text>
+<text xml:space="preserve" text-anchor="start" x="1487.01" y="-108.5" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="14.00">  </text>
+<text xml:space="preserve" text-anchor="start" x="1502.57" y="-108.5" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="12.00" fill="#94a3b8">INTEGER</text>
+<polygon fill="#ffffff" stroke="none" points="1304.25,-70 1304.25,-98 1591.93,-98 1591.93,-70 1304.25,-70"/>
+<polygon fill="none" stroke="#cbd5e1" points="1304.25,-70 1304.25,-98 1591.93,-98 1591.93,-70 1304.25,-70"/>
+<text xml:space="preserve" text-anchor="start" x="1309.25" y="-80.5" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="15.00" fill="#334155">nama_departemen_baru</text>
+<text xml:space="preserve" text-anchor="start" x="1473.53" y="-80.5" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="14.00">  </text>
+<text xml:space="preserve" text-anchor="start" x="1489.09" y="-80.5" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="12.00" fill="#94a3b8">NVARCHAR(100)</text>
+<polygon fill="#ffffff" stroke="none" points="1304.25,-42 1304.25,-70 1591.93,-70 1591.93,-42 1304.25,-42"/>
+<polygon fill="none" stroke="#cbd5e1" points="1304.25,-42 1304.25,-70 1591.93,-70 1591.93,-42 1304.25,-42"/>
+<text xml:space="preserve" text-anchor="start" x="1309.25" y="-52.5" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="15.00" fill="#334155">keterangan</text>
+<text xml:space="preserve" text-anchor="start" x="1384.3" y="-52.5" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="14.00">  </text>
+<text xml:space="preserve" text-anchor="start" x="1399.86" y="-52.5" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="12.00" fill="#94a3b8">NVARCHAR(255)</text>
+<polygon fill="#ffffff" stroke="none" points="1304.25,-14 1304.25,-42 1591.93,-42 1591.93,-14 1304.25,-14"/>
+<polygon fill="none" stroke="#cbd5e1" points="1304.25,-14 1304.25,-42 1591.93,-42 1591.93,-14 1304.25,-14"/>
+<text xml:space="preserve" text-anchor="start" x="1309.25" y="-24.5" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="15.00" fill="#334155">tanggal_pindah</text>
+<text xml:space="preserve" text-anchor="start" x="1411.84" y="-24.5" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="14.00">  </text>
+<text xml:space="preserve" text-anchor="start" x="1427.4" y="-24.5" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="12.00" fill="#94a3b8">DATETIMEOFFSET</text>
+</g>
+<!-- asset_hardware -->
+<g id="node2" class="node">
+<title>asset_hardware</title>
+<polygon fill="#0f766e" stroke="none" points="1046,-224 1046,-260.4 1272.18,-260.4 1272.18,-224 1046,-224"/>
+<polygon fill="none" stroke="#cbd5e1" points="1046,-224 1046,-260.4 1272.18,-260.4 1272.18,-224 1046,-224"/>
+<text xml:space="preserve" text-anchor="start" x="1094.83" y="-238.1" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-weight="bold" font-size="17.00" fill="#ffffff">asset_hardware</text>
+<polygon fill="#fef2f2" stroke="none" points="1046,-196 1046,-224 1272.18,-224 1272.18,-196 1046,-196"/>
+<polygon fill="none" stroke="#cbd5e1" points="1046,-196 1046,-224 1272.18,-224 1272.18,-196 1046,-196"/>
+<text xml:space="preserve" text-anchor="start" x="1051" y="-206.5" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-weight="bold" font-size="11.00" fill="#b91c1c">PK</text>
+<text xml:space="preserve" text-anchor="start" x="1066.28" y="-206.5" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="14.00">  </text>
+<text xml:space="preserve" text-anchor="start" x="1081.84" y="-206.5" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-weight="bold" font-size="15.00" fill="#b91c1c">id</text>
+<text xml:space="preserve" text-anchor="start" x="1095.17" y="-206.5" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="14.00">  </text>
+<text xml:space="preserve" text-anchor="start" x="1110.73" y="-206.5" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="12.00" fill="#94a3b8">INTEGER</text>
+<polygon fill="#eff6ff" stroke="none" points="1046,-168 1046,-196 1272.18,-196 1272.18,-168 1046,-168"/>
+<polygon fill="none" stroke="#cbd5e1" points="1046,-168 1046,-196 1272.18,-196 1272.18,-168 1046,-168"/>
+<text xml:space="preserve" text-anchor="start" x="1051" y="-178.5" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-weight="bold" font-size="11.00" fill="#0369a1">FK</text>
+<text xml:space="preserve" text-anchor="start" x="1065.66" y="-178.5" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="14.00">  </text>
+<text xml:space="preserve" text-anchor="start" x="1081.22" y="-178.5" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-weight="bold" font-size="15.00" fill="#0369a1">kode_asset</text>
+<text xml:space="preserve" text-anchor="start" x="1162.94" y="-178.5" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="14.00">  </text>
+<text xml:space="preserve" text-anchor="start" x="1178.5" y="-178.5" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="12.00" fill="#94a3b8">NVARCHAR(50)</text>
+<polygon fill="#ffffff" stroke="none" points="1046,-140 1046,-168 1272.18,-168 1272.18,-140 1046,-140"/>
+<polygon fill="none" stroke="#cbd5e1" points="1046,-140 1046,-168 1272.18,-168 1272.18,-140 1046,-140"/>
+<text xml:space="preserve" text-anchor="start" x="1051" y="-150.5" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="15.00" fill="#334155">komponen</text>
+<text xml:space="preserve" text-anchor="start" x="1121.05" y="-150.5" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="14.00">  </text>
+<text xml:space="preserve" text-anchor="start" x="1136.61" y="-150.5" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="12.00" fill="#94a3b8">NVARCHAR(100)</text>
+<polygon fill="#ffffff" stroke="none" points="1046,-112 1046,-140 1272.18,-140 1272.18,-112 1046,-112"/>
+<polygon fill="none" stroke="#cbd5e1" points="1046,-112 1046,-140 1272.18,-140 1272.18,-112 1046,-112"/>
+<text xml:space="preserve" text-anchor="start" x="1051" y="-122.5" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="15.00" fill="#334155">spesifikasi</text>
+<text xml:space="preserve" text-anchor="start" x="1120.19" y="-122.5" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="14.00">  </text>
+<text xml:space="preserve" text-anchor="start" x="1135.75" y="-122.5" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="12.00" fill="#94a3b8">NVARCHAR(255)</text>
+<polygon fill="#ffffff" stroke="none" points="1046,-84 1046,-112 1272.18,-112 1272.18,-84 1046,-84"/>
+<polygon fill="none" stroke="#cbd5e1" points="1046,-84 1046,-112 1272.18,-112 1272.18,-84 1046,-84"/>
+<text xml:space="preserve" text-anchor="start" x="1051" y="-94.5" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="15.00" fill="#334155">keterangan</text>
+<text xml:space="preserve" text-anchor="start" x="1126.06" y="-94.5" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="14.00">  </text>
+<text xml:space="preserve" text-anchor="start" x="1141.62" y="-94.5" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="12.00" fill="#94a3b8">NVARCHAR(MAX)</text>
+<polygon fill="#ffffff" stroke="none" points="1046,-56 1046,-84 1272.18,-84 1272.18,-56 1046,-56"/>
+<polygon fill="none" stroke="#cbd5e1" points="1046,-56 1046,-84 1272.18,-84 1272.18,-56 1046,-56"/>
+<text xml:space="preserve" text-anchor="start" x="1051" y="-66.5" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="15.00" fill="#334155">created_at</text>
+<text xml:space="preserve" text-anchor="start" x="1121.88" y="-66.5" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="14.00">  </text>
+<text xml:space="preserve" text-anchor="start" x="1137.44" y="-66.5" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="12.00" fill="#94a3b8">DATETIMEOFFSET</text>
+<polygon fill="#ffffff" stroke="none" points="1046,-28 1046,-56 1272.18,-56 1272.18,-28 1046,-28"/>
+<polygon fill="none" stroke="#cbd5e1" points="1046,-28 1046,-56 1272.18,-56 1272.18,-28 1046,-28"/>
+<text xml:space="preserve" text-anchor="start" x="1051" y="-38.5" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="15.00" fill="#334155">updated_at</text>
+<text xml:space="preserve" text-anchor="start" x="1126.07" y="-38.5" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="14.00">  </text>
+<text xml:space="preserve" text-anchor="start" x="1141.63" y="-38.5" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="12.00" fill="#94a3b8">DATETIMEOFFSET</text>
+</g>
+<!-- asset_hardware_detail -->
+<g id="node3" class="node">
+<title>asset_hardware_detail</title>
+<polygon fill="#0f766e" stroke="none" points="529.69,-250.8 529.69,-287.2 756.49,-287.2 756.49,-250.8 529.69,-250.8"/>
+<polygon fill="none" stroke="#cbd5e1" points="529.69,-250.8 529.69,-287.2 756.49,-287.2 756.49,-250.8 529.69,-250.8"/>
+<text xml:space="preserve" text-anchor="start" x="551.9" y="-264.9" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-weight="bold" font-size="17.00" fill="#ffffff">asset_hardware_detail</text>
+<polygon fill="#fef2f2" stroke="none" points="529.69,-222.8 529.69,-250.8 756.49,-250.8 756.49,-222.8 529.69,-222.8"/>
+<polygon fill="none" stroke="#cbd5e1" points="529.69,-222.8 529.69,-250.8 756.49,-250.8 756.49,-222.8 529.69,-222.8"/>
+<text xml:space="preserve" text-anchor="start" x="534.69" y="-233.3" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-weight="bold" font-size="11.00" fill="#b91c1c">PK</text>
+<text xml:space="preserve" text-anchor="start" x="549.97" y="-233.3" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="14.00">  </text>
+<text xml:space="preserve" text-anchor="start" x="565.53" y="-233.3" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-weight="bold" font-size="15.00" fill="#b91c1c">kode_asset</text>
+<text xml:space="preserve" text-anchor="start" x="647.25" y="-233.3" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="14.00">  </text>
+<text xml:space="preserve" text-anchor="start" x="662.81" y="-233.3" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="12.00" fill="#94a3b8">NVARCHAR(50)</text>
+<polygon fill="#ffffff" stroke="none" points="529.69,-194.8 529.69,-222.8 756.49,-222.8 756.49,-194.8 529.69,-194.8"/>
+<polygon fill="none" stroke="#cbd5e1" points="529.69,-194.8 529.69,-222.8 756.49,-222.8 756.49,-194.8 529.69,-194.8"/>
+<text xml:space="preserve" text-anchor="start" x="534.69" y="-205.3" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="15.00" fill="#334155">serial_no_pc</text>
+<text xml:space="preserve" text-anchor="start" x="619.75" y="-205.3" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="14.00">  </text>
+<text xml:space="preserve" text-anchor="start" x="635.31" y="-205.3" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="12.00" fill="#94a3b8">NVARCHAR(100)</text>
+<polygon fill="#ffffff" stroke="none" points="529.69,-166.8 529.69,-194.8 756.49,-194.8 756.49,-166.8 529.69,-166.8"/>
+<polygon fill="none" stroke="#cbd5e1" points="529.69,-166.8 529.69,-194.8 756.49,-194.8 756.49,-166.8 529.69,-166.8"/>
+<text xml:space="preserve" text-anchor="start" x="534.69" y="-177.3" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="15.00" fill="#334155">mobo_type</text>
+<text xml:space="preserve" text-anchor="start" x="608.91" y="-177.3" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="14.00">  </text>
+<text xml:space="preserve" text-anchor="start" x="624.47" y="-177.3" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="12.00" fill="#94a3b8">NVARCHAR(100)</text>
+<polygon fill="#ffffff" stroke="none" points="529.69,-138.8 529.69,-166.8 756.49,-166.8 756.49,-138.8 529.69,-138.8"/>
+<polygon fill="none" stroke="#cbd5e1" points="529.69,-138.8 529.69,-166.8 756.49,-166.8 756.49,-138.8 529.69,-138.8"/>
+<text xml:space="preserve" text-anchor="start" x="534.69" y="-149.3" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="15.00" fill="#334155">kelas</text>
+<text xml:space="preserve" text-anchor="start" x="569.71" y="-149.3" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="14.00">  </text>
+<text xml:space="preserve" text-anchor="start" x="585.27" y="-149.3" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="12.00" fill="#94a3b8">NVARCHAR(50)</text>
+<polygon fill="#ffffff" stroke="none" points="529.69,-110.8 529.69,-138.8 756.49,-138.8 756.49,-110.8 529.69,-110.8"/>
+<polygon fill="none" stroke="#cbd5e1" points="529.69,-110.8 529.69,-138.8 756.49,-138.8 756.49,-110.8 529.69,-110.8"/>
+<text xml:space="preserve" text-anchor="start" x="534.69" y="-121.3" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="15.00" fill="#334155">processor</text>
+<text xml:space="preserve" text-anchor="start" x="600.55" y="-121.3" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="14.00">  </text>
+<text xml:space="preserve" text-anchor="start" x="616.11" y="-121.3" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="12.00" fill="#94a3b8">NVARCHAR(150)</text>
+<polygon fill="#ffffff" stroke="none" points="529.69,-82.8 529.69,-110.8 756.49,-110.8 756.49,-82.8 529.69,-82.8"/>
+<polygon fill="none" stroke="#cbd5e1" points="529.69,-82.8 529.69,-110.8 756.49,-110.8 756.49,-82.8 529.69,-82.8"/>
+<text xml:space="preserve" text-anchor="start" x="534.69" y="-93.3" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="15.00" fill="#334155">hdd_size</text>
+<text xml:space="preserve" text-anchor="start" x="594.74" y="-93.3" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="14.00">  </text>
+<text xml:space="preserve" text-anchor="start" x="610.29" y="-93.3" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="12.00" fill="#94a3b8">NVARCHAR(50)</text>
+<polygon fill="#ffffff" stroke="none" points="529.69,-54.8 529.69,-82.8 756.49,-82.8 756.49,-54.8 529.69,-54.8"/>
+<polygon fill="none" stroke="#cbd5e1" points="529.69,-54.8 529.69,-82.8 756.49,-82.8 756.49,-54.8 529.69,-54.8"/>
+<text xml:space="preserve" text-anchor="start" x="534.69" y="-65.3" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="15.00" fill="#334155">hdd_model</text>
+<text xml:space="preserve" text-anchor="start" x="608.91" y="-65.3" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="14.00">  </text>
+<text xml:space="preserve" text-anchor="start" x="624.47" y="-65.3" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="12.00" fill="#94a3b8">NVARCHAR(150)</text>
+<polygon fill="#ffffff" stroke="none" points="529.69,-26.8 529.69,-54.8 756.49,-54.8 756.49,-26.8 529.69,-26.8"/>
+<polygon fill="none" stroke="#cbd5e1" points="529.69,-26.8 529.69,-54.8 756.49,-54.8 756.49,-26.8 529.69,-26.8"/>
+<text xml:space="preserve" text-anchor="start" x="534.69" y="-37.3" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="15.00" fill="#334155">hdd_serial_no</text>
+<text xml:space="preserve" text-anchor="start" x="628.93" y="-37.3" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="14.00">  </text>
+<text xml:space="preserve" text-anchor="start" x="644.49" y="-37.3" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="12.00" fill="#94a3b8">NVARCHAR(100)</text>
+<polygon fill="#f8fafc" stroke="none" points="529.69,-1.2 529.69,-26.8 756.49,-26.8 756.49,-1.2 529.69,-1.2"/>
+<polygon fill="none" stroke="#cbd5e1" points="529.69,-1.2 529.69,-26.8 756.49,-26.8 756.49,-1.2 529.69,-1.2"/>
+<text xml:space="preserve" text-anchor="start" x="534.69" y="-11.1" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-style="italic" font-size="13.00" fill="#94a3b8">… +4 kolom lainnya</text>
+</g>
+<!-- asset_history -->
+<g id="node4" class="node">
+<title>asset_history</title>
+<polygon fill="#0f766e" stroke="none" points="788,-224 788,-260.4 1014.18,-260.4 1014.18,-224 788,-224"/>
+<polygon fill="none" stroke="#cbd5e1" points="788,-224 788,-260.4 1014.18,-260.4 1014.18,-224 788,-224"/>
+<text xml:space="preserve" text-anchor="start" x="846.28" y="-238.1" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-weight="bold" font-size="17.00" fill="#ffffff">asset_history</text>
+<polygon fill="#fef2f2" stroke="none" points="788,-196 788,-224 1014.18,-224 1014.18,-196 788,-196"/>
+<polygon fill="none" stroke="#cbd5e1" points="788,-196 788,-224 1014.18,-224 1014.18,-196 788,-196"/>
+<text xml:space="preserve" text-anchor="start" x="793" y="-206.5" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-weight="bold" font-size="11.00" fill="#b91c1c">PK</text>
+<text xml:space="preserve" text-anchor="start" x="808.28" y="-206.5" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="14.00">  </text>
+<text xml:space="preserve" text-anchor="start" x="823.84" y="-206.5" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-weight="bold" font-size="15.00" fill="#b91c1c">id</text>
+<text xml:space="preserve" text-anchor="start" x="837.17" y="-206.5" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="14.00">  </text>
+<text xml:space="preserve" text-anchor="start" x="852.73" y="-206.5" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="12.00" fill="#94a3b8">INTEGER</text>
+<polygon fill="#eff6ff" stroke="none" points="788,-168 788,-196 1014.18,-196 1014.18,-168 788,-168"/>
+<polygon fill="none" stroke="#cbd5e1" points="788,-168 788,-196 1014.18,-196 1014.18,-168 788,-168"/>
+<text xml:space="preserve" text-anchor="start" x="793" y="-178.5" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-weight="bold" font-size="11.00" fill="#0369a1">FK</text>
+<text xml:space="preserve" text-anchor="start" x="807.66" y="-178.5" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="14.00">  </text>
+<text xml:space="preserve" text-anchor="start" x="823.22" y="-178.5" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-weight="bold" font-size="15.00" fill="#0369a1">kode_asset</text>
+<text xml:space="preserve" text-anchor="start" x="904.94" y="-178.5" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="14.00">  </text>
+<text xml:space="preserve" text-anchor="start" x="920.5" y="-178.5" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="12.00" fill="#94a3b8">NVARCHAR(50)</text>
+<polygon fill="#ffffff" stroke="none" points="788,-140 788,-168 1014.18,-168 1014.18,-140 788,-140"/>
+<polygon fill="none" stroke="#cbd5e1" points="788,-140 788,-168 1014.18,-168 1014.18,-140 788,-140"/>
+<text xml:space="preserve" text-anchor="start" x="793" y="-150.5" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="15.00" fill="#334155">tanggal</text>
+<text xml:space="preserve" text-anchor="start" x="842.21" y="-150.5" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="14.00">  </text>
+<text xml:space="preserve" text-anchor="start" x="857.77" y="-150.5" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="12.00" fill="#94a3b8">DATE</text>
+<polygon fill="#ffffff" stroke="none" points="788,-112 788,-140 1014.18,-140 1014.18,-112 788,-112"/>
+<polygon fill="none" stroke="#cbd5e1" points="788,-112 788,-140 1014.18,-140 1014.18,-112 788,-112"/>
+<text xml:space="preserve" text-anchor="start" x="793" y="-122.5" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="15.00" fill="#334155">jenis_aktivitas</text>
+<text xml:space="preserve" text-anchor="start" x="886.38" y="-122.5" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="14.00">  </text>
+<text xml:space="preserve" text-anchor="start" x="901.94" y="-122.5" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="12.00" fill="#94a3b8">NVARCHAR(100)</text>
+<polygon fill="#ffffff" stroke="none" points="788,-84 788,-112 1014.18,-112 1014.18,-84 788,-84"/>
+<polygon fill="none" stroke="#cbd5e1" points="788,-84 788,-112 1014.18,-112 1014.18,-84 788,-84"/>
+<text xml:space="preserve" text-anchor="start" x="793" y="-94.5" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="15.00" fill="#334155">deskripsi</text>
+<text xml:space="preserve" text-anchor="start" x="852.19" y="-94.5" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="14.00">  </text>
+<text xml:space="preserve" text-anchor="start" x="867.75" y="-94.5" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="12.00" fill="#94a3b8">NVARCHAR(MAX)</text>
+<polygon fill="#ffffff" stroke="none" points="788,-56 788,-84 1014.18,-84 1014.18,-56 788,-56"/>
+<polygon fill="none" stroke="#cbd5e1" points="788,-56 788,-84 1014.18,-84 1014.18,-56 788,-56"/>
+<text xml:space="preserve" text-anchor="start" x="793" y="-66.5" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="15.00" fill="#334155">dilakukan_oleh</text>
+<text xml:space="preserve" text-anchor="start" x="893.08" y="-66.5" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="14.00">  </text>
+<text xml:space="preserve" text-anchor="start" x="908.64" y="-66.5" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="12.00" fill="#94a3b8">NVARCHAR(100)</text>
+<polygon fill="#ffffff" stroke="none" points="788,-28 788,-56 1014.18,-56 1014.18,-28 788,-28"/>
+<polygon fill="none" stroke="#cbd5e1" points="788,-28 788,-56 1014.18,-56 1014.18,-28 788,-28"/>
+<text xml:space="preserve" text-anchor="start" x="793" y="-38.5" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="15.00" fill="#334155">created_at</text>
+<text xml:space="preserve" text-anchor="start" x="863.88" y="-38.5" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="14.00">  </text>
+<text xml:space="preserve" text-anchor="start" x="879.44" y="-38.5" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="12.00" fill="#94a3b8">DATETIMEOFFSET</text>
+</g>
+<!-- asset_holder_history -->
+<g id="node5" class="node">
+<title>asset_holder_history</title>
+<polygon fill="#0f766e" stroke="none" points="1624.01,-238 1624.01,-274.4 1860.17,-274.4 1860.17,-238 1624.01,-238"/>
+<polygon fill="none" stroke="#cbd5e1" points="1624.01,-238 1624.01,-274.4 1860.17,-274.4 1860.17,-238 1624.01,-238"/>
+<text xml:space="preserve" text-anchor="start" x="1656.58" y="-252.1" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-weight="bold" font-size="17.00" fill="#ffffff">asset_holder_history</text>
+<polygon fill="#fef2f2" stroke="none" points="1624.01,-210 1624.01,-238 1860.17,-238 1860.17,-210 1624.01,-210"/>
+<polygon fill="none" stroke="#cbd5e1" points="1624.01,-210 1624.01,-238 1860.17,-238 1860.17,-210 1624.01,-210"/>
+<text xml:space="preserve" text-anchor="start" x="1629.01" y="-220.5" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-weight="bold" font-size="11.00" fill="#b91c1c">PK</text>
+<text xml:space="preserve" text-anchor="start" x="1644.29" y="-220.5" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="14.00">  </text>
+<text xml:space="preserve" text-anchor="start" x="1659.85" y="-220.5" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-weight="bold" font-size="15.00" fill="#b91c1c">id</text>
+<text xml:space="preserve" text-anchor="start" x="1673.18" y="-220.5" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="14.00">  </text>
+<text xml:space="preserve" text-anchor="start" x="1688.74" y="-220.5" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="12.00" fill="#94a3b8">INTEGER</text>
+<polygon fill="#eff6ff" stroke="none" points="1624.01,-182 1624.01,-210 1860.17,-210 1860.17,-182 1624.01,-182"/>
+<polygon fill="none" stroke="#cbd5e1" points="1624.01,-182 1624.01,-210 1860.17,-210 1860.17,-182 1624.01,-182"/>
+<text xml:space="preserve" text-anchor="start" x="1629.01" y="-192.5" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-weight="bold" font-size="11.00" fill="#0369a1">FK</text>
+<text xml:space="preserve" text-anchor="start" x="1643.67" y="-192.5" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="14.00">  </text>
+<text xml:space="preserve" text-anchor="start" x="1659.23" y="-192.5" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-weight="bold" font-size="15.00" fill="#0369a1">kode_asset</text>
+<text xml:space="preserve" text-anchor="start" x="1740.95" y="-192.5" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="14.00">  </text>
+<text xml:space="preserve" text-anchor="start" x="1756.51" y="-192.5" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="12.00" fill="#94a3b8">NVARCHAR(50)</text>
+<polygon fill="#eff6ff" stroke="none" points="1624.01,-154 1624.01,-182 1860.17,-182 1860.17,-154 1624.01,-154"/>
+<polygon fill="none" stroke="#cbd5e1" points="1624.01,-154 1624.01,-182 1860.17,-182 1860.17,-154 1624.01,-154"/>
+<text xml:space="preserve" text-anchor="start" x="1629.01" y="-164.5" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-weight="bold" font-size="11.00" fill="#0369a1">FK</text>
+<text xml:space="preserve" text-anchor="start" x="1643.67" y="-164.5" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="14.00">  </text>
+<text xml:space="preserve" text-anchor="start" x="1659.23" y="-164.5" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-weight="bold" font-size="15.00" fill="#0369a1">nik_lama</text>
+<text xml:space="preserve" text-anchor="start" x="1723.44" y="-164.5" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="14.00">  </text>
+<text xml:space="preserve" text-anchor="start" x="1739" y="-164.5" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="12.00" fill="#94a3b8">NVARCHAR(50)</text>
+<polygon fill="#ffffff" stroke="none" points="1624.01,-126 1624.01,-154 1860.17,-154 1860.17,-126 1624.01,-126"/>
+<polygon fill="none" stroke="#cbd5e1" points="1624.01,-126 1624.01,-154 1860.17,-154 1860.17,-126 1624.01,-126"/>
+<text xml:space="preserve" text-anchor="start" x="1629.01" y="-136.5" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="15.00" fill="#334155">nama_lama</text>
+<text xml:space="preserve" text-anchor="start" x="1707.39" y="-136.5" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="14.00">  </text>
+<text xml:space="preserve" text-anchor="start" x="1722.95" y="-136.5" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="12.00" fill="#94a3b8">NVARCHAR(150)</text>
+<polygon fill="#eff6ff" stroke="none" points="1624.01,-98 1624.01,-126 1860.17,-126 1860.17,-98 1624.01,-98"/>
+<polygon fill="none" stroke="#cbd5e1" points="1624.01,-98 1624.01,-126 1860.17,-126 1860.17,-98 1624.01,-98"/>
+<text xml:space="preserve" text-anchor="start" x="1629.01" y="-108.5" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-weight="bold" font-size="11.00" fill="#0369a1">FK</text>
+<text xml:space="preserve" text-anchor="start" x="1643.67" y="-108.5" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="14.00">  </text>
+<text xml:space="preserve" text-anchor="start" x="1659.23" y="-108.5" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-weight="bold" font-size="15.00" fill="#0369a1">nik_baru</text>
+<text xml:space="preserve" text-anchor="start" x="1721.75" y="-108.5" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="14.00">  </text>
+<text xml:space="preserve" text-anchor="start" x="1737.31" y="-108.5" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="12.00" fill="#94a3b8">NVARCHAR(50)</text>
+<polygon fill="#ffffff" stroke="none" points="1624.01,-70 1624.01,-98 1860.17,-98 1860.17,-70 1624.01,-70"/>
+<polygon fill="none" stroke="#cbd5e1" points="1624.01,-70 1624.01,-98 1860.17,-98 1860.17,-70 1624.01,-70"/>
+<text xml:space="preserve" text-anchor="start" x="1629.01" y="-80.5" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="15.00" fill="#334155">nama_baru</text>
+<text xml:space="preserve" text-anchor="start" x="1704.9" y="-80.5" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="14.00">  </text>
+<text xml:space="preserve" text-anchor="start" x="1720.46" y="-80.5" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="12.00" fill="#94a3b8">NVARCHAR(150)</text>
+<polygon fill="#ffffff" stroke="none" points="1624.01,-42 1624.01,-70 1860.17,-70 1860.17,-42 1624.01,-42"/>
+<polygon fill="none" stroke="#cbd5e1" points="1624.01,-42 1624.01,-70 1860.17,-70 1860.17,-42 1624.01,-42"/>
+<text xml:space="preserve" text-anchor="start" x="1629.01" y="-52.5" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="15.00" fill="#334155">keterangan</text>
+<text xml:space="preserve" text-anchor="start" x="1704.07" y="-52.5" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="14.00">  </text>
+<text xml:space="preserve" text-anchor="start" x="1719.63" y="-52.5" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="12.00" fill="#94a3b8">NVARCHAR(255)</text>
+<polygon fill="#ffffff" stroke="none" points="1624.01,-14 1624.01,-42 1860.17,-42 1860.17,-14 1624.01,-14"/>
+<polygon fill="none" stroke="#cbd5e1" points="1624.01,-14 1624.01,-42 1860.17,-42 1860.17,-14 1624.01,-14"/>
+<text xml:space="preserve" text-anchor="start" x="1629.01" y="-24.5" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="15.00" fill="#334155">tanggal_pindah</text>
+<text xml:space="preserve" text-anchor="start" x="1731.61" y="-24.5" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="14.00">  </text>
+<text xml:space="preserve" text-anchor="start" x="1747.17" y="-24.5" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="12.00" fill="#94a3b8">DATETIMEOFFSET</text>
+</g>
+<!-- asset_software -->
+<g id="node6" class="node">
+<title>asset_software</title>
+<polygon fill="#0f766e" stroke="none" points="0,-252 0,-288.4 226.18,-288.4 226.18,-252 0,-252"/>
+<polygon fill="none" stroke="#cbd5e1" points="0,-252 0,-288.4 226.18,-288.4 226.18,-252 0,-252"/>
+<text xml:space="preserve" text-anchor="start" x="51.67" y="-266.1" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-weight="bold" font-size="17.00" fill="#ffffff">asset_software</text>
+<polygon fill="#fef2f2" stroke="none" points="0,-224 0,-252 226.18,-252 226.18,-224 0,-224"/>
+<polygon fill="none" stroke="#cbd5e1" points="0,-224 0,-252 226.18,-252 226.18,-224 0,-224"/>
+<text xml:space="preserve" text-anchor="start" x="5" y="-234.5" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-weight="bold" font-size="11.00" fill="#b91c1c">PK</text>
+<text xml:space="preserve" text-anchor="start" x="20.28" y="-234.5" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="14.00">  </text>
+<text xml:space="preserve" text-anchor="start" x="35.84" y="-234.5" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-weight="bold" font-size="15.00" fill="#b91c1c">id</text>
+<text xml:space="preserve" text-anchor="start" x="49.17" y="-234.5" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="14.00">  </text>
+<text xml:space="preserve" text-anchor="start" x="64.73" y="-234.5" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="12.00" fill="#94a3b8">INTEGER</text>
+<polygon fill="#eff6ff" stroke="none" points="0,-196 0,-224 226.18,-224 226.18,-196 0,-196"/>
+<polygon fill="none" stroke="#cbd5e1" points="0,-196 0,-224 226.18,-224 226.18,-196 0,-196"/>
+<text xml:space="preserve" text-anchor="start" x="5" y="-206.5" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-weight="bold" font-size="11.00" fill="#0369a1">FK</text>
+<text xml:space="preserve" text-anchor="start" x="19.66" y="-206.5" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="14.00">  </text>
+<text xml:space="preserve" text-anchor="start" x="35.22" y="-206.5" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-weight="bold" font-size="15.00" fill="#0369a1">kode_asset</text>
+<text xml:space="preserve" text-anchor="start" x="116.94" y="-206.5" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="14.00">  </text>
+<text xml:space="preserve" text-anchor="start" x="132.5" y="-206.5" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="12.00" fill="#94a3b8">NVARCHAR(50)</text>
+<polygon fill="#ffffff" stroke="none" points="0,-168 0,-196 226.18,-196 226.18,-168 0,-168"/>
+<polygon fill="none" stroke="#cbd5e1" points="0,-168 0,-196 226.18,-196 226.18,-168 0,-168"/>
+<text xml:space="preserve" text-anchor="start" x="5" y="-178.5" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="15.00" fill="#334155">nama_software</text>
+<text xml:space="preserve" text-anchor="start" x="107.55" y="-178.5" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="14.00">  </text>
+<text xml:space="preserve" text-anchor="start" x="123.11" y="-178.5" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="12.00" fill="#94a3b8">NVARCHAR(150)</text>
+<polygon fill="#ffffff" stroke="none" points="0,-140 0,-168 226.18,-168 226.18,-140 0,-140"/>
+<polygon fill="none" stroke="#cbd5e1" points="0,-140 0,-168 226.18,-168 226.18,-140 0,-140"/>
+<text xml:space="preserve" text-anchor="start" x="5" y="-150.5" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="15.00" fill="#334155">versi</text>
+<text xml:space="preserve" text-anchor="start" x="36.67" y="-150.5" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="14.00">  </text>
+<text xml:space="preserve" text-anchor="start" x="52.23" y="-150.5" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="12.00" fill="#94a3b8">NVARCHAR(50)</text>
+<polygon fill="#ffffff" stroke="none" points="0,-112 0,-140 226.18,-140 226.18,-112 0,-112"/>
+<polygon fill="none" stroke="#cbd5e1" points="0,-112 0,-140 226.18,-140 226.18,-112 0,-112"/>
+<text xml:space="preserve" text-anchor="start" x="5" y="-122.5" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="15.00" fill="#334155">lisensi</text>
+<text xml:space="preserve" text-anchor="start" x="46.68" y="-122.5" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="14.00">  </text>
+<text xml:space="preserve" text-anchor="start" x="62.24" y="-122.5" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="12.00" fill="#94a3b8">NVARCHAR(100)</text>
+<polygon fill="#ffffff" stroke="none" points="0,-84 0,-112 226.18,-112 226.18,-84 0,-84"/>
+<polygon fill="none" stroke="#cbd5e1" points="0,-84 0,-112 226.18,-112 226.18,-84 0,-84"/>
+<text xml:space="preserve" text-anchor="start" x="5" y="-94.5" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="15.00" fill="#334155">tanggal_install</text>
+<text xml:space="preserve" text-anchor="start" x="100.9" y="-94.5" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="14.00">  </text>
+<text xml:space="preserve" text-anchor="start" x="116.46" y="-94.5" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="12.00" fill="#94a3b8">DATE</text>
+<polygon fill="#ffffff" stroke="none" points="0,-56 0,-84 226.18,-84 226.18,-56 0,-56"/>
+<polygon fill="none" stroke="#cbd5e1" points="0,-56 0,-84 226.18,-84 226.18,-56 0,-56"/>
+<text xml:space="preserve" text-anchor="start" x="5" y="-66.5" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="15.00" fill="#334155">keterangan</text>
+<text xml:space="preserve" text-anchor="start" x="80.06" y="-66.5" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="14.00">  </text>
+<text xml:space="preserve" text-anchor="start" x="95.62" y="-66.5" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="12.00" fill="#94a3b8">NVARCHAR(MAX)</text>
+<polygon fill="#ffffff" stroke="none" points="0,-28 0,-56 226.18,-56 226.18,-28 0,-28"/>
+<polygon fill="none" stroke="#cbd5e1" points="0,-28 0,-56 226.18,-56 226.18,-28 0,-28"/>
+<text xml:space="preserve" text-anchor="start" x="5" y="-38.5" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="15.00" fill="#334155">created_at</text>
+<text xml:space="preserve" text-anchor="start" x="75.88" y="-38.5" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="14.00">  </text>
+<text xml:space="preserve" text-anchor="start" x="91.44" y="-38.5" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="12.00" fill="#94a3b8">DATETIMEOFFSET</text>
+<polygon fill="#ffffff" stroke="none" points="0,0 0,-28 226.18,-28 226.18,0 0,0"/>
+<polygon fill="none" stroke="#cbd5e1" points="0,0 0,-28 226.18,-28 226.18,0 0,0"/>
+<text xml:space="preserve" text-anchor="start" x="5" y="-10.5" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="15.00" fill="#334155">updated_at</text>
+<text xml:space="preserve" text-anchor="start" x="80.07" y="-10.5" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="14.00">  </text>
+<text xml:space="preserve" text-anchor="start" x="95.63" y="-10.5" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="12.00" fill="#94a3b8">DATETIMEOFFSET</text>
+</g>
+<!-- asset_software_detail -->
+<g id="node7" class="node">
+<title>asset_software_detail</title>
+<polygon fill="#0f766e" stroke="none" points="258.43,-250.8 258.43,-287.2 497.74,-287.2 497.74,-250.8 258.43,-250.8"/>
+<polygon fill="none" stroke="#cbd5e1" points="258.43,-250.8 258.43,-287.2 497.74,-287.2 497.74,-250.8 258.43,-250.8"/>
+<text xml:space="preserve" text-anchor="start" x="289.74" y="-264.9" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-weight="bold" font-size="17.00" fill="#ffffff">asset_software_detail</text>
+<polygon fill="#fef2f2" stroke="none" points="258.43,-222.8 258.43,-250.8 497.74,-250.8 497.74,-222.8 258.43,-222.8"/>
+<polygon fill="none" stroke="#cbd5e1" points="258.43,-222.8 258.43,-250.8 497.74,-250.8 497.74,-222.8 258.43,-222.8"/>
+<text xml:space="preserve" text-anchor="start" x="263.43" y="-233.3" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-weight="bold" font-size="11.00" fill="#b91c1c">PK</text>
+<text xml:space="preserve" text-anchor="start" x="278.71" y="-233.3" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="14.00">  </text>
+<text xml:space="preserve" text-anchor="start" x="294.27" y="-233.3" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-weight="bold" font-size="15.00" fill="#b91c1c">kode_asset</text>
+<text xml:space="preserve" text-anchor="start" x="375.99" y="-233.3" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="14.00">  </text>
+<text xml:space="preserve" text-anchor="start" x="391.55" y="-233.3" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="12.00" fill="#94a3b8">NVARCHAR(50)</text>
+<polygon fill="#ffffff" stroke="none" points="258.43,-194.8 258.43,-222.8 497.74,-222.8 497.74,-194.8 258.43,-194.8"/>
+<polygon fill="none" stroke="#cbd5e1" points="258.43,-194.8 258.43,-222.8 497.74,-222.8 497.74,-194.8 258.43,-194.8"/>
+<text xml:space="preserve" text-anchor="start" x="263.43" y="-205.3" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="15.00" fill="#334155">operating_system</text>
+<text xml:space="preserve" text-anchor="start" x="381.83" y="-205.3" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="14.00">  </text>
+<text xml:space="preserve" text-anchor="start" x="397.39" y="-205.3" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="12.00" fill="#94a3b8">NVARCHAR(100)</text>
+<polygon fill="#ffffff" stroke="none" points="258.43,-166.8 258.43,-194.8 497.74,-194.8 497.74,-166.8 258.43,-166.8"/>
+<polygon fill="none" stroke="#cbd5e1" points="258.43,-166.8 258.43,-194.8 497.74,-194.8 497.74,-166.8 258.43,-166.8"/>
+<text xml:space="preserve" text-anchor="start" x="263.43" y="-177.3" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="15.00" fill="#334155">serial_no_os</text>
+<text xml:space="preserve" text-anchor="start" x="348.49" y="-177.3" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="14.00">  </text>
+<text xml:space="preserve" text-anchor="start" x="364.05" y="-177.3" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="12.00" fill="#94a3b8">NVARCHAR(100)</text>
+<polygon fill="#ffffff" stroke="none" points="258.43,-138.8 258.43,-166.8 497.74,-166.8 497.74,-138.8 258.43,-138.8"/>
+<polygon fill="none" stroke="#cbd5e1" points="258.43,-138.8 258.43,-166.8 497.74,-166.8 497.74,-138.8 258.43,-138.8"/>
+<text xml:space="preserve" text-anchor="start" x="263.43" y="-149.3" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="15.00" fill="#334155">ms_office</text>
+<text xml:space="preserve" text-anchor="start" x="327.62" y="-149.3" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="14.00">  </text>
+<text xml:space="preserve" text-anchor="start" x="343.18" y="-149.3" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="12.00" fill="#94a3b8">NVARCHAR(100)</text>
+<polygon fill="#ffffff" stroke="none" points="258.43,-110.8 258.43,-138.8 497.74,-138.8 497.74,-110.8 258.43,-110.8"/>
+<polygon fill="none" stroke="#cbd5e1" points="258.43,-110.8 258.43,-138.8 497.74,-138.8 497.74,-110.8 258.43,-110.8"/>
+<text xml:space="preserve" text-anchor="start" x="263.43" y="-121.3" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="15.00" fill="#334155">ms_office_sn</text>
+<text xml:space="preserve" text-anchor="start" x="351.81" y="-121.3" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="14.00">  </text>
+<text xml:space="preserve" text-anchor="start" x="367.37" y="-121.3" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="12.00" fill="#94a3b8">NVARCHAR(100)</text>
+<polygon fill="#ffffff" stroke="none" points="258.43,-82.8 258.43,-110.8 497.74,-110.8 497.74,-82.8 258.43,-82.8"/>
+<polygon fill="none" stroke="#cbd5e1" points="258.43,-82.8 258.43,-110.8 497.74,-110.8 497.74,-82.8 258.43,-82.8"/>
+<text xml:space="preserve" text-anchor="start" x="263.43" y="-93.3" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="15.00" fill="#334155">erp</text>
+<text xml:space="preserve" text-anchor="start" x="285.11" y="-93.3" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="14.00">  </text>
+<text xml:space="preserve" text-anchor="start" x="300.67" y="-93.3" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="12.00" fill="#94a3b8">NVARCHAR(5)</text>
+<polygon fill="#ffffff" stroke="none" points="258.43,-54.8 258.43,-82.8 497.74,-82.8 497.74,-54.8 258.43,-54.8"/>
+<polygon fill="none" stroke="#cbd5e1" points="258.43,-54.8 258.43,-82.8 497.74,-82.8 497.74,-54.8 258.43,-54.8"/>
+<text xml:space="preserve" text-anchor="start" x="263.43" y="-65.3" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="15.00" fill="#334155">wms</text>
+<text xml:space="preserve" text-anchor="start" x="294.26" y="-65.3" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="14.00">  </text>
+<text xml:space="preserve" text-anchor="start" x="309.82" y="-65.3" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="12.00" fill="#94a3b8">NVARCHAR(5)</text>
+<polygon fill="#ffffff" stroke="none" points="258.43,-26.8 258.43,-54.8 497.74,-54.8 497.74,-26.8 258.43,-26.8"/>
+<polygon fill="none" stroke="#cbd5e1" points="258.43,-26.8 258.43,-54.8 497.74,-54.8 497.74,-26.8 258.43,-26.8"/>
+<text xml:space="preserve" text-anchor="start" x="263.43" y="-37.3" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="15.00" fill="#334155">eris</text>
+<text xml:space="preserve" text-anchor="start" x="287.6" y="-37.3" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="14.00">  </text>
+<text xml:space="preserve" text-anchor="start" x="303.16" y="-37.3" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="12.00" fill="#94a3b8">NVARCHAR(5)</text>
+<polygon fill="#f8fafc" stroke="none" points="258.43,-1.2 258.43,-26.8 497.74,-26.8 497.74,-1.2 258.43,-1.2"/>
+<polygon fill="none" stroke="#cbd5e1" points="258.43,-1.2 258.43,-26.8 497.74,-26.8 497.74,-1.2 258.43,-1.2"/>
+<text xml:space="preserve" text-anchor="start" x="263.43" y="-11.1" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-style="italic" font-size="13.00" fill="#94a3b8">… +7 kolom lainnya</text>
+</g>
+<!-- inventory -->
+<g id="node8" class="node">
+<title>inventory</title>
+<polygon fill="#0f766e" stroke="none" points="804.49,-632.4 804.49,-668.8 1083.69,-668.8 1083.69,-632.4 804.49,-632.4"/>
+<polygon fill="none" stroke="#cbd5e1" points="804.49,-632.4 804.49,-668.8 1083.69,-668.8 1083.69,-632.4 804.49,-632.4"/>
+<text xml:space="preserve" text-anchor="start" x="905.83" y="-646.5" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-weight="bold" font-size="17.00" fill="#ffffff">inventory</text>
+<polygon fill="#fef2f2" stroke="none" points="804.49,-604.4 804.49,-632.4 1083.69,-632.4 1083.69,-604.4 804.49,-604.4"/>
+<polygon fill="none" stroke="#cbd5e1" points="804.49,-604.4 804.49,-632.4 1083.69,-632.4 1083.69,-604.4 804.49,-604.4"/>
+<text xml:space="preserve" text-anchor="start" x="809.49" y="-614.9" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-weight="bold" font-size="11.00" fill="#b91c1c">PK</text>
+<text xml:space="preserve" text-anchor="start" x="824.77" y="-614.9" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="14.00">  </text>
+<text xml:space="preserve" text-anchor="start" x="840.33" y="-614.9" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-weight="bold" font-size="15.00" fill="#b91c1c">kode_asset</text>
+<text xml:space="preserve" text-anchor="start" x="922.05" y="-614.9" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="14.00">  </text>
+<text xml:space="preserve" text-anchor="start" x="937.61" y="-614.9" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="12.00" fill="#94a3b8">NVARCHAR(15)</text>
+<polygon fill="#ffffff" stroke="none" points="804.49,-576.4 804.49,-604.4 1083.69,-604.4 1083.69,-576.4 804.49,-576.4"/>
+<polygon fill="none" stroke="#cbd5e1" points="804.49,-576.4 804.49,-604.4 1083.69,-604.4 1083.69,-576.4 804.49,-576.4"/>
+<text xml:space="preserve" text-anchor="start" x="809.49" y="-586.9" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="15.00" fill="#334155">nama_barang</text>
+<text xml:space="preserve" text-anchor="start" x="902.06" y="-586.9" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="14.00">  </text>
+<text xml:space="preserve" text-anchor="start" x="917.62" y="-586.9" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="12.00" fill="#94a3b8">NVARCHAR(100)</text>
+<polygon fill="#ffffff" stroke="none" points="804.49,-548.4 804.49,-576.4 1083.69,-576.4 1083.69,-548.4 804.49,-548.4"/>
+<polygon fill="none" stroke="#cbd5e1" points="804.49,-548.4 804.49,-576.4 1083.69,-576.4 1083.69,-548.4 804.49,-548.4"/>
+<text xml:space="preserve" text-anchor="start" x="809.49" y="-558.9" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="15.00" fill="#334155">merk_model</text>
+<text xml:space="preserve" text-anchor="start" x="892.02" y="-558.9" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="14.00">  </text>
+<text xml:space="preserve" text-anchor="start" x="907.58" y="-558.9" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="12.00" fill="#94a3b8">NVARCHAR(100)</text>
+<polygon fill="#eff6ff" stroke="none" points="804.49,-520.4 804.49,-548.4 1083.69,-548.4 1083.69,-520.4 804.49,-520.4"/>
+<polygon fill="none" stroke="#cbd5e1" points="804.49,-520.4 804.49,-548.4 1083.69,-548.4 1083.69,-520.4 804.49,-520.4"/>
+<text xml:space="preserve" text-anchor="start" x="809.49" y="-530.9" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-weight="bold" font-size="11.00" fill="#0369a1">FK</text>
+<text xml:space="preserve" text-anchor="start" x="824.16" y="-530.9" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="14.00">  </text>
+<text xml:space="preserve" text-anchor="start" x="839.71" y="-530.9" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-weight="bold" font-size="15.00" fill="#0369a1">id_departemen</text>
+<text xml:space="preserve" text-anchor="start" x="946.41" y="-530.9" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="14.00">  </text>
+<text xml:space="preserve" text-anchor="start" x="961.97" y="-530.9" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="12.00" fill="#94a3b8">INTEGER</text>
+<polygon fill="#eff6ff" stroke="none" points="804.49,-492.4 804.49,-520.4 1083.69,-520.4 1083.69,-492.4 804.49,-492.4"/>
+<polygon fill="none" stroke="#cbd5e1" points="804.49,-492.4 804.49,-520.4 1083.69,-520.4 1083.69,-492.4 804.49,-492.4"/>
+<text xml:space="preserve" text-anchor="start" x="809.49" y="-502.9" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-weight="bold" font-size="11.00" fill="#0369a1">FK</text>
+<text xml:space="preserve" text-anchor="start" x="824.16" y="-502.9" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="14.00">  </text>
+<text xml:space="preserve" text-anchor="start" x="839.71" y="-502.9" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-weight="bold" font-size="15.00" fill="#0369a1">id_kategori</text>
+<text xml:space="preserve" text-anchor="start" x="919.74" y="-502.9" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="14.00">  </text>
+<text xml:space="preserve" text-anchor="start" x="935.3" y="-502.9" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="12.00" fill="#94a3b8">INTEGER</text>
+<polygon fill="#eff6ff" stroke="none" points="804.49,-464.4 804.49,-492.4 1083.69,-492.4 1083.69,-464.4 804.49,-464.4"/>
+<polygon fill="none" stroke="#cbd5e1" points="804.49,-464.4 804.49,-492.4 1083.69,-492.4 1083.69,-464.4 804.49,-464.4"/>
+<text xml:space="preserve" text-anchor="start" x="809.49" y="-474.9" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-weight="bold" font-size="11.00" fill="#0369a1">FK</text>
+<text xml:space="preserve" text-anchor="start" x="824.16" y="-474.9" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="14.00">  </text>
+<text xml:space="preserve" text-anchor="start" x="839.71" y="-474.9" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-weight="bold" font-size="15.00" fill="#0369a1">nik_pemegang</text>
+<text xml:space="preserve" text-anchor="start" x="944.74" y="-474.9" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="14.00">  </text>
+<text xml:space="preserve" text-anchor="start" x="960.3" y="-474.9" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="12.00" fill="#94a3b8">NVARCHAR(10)</text>
+<polygon fill="#eff6ff" stroke="none" points="804.49,-436.4 804.49,-464.4 1083.69,-464.4 1083.69,-436.4 804.49,-436.4"/>
+<polygon fill="none" stroke="#cbd5e1" points="804.49,-436.4 804.49,-464.4 1083.69,-464.4 1083.69,-436.4 804.49,-436.4"/>
+<text xml:space="preserve" text-anchor="start" x="809.49" y="-446.9" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-weight="bold" font-size="11.00" fill="#0369a1">FK</text>
+<text xml:space="preserve" text-anchor="start" x="824.16" y="-446.9" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="14.00">  </text>
+<text xml:space="preserve" text-anchor="start" x="839.71" y="-446.9" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-weight="bold" font-size="15.00" fill="#0369a1">id_preventive_schedule</text>
+<text xml:space="preserve" text-anchor="start" x="1009.79" y="-446.9" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="14.00">  </text>
+<text xml:space="preserve" text-anchor="start" x="1025.35" y="-446.9" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="12.00" fill="#94a3b8">INTEGER</text>
+<polygon fill="#eff6ff" stroke="none" points="804.49,-408.4 804.49,-436.4 1083.69,-436.4 1083.69,-408.4 804.49,-408.4"/>
+<polygon fill="none" stroke="#cbd5e1" points="804.49,-408.4 804.49,-436.4 1083.69,-436.4 1083.69,-408.4 804.49,-408.4"/>
+<text xml:space="preserve" text-anchor="start" x="809.49" y="-418.9" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-weight="bold" font-size="11.00" fill="#0369a1">FK</text>
+<text xml:space="preserve" text-anchor="start" x="824.16" y="-418.9" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="14.00">  </text>
+<text xml:space="preserve" text-anchor="start" x="839.71" y="-418.9" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-weight="bold" font-size="15.00" fill="#0369a1">id_asset_type</text>
+<text xml:space="preserve" text-anchor="start" x="938.94" y="-418.9" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="14.00">  </text>
+<text xml:space="preserve" text-anchor="start" x="954.49" y="-418.9" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="12.00" fill="#94a3b8">INTEGER</text>
+<polygon fill="#f8fafc" stroke="none" points="804.49,-382.8 804.49,-408.4 1083.69,-408.4 1083.69,-382.8 804.49,-382.8"/>
+<polygon fill="none" stroke="#cbd5e1" points="804.49,-382.8 804.49,-408.4 1083.69,-408.4 1083.69,-382.8 804.49,-382.8"/>
+<text xml:space="preserve" text-anchor="start" x="809.49" y="-392.7" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-style="italic" font-size="13.00" fill="#94a3b8">… +16 kolom lainnya</text>
+</g>
+<!-- inventory&#45;&gt;asset_department_history -->
+<g id="edge1" class="edge">
+<title>inventory&#45;&gt;asset_department_history</title>
+<path fill="none" stroke="#64748b" stroke-width="1.4" stroke-dasharray="5,2" d="M1086.32,-417.93C1127.82,-387.99 1173.68,-356.09 1217.04,-328.4 1247.59,-308.9 1258.63,-309.5 1288.09,-288.4 1292.07,-285.55 1296.06,-282.62 1300.05,-279.62"/>
+<polygon fill="#64748b" stroke="#64748b" stroke-width="1.4" points="1086.52,-423.02 1081.54,-416.13 1082.92,-415.14 1087.9,-422.03 1086.52,-423.02"/>
+<polyline fill="none" stroke="#64748b" stroke-width="1.4" points="1083.34,-420.08 1086.79,-417.59"/>
+<polygon fill="#64748b" stroke="#64748b" stroke-width="1.4" points="1300.1,-279.58 1309.18,-277.47 1303.85,-276.72 1306.49,-274.71 1306.49,-274.71 1306.49,-274.71 1303.85,-276.72 1304.54,-271.39 1300.1,-279.58"/>
+<text xml:space="preserve" text-anchor="middle" x="1251.07" y="-332" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="12.00" fill="#64748b"> kode_asset </text>
+</g>
+<!-- inventory&#45;&gt;asset_hardware -->
+<g id="edge2" class="edge">
+<title>inventory&#45;&gt;asset_hardware</title>
+<path fill="none" stroke="#64748b" stroke-width="1.4" stroke-dasharray="5,2" d="M1026.34,-379.59C1047.21,-342.72 1069.44,-303.48 1089.62,-267.86"/>
+<polygon fill="#64748b" stroke="#64748b" stroke-width="1.4" points="1028.57,-384.27 1021.17,-380.08 1022.01,-378.6 1029.41,-382.79 1028.57,-384.27"/>
+<polyline fill="none" stroke="#64748b" stroke-width="1.4" points="1024.45,-382.91 1026.55,-379.21"/>
+<polygon fill="#64748b" stroke="#64748b" stroke-width="1.4" points="1089.47,-268.12 1096.99,-262.61 1091.79,-264.01 1093.43,-261.13 1093.43,-261.13 1093.43,-261.13 1091.79,-264.01 1090.33,-258.84 1089.47,-268.12"/>
+<text xml:space="preserve" text-anchor="middle" x="1085.61" y="-332" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="12.00" fill="#64748b"> kode_asset </text>
+</g>
+<!-- inventory&#45;&gt;asset_hardware_detail -->
+<g id="edge3" class="edge">
+<title>inventory&#45;&gt;asset_hardware_detail</title>
+<path fill="none" stroke="#64748b" stroke-width="1.4" stroke-dasharray="5,2" d="M828.95,-379.6C805.7,-350.27 781.25,-319.43 758,-290.12"/>
+<polygon fill="#64748b" stroke="#64748b" stroke-width="1.4" points="834.38,-379.6 827.72,-384.89 826.67,-383.55 833.33,-378.27 834.38,-379.6"/>
+<polyline fill="none" stroke="#64748b" stroke-width="1.4" points="831.58,-382.91 828.94,-379.58"/>
+<polygon fill="#64748b" stroke="#64748b" stroke-width="1.4" points="752.66,-290.22 759.32,-284.94 760.38,-286.27 753.72,-291.56 752.66,-290.22"/>
+<polyline fill="none" stroke="#64748b" stroke-width="1.4" points="755.46,-286.92 758.1,-290.25"/>
+<text xml:space="preserve" text-anchor="middle" x="827.61" y="-332" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="12.00" fill="#64748b"> kode_asset </text>
+</g>
+<!-- inventory&#45;&gt;asset_history -->
+<g id="edge4" class="edge">
+<title>inventory&#45;&gt;asset_history</title>
+<path fill="none" stroke="#64748b" stroke-width="1.4" stroke-dasharray="5,2" d="M927.59,-379.11C923.48,-342.84 919.11,-304.29 915.13,-269.17"/>
+<polygon fill="#64748b" stroke="#64748b" stroke-width="1.4" points="932.14,-381.59 923.7,-382.55 923.51,-380.86 931.95,-379.9 932.14,-381.59"/>
+<polyline fill="none" stroke="#64748b" stroke-width="1.4" points="928.02,-382.91 927.54,-378.69"/>
+<polygon fill="#64748b" stroke="#64748b" stroke-width="1.4" points="915.14,-269.23 917.98,-260.35 914.61,-264.54 914.23,-261.25 914.23,-261.25 914.23,-261.25 914.61,-264.54 910.38,-261.21 915.14,-269.23"/>
+<text xml:space="preserve" text-anchor="middle" x="956.61" y="-332" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="12.00" fill="#64748b"> kode_asset </text>
+</g>
+<!-- inventory&#45;&gt;asset_holder_history -->
+<g id="edge5" class="edge">
+<title>inventory&#45;&gt;asset_holder_history</title>
+<path fill="none" stroke="#64748b" stroke-width="1.4" stroke-dasharray="5,2" d="M1087.28,-457.32C1143.57,-432.14 1209.19,-404.45 1270.09,-382.8 1417.05,-330.55 1474.75,-369.32 1608.09,-288.4 1612.77,-285.56 1617.39,-282.51 1621.94,-279.29"/>
+<polygon fill="#64748b" stroke="#64748b" stroke-width="1.4" points="1086.1,-462.5 1082.63,-454.74 1084.18,-454.05 1087.66,-461.81 1086.1,-462.5"/>
+<polyline fill="none" stroke="#64748b" stroke-width="1.4" points="1083.59,-458.97 1087.47,-457.23"/>
+<polygon fill="#64748b" stroke="#64748b" stroke-width="1.4" points="1621.8,-279.4 1630.91,-277.46 1625.6,-276.61 1628.28,-274.65 1628.28,-274.65 1628.28,-274.65 1625.6,-276.61 1626.39,-271.29 1621.8,-279.4"/>
+<text xml:space="preserve" text-anchor="middle" x="1556.9" y="-332" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="12.00" fill="#64748b"> kode_asset </text>
+</g>
+<!-- inventory&#45;&gt;asset_software -->
+<g id="edge6" class="edge">
+<title>inventory&#45;&gt;asset_software</title>
+<path fill="none" stroke="#64748b" stroke-width="1.4" stroke-dasharray="5,2" d="M800.6,-498.96C651.62,-467.21 416.42,-402.91 242.09,-288.4 239.11,-286.44 236.15,-284.4 233.22,-282.28"/>
+<polygon fill="#64748b" stroke="#64748b" stroke-width="1.4" points="804.59,-495.46 802.83,-503.78 801.16,-503.42 802.93,-495.11 804.59,-495.46"/>
+<polyline fill="none" stroke="#64748b" stroke-width="1.4" points="804.54,-499.8 800.38,-498.91"/>
+<polygon fill="#64748b" stroke="#64748b" stroke-width="1.4" points="233.17,-282.24 228.66,-274.08 229.39,-279.41 226.74,-277.42 226.74,-277.42 226.74,-277.42 229.39,-279.41 224.07,-280.2 233.17,-282.24"/>
+<text xml:space="preserve" text-anchor="middle" x="362.63" y="-332" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="12.00" fill="#64748b"> kode_asset </text>
+</g>
+<!-- inventory&#45;&gt;asset_software_detail -->
+<g id="edge7" class="edge">
+<title>inventory&#45;&gt;asset_software_detail</title>
+<path fill="none" stroke="#64748b" stroke-width="1.4" stroke-dasharray="5,2" d="M801.2,-460.16C714.13,-417.48 602.92,-356.9 514.09,-288.4 509.57,-284.91 505.06,-281.27 500.58,-277.51"/>
+<polygon fill="#64748b" stroke="#64748b" stroke-width="1.4" points="805.91,-457.73 802.17,-465.37 800.64,-464.62 804.38,-456.98 805.91,-457.73"/>
+<polyline fill="none" stroke="#64748b" stroke-width="1.4" points="804.8,-461.92 800.99,-460.06"/>
+<polygon fill="#64748b" stroke="#64748b" stroke-width="1.4" points="495.39,-278.69 500.88,-272.2 502.17,-273.3 496.68,-279.79 495.39,-278.69"/>
+<polyline fill="none" stroke="#64748b" stroke-width="1.4" points="497.48,-274.9 500.73,-277.64"/>
+<text xml:space="preserve" text-anchor="middle" x="624.68" y="-332" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="12.00" fill="#64748b"> kode_asset </text>
+</g>
+<!-- departemen -->
+<g id="node9" class="node">
+<title>departemen</title>
+<polygon fill="none" stroke="#94a3b8" stroke-width="2" stroke-dasharray="5,2" points="1201.87,-764.2 1201.87,-826.6 1418.31,-826.6 1418.31,-764.2 1201.87,-764.2"/>
+<polygon fill="#475569" stroke="none" stroke-width="2" stroke-dasharray="5,2" points="1202.87,-791.2 1202.87,-825.6 1417.31,-825.6 1417.31,-791.2 1202.87,-791.2"/>
+<text xml:space="preserve" text-anchor="start" x="1261.91" y="-804.3" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-weight="bold" font-size="17.00" fill="#ffffff">departemen</text>
+<polygon fill="#fef2f2" stroke="none" stroke-width="2" stroke-dasharray="5,2" points="1202.87,-765.2 1202.87,-791.2 1417.31,-791.2 1417.31,-765.2 1202.87,-765.2"/>
+<text xml:space="preserve" text-anchor="start" x="1206.87" y="-774.7" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-weight="bold" font-size="11.00" fill="#b91c1c">PK</text>
+<text xml:space="preserve" text-anchor="start" x="1222.15" y="-774.7" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="14.00">  </text>
+<text xml:space="preserve" text-anchor="start" x="1237.71" y="-774.7" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-weight="bold" font-size="15.00" fill="#b91c1c">id_departemen</text>
+<text xml:space="preserve" text-anchor="start" x="1344.41" y="-774.7" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="14.00">  </text>
+<text xml:space="preserve" text-anchor="start" x="1359.97" y="-774.7" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="12.00" fill="#94a3b8">INTEGER</text>
+</g>
+<!-- departemen&#45;&gt;asset_department_history -->
+<g id="edge13" class="edge">
+<title>departemen&#45;&gt;asset_department_history</title>
+<path fill="none" stroke="#64748b" stroke-width="1.4" stroke-dasharray="5,2" d="M1356.64,-760.93C1384.35,-738.26 1417.46,-705.77 1435.09,-668.8 1492.68,-548.03 1488.36,-393.12 1474.28,-283.2"/>
+<polygon fill="#64748b" stroke="#64748b" stroke-width="1.4" points="1356.97,-766.13 1351.62,-759.53 1352.94,-758.46 1358.29,-765.06 1356.97,-766.13"/>
+<polyline fill="none" stroke="#64748b" stroke-width="1.4" points="1353.63,-763.37 1356.93,-760.69"/>
+<polygon fill="#64748b" stroke="#64748b" stroke-width="1.4" points="1474.29,-283.27 1476.97,-274.34 1473.67,-278.59 1473.24,-275.3 1473.24,-275.3 1473.24,-275.3 1473.67,-278.59 1469.38,-275.34 1474.29,-283.27"/>
+<text xml:space="preserve" text-anchor="middle" x="1542.96" y="-522.2" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="12.00" fill="#64748b"> id_departemen_lama </text>
+</g>
+<!-- departemen&#45;&gt;asset_department_history -->
+<g id="edge14" class="edge">
+<title>departemen&#45;&gt;asset_department_history</title>
+<path fill="none" stroke="#64748b" stroke-width="1.4" stroke-dasharray="5,2" d="M1304.01,-759.44C1292.8,-687.44 1273.16,-518.01 1309.67,-382.8 1319.01,-348.24 1334.75,-313.54 1352.34,-281.75"/>
+<polygon fill="#64748b" stroke="#64748b" stroke-width="1.4" points="1308.67,-761.71 1300.28,-763.04 1300.01,-761.36 1308.41,-760.03 1308.67,-761.71"/>
+<polyline fill="none" stroke="#64748b" stroke-width="1.4" points="1304.61,-763.21 1303.95,-759.02"/>
+<polygon fill="#64748b" stroke="#64748b" stroke-width="1.4" points="1352.21,-281.98 1359.71,-276.44 1354.53,-277.86 1356.15,-274.97 1356.15,-274.97 1356.15,-274.97 1354.53,-277.86 1353.04,-272.69 1352.21,-281.98"/>
+<text xml:space="preserve" text-anchor="middle" x="1368.38" y="-522.2" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="12.00" fill="#64748b"> id_departemen_baru </text>
+</g>
+<!-- departemen&#45;&gt;inventory -->
+<g id="edge8" class="edge">
+<title>departemen&#45;&gt;inventory</title>
+<path fill="none" stroke="#64748b" stroke-width="1.4" d="M1255.93,-761.27C1237.43,-749.59 1216.78,-736.14 1198.36,-723.2 1162.85,-698.25 1125.44,-670.32 1090.55,-643.53"/>
+<polygon fill="#64748b" stroke="#64748b" stroke-width="1.4" points="1260.67,-759.23 1256.13,-766.42 1254.7,-765.51 1259.23,-758.32 1260.67,-759.23"/>
+<polyline fill="none" stroke="#64748b" stroke-width="1.4" points="1259.12,-763.27 1255.52,-761.01"/>
+<polygon fill="#64748b" stroke="#64748b" stroke-width="1.4" points="1090.72,-643.65 1086.32,-635.44 1086.98,-640.78 1084.35,-638.75 1084.35,-638.75 1084.35,-638.75 1086.98,-640.78 1081.65,-641.5 1090.72,-643.65"/>
+<text xml:space="preserve" text-anchor="middle" x="1241.73" y="-712.4" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="12.00" fill="#64748b"> id_departemen </text>
+</g>
+<!-- maintenance_asset_type -->
+<g id="node10" class="node">
+<title>maintenance_asset_type</title>
+<polygon fill="none" stroke="#94a3b8" stroke-width="2" stroke-dasharray="5,2" points="477.45,-764.2 477.45,-826.6 694.72,-826.6 694.72,-764.2 477.45,-764.2"/>
+<polygon fill="#7c3aed" stroke="none" stroke-width="2" stroke-dasharray="5,2" points="478.45,-791.2 478.45,-825.6 693.72,-825.6 693.72,-791.2 478.45,-791.2"/>
+<text xml:space="preserve" text-anchor="start" x="485.45" y="-804.3" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-weight="bold" font-size="17.00" fill="#ffffff">maintenance_asset_type</text>
+<polygon fill="#fef2f2" stroke="none" stroke-width="2" stroke-dasharray="5,2" points="478.45,-765.2 478.45,-791.2 693.72,-791.2 693.72,-765.2 478.45,-765.2"/>
+<text xml:space="preserve" text-anchor="start" x="482.45" y="-774.7" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-weight="bold" font-size="11.00" fill="#b91c1c">PK</text>
+<text xml:space="preserve" text-anchor="start" x="497.74" y="-774.7" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="14.00">  </text>
+<text xml:space="preserve" text-anchor="start" x="513.29" y="-774.7" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-weight="bold" font-size="15.00" fill="#b91c1c">id_asset_type</text>
+<text xml:space="preserve" text-anchor="start" x="612.52" y="-774.7" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="14.00">  </text>
+<text xml:space="preserve" text-anchor="start" x="628.07" y="-774.7" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="12.00" fill="#94a3b8">INTEGER</text>
+</g>
+<!-- maintenance_asset_type&#45;&gt;inventory -->
+<g id="edge9" class="edge">
+<title>maintenance_asset_type&#45;&gt;inventory</title>
+<path fill="none" stroke="#64748b" stroke-width="1.4" d="M630.86,-760.93C672.72,-729.64 737.6,-681.15 797.47,-636.39"/>
+<polygon fill="#64748b" stroke="#64748b" stroke-width="1.4" points="630.73,-766.34 625.64,-759.53 627,-758.51 632.09,-765.32 630.73,-766.34"/>
+<polyline fill="none" stroke="#64748b" stroke-width="1.4" points="627.51,-763.44 630.91,-760.9"/>
+<polygon fill="#64748b" stroke="#64748b" stroke-width="1.4" points="797.57,-636.32 806.66,-634.3 801.34,-633.5 804,-631.52 804,-631.52 804,-631.52 801.34,-633.5 802.08,-628.17 797.57,-636.32"/>
+<text xml:space="preserve" text-anchor="middle" x="732.23" y="-712.4" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="12.00" fill="#64748b"> id_asset_type </text>
+</g>
+<!-- karyawan -->
+<g id="node11" class="node">
+<title>karyawan</title>
+<polygon fill="none" stroke="#94a3b8" stroke-width="2" stroke-dasharray="5,2" points="1590.71,-764.2 1590.71,-826.6 1757.47,-826.6 1757.47,-764.2 1590.71,-764.2"/>
+<polygon fill="#475569" stroke="none" stroke-width="2" stroke-dasharray="5,2" points="1591.71,-791.2 1591.71,-825.6 1756.47,-825.6 1756.47,-791.2 1591.71,-791.2"/>
+<text xml:space="preserve" text-anchor="start" x="1635.34" y="-804.3" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-weight="bold" font-size="17.00" fill="#ffffff">karyawan</text>
+<polygon fill="#fef2f2" stroke="none" stroke-width="2" stroke-dasharray="5,2" points="1591.71,-765.2 1591.71,-791.2 1756.47,-791.2 1756.47,-765.2 1591.71,-765.2"/>
+<text xml:space="preserve" text-anchor="start" x="1595.71" y="-774.7" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-weight="bold" font-size="11.00" fill="#b91c1c">PK</text>
+<text xml:space="preserve" text-anchor="start" x="1610.99" y="-774.7" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="14.00">  </text>
+<text xml:space="preserve" text-anchor="start" x="1626.55" y="-774.7" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-weight="bold" font-size="15.00" fill="#b91c1c">nik</text>
+<text xml:space="preserve" text-anchor="start" x="1648.22" y="-774.7" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="14.00">  </text>
+<text xml:space="preserve" text-anchor="start" x="1663.78" y="-774.7" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="12.00" fill="#94a3b8">NVARCHAR(10)</text>
+</g>
+<!-- karyawan&#45;&gt;asset_holder_history -->
+<g id="edge15" class="edge">
+<title>karyawan&#45;&gt;asset_holder_history</title>
+<path fill="none" stroke="#64748b" stroke-width="1.4" stroke-dasharray="5,2" d="M1696.04,-759.8C1710.2,-735.41 1727.36,-701.4 1735.09,-668.8 1765.45,-540.71 1763.71,-390 1756.46,-283.24"/>
+<polygon fill="#64748b" stroke="#64748b" stroke-width="1.4" points="1698.07,-764.74 1690.74,-760.45 1691.6,-758.98 1698.93,-763.27 1698.07,-764.74"/>
+<polyline fill="none" stroke="#64748b" stroke-width="1.4" points="1693.98,-763.33 1696.12,-759.66"/>
+<polygon fill="#64748b" stroke="#64748b" stroke-width="1.4" points="1756.46,-283.29 1759.68,-274.54 1756.13,-278.58 1755.9,-275.28 1755.9,-275.28 1755.9,-275.28 1756.13,-278.58 1752.05,-275.08 1756.46,-283.29"/>
+<text xml:space="preserve" text-anchor="middle" x="1788.25" y="-522.2" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="12.00" fill="#64748b"> nik_lama </text>
+</g>
+<!-- karyawan&#45;&gt;asset_holder_history -->
+<g id="edge16" class="edge">
+<title>karyawan&#45;&gt;asset_holder_history</title>
+<path fill="none" stroke="#64748b" stroke-width="1.4" stroke-dasharray="5,2" d="M1670.85,-759.06C1665.02,-687.57 1655.05,-520.88 1674.39,-382.8 1678.99,-349.95 1686.99,-315.26 1695.92,-282.85"/>
+<polygon fill="#64748b" stroke="#64748b" stroke-width="1.4" points="1675.36,-762.02 1666.89,-762.72 1666.75,-761.02 1675.22,-760.32 1675.36,-762.02"/>
+<polyline fill="none" stroke="#64748b" stroke-width="1.4" points="1671.19,-763.22 1670.84,-758.98"/>
+<polygon fill="#64748b" stroke="#64748b" stroke-width="1.4" points="1695.91,-282.85 1701.89,-275.69 1697.18,-278.31 1698.08,-275.11 1698.08,-275.11 1698.08,-275.11 1697.18,-278.31 1694.52,-273.63 1695.91,-282.85"/>
+<text xml:space="preserve" text-anchor="middle" x="1700.74" y="-522.2" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="12.00" fill="#64748b"> nik_baru </text>
+</g>
+<!-- karyawan&#45;&gt;inventory -->
+<g id="edge10" class="edge">
+<title>karyawan&#45;&gt;inventory</title>
+<path fill="none" stroke="#64748b" stroke-width="1.4" d="M1586.12,-770.06C1503.65,-746.54 1377.33,-708.69 1270.09,-668.8 1210.94,-646.8 1147.05,-619.73 1091.64,-595.14"/>
+<polygon fill="#64748b" stroke="#64748b" stroke-width="1.4" points="1590.36,-766.85 1588.03,-775.03 1586.4,-774.56 1588.73,-766.39 1590.36,-766.85"/>
+<polyline fill="none" stroke="#64748b" stroke-width="1.4" points="1590.01,-771.17 1585.93,-770.01"/>
+<polygon fill="#64748b" stroke="#64748b" stroke-width="1.4" points="1091.72,-595.18 1085.51,-588.23 1087.41,-593.26 1084.38,-591.91 1084.38,-591.91 1084.38,-591.91 1087.41,-593.26 1082.4,-595.22 1091.72,-595.18"/>
+<text xml:space="preserve" text-anchor="middle" x="1466.81" y="-712.4" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="12.00" fill="#64748b"> nik_pemegang </text>
+</g>
+<!-- kategori -->
+<g id="node12" class="node">
+<title>kategori</title>
+<polygon fill="none" stroke="#94a3b8" stroke-width="2" stroke-dasharray="5,2" points="729.21,-764.2 729.21,-826.6 918.97,-826.6 918.97,-764.2 729.21,-764.2"/>
+<polygon fill="#475569" stroke="none" stroke-width="2" stroke-dasharray="5,2" points="730.21,-791.2 730.21,-825.6 917.97,-825.6 917.97,-791.2 730.21,-791.2"/>
+<text xml:space="preserve" text-anchor="start" x="791.02" y="-804.3" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-weight="bold" font-size="17.00" fill="#ffffff">kategori</text>
+<polygon fill="#fef2f2" stroke="none" stroke-width="2" stroke-dasharray="5,2" points="730.21,-765.2 730.21,-791.2 917.97,-791.2 917.97,-765.2 730.21,-765.2"/>
+<text xml:space="preserve" text-anchor="start" x="734.21" y="-774.7" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-weight="bold" font-size="11.00" fill="#b91c1c">PK</text>
+<text xml:space="preserve" text-anchor="start" x="749.49" y="-774.7" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="14.00">  </text>
+<text xml:space="preserve" text-anchor="start" x="765.05" y="-774.7" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-weight="bold" font-size="15.00" fill="#b91c1c">id_kategori</text>
+<text xml:space="preserve" text-anchor="start" x="845.07" y="-774.7" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="14.00">  </text>
+<text xml:space="preserve" text-anchor="start" x="860.63" y="-774.7" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="12.00" fill="#94a3b8">INTEGER</text>
+</g>
+<!-- kategori&#45;&gt;inventory -->
+<g id="edge11" class="edge">
+<title>kategori&#45;&gt;inventory</title>
+<path fill="none" stroke="#64748b" stroke-width="1.4" d="M839.65,-759.71C849.47,-737.8 862.91,-707.83 876.88,-676.67"/>
+<polygon fill="#64748b" stroke="#64748b" stroke-width="1.4" points="842.2,-764.4 834.44,-760.93 835.14,-759.38 842.89,-762.85 842.2,-764.4"/>
+<polyline fill="none" stroke="#64748b" stroke-width="1.4" points="837.97,-763.44 839.71,-759.56"/>
+<polygon fill="#64748b" stroke="#64748b" stroke-width="1.4" points="876.77,-676.91 883.74,-670.72 878.71,-672.61 880.06,-669.58 880.06,-669.58 880.06,-669.58 878.71,-672.61 876.76,-667.59 876.77,-676.91"/>
+<text xml:space="preserve" text-anchor="middle" x="892.23" y="-712.4" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="12.00" fill="#64748b"> id_kategori </text>
+</g>
+<!-- preventive_schedule -->
+<g id="node13" class="node">
+<title>preventive_schedule</title>
+<polygon fill="none" stroke="#94a3b8" stroke-width="2" stroke-dasharray="5,2" points="952.87,-764.2 952.87,-826.6 1149.31,-826.6 1149.31,-764.2 952.87,-764.2"/>
+<polygon fill="#7c3aed" stroke="none" stroke-width="2" stroke-dasharray="5,2" points="953.87,-791.2 953.87,-825.6 1148.31,-825.6 1148.31,-791.2 953.87,-791.2"/>
+<text xml:space="preserve" text-anchor="start" x="966.99" y="-804.3" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-weight="bold" font-size="17.00" fill="#ffffff">preventive_schedule</text>
+<polygon fill="#fef2f2" stroke="none" stroke-width="2" stroke-dasharray="5,2" points="953.87,-765.2 953.87,-791.2 1148.31,-791.2 1148.31,-765.2 953.87,-765.2"/>
+<text xml:space="preserve" text-anchor="start" x="957.87" y="-774.7" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-weight="bold" font-size="11.00" fill="#b91c1c">PK</text>
+<text xml:space="preserve" text-anchor="start" x="973.15" y="-774.7" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="14.00">  </text>
+<text xml:space="preserve" text-anchor="start" x="988.71" y="-774.7" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-weight="bold" font-size="15.00" fill="#b91c1c">id_schedule</text>
+<text xml:space="preserve" text-anchor="start" x="1075.41" y="-774.7" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="14.00">  </text>
+<text xml:space="preserve" text-anchor="start" x="1090.97" y="-774.7" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="12.00" fill="#94a3b8">INTEGER</text>
+</g>
+<!-- preventive_schedule&#45;&gt;inventory -->
+<g id="edge12" class="edge">
+<title>preventive_schedule&#45;&gt;inventory</title>
+<path fill="none" stroke="#64748b" stroke-width="1.4" d="M1037.22,-759.71C1028.5,-737.9 1016.57,-708.08 1004.17,-677.07"/>
+<polygon fill="#64748b" stroke="#64748b" stroke-width="1.4" points="1042.34,-761.07 1034.45,-764.23 1033.82,-762.65 1041.71,-759.5 1042.34,-761.07"/>
+<polyline fill="none" stroke="#64748b" stroke-width="1.4" points="1038.71,-763.44 1037.13,-759.5"/>
+<polygon fill="#64748b" stroke="#64748b" stroke-width="1.4" points="1004.17,-677.06 1004.56,-667.74 1002.42,-672.67 1001.19,-669.6 1001.19,-669.6 1001.19,-669.6 1002.42,-672.67 997.46,-670.58 1004.17,-677.06"/>
+<text xml:space="preserve" text-anchor="middle" x="1088.77" y="-712.4" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="12.00" fill="#64748b"> id_preventive_schedule </text>
+</g>
+</g>
+
+  </g>
+  <rect x="64" y="1037" width="26" height="18" rx="3" fill="#FEF2F2" stroke="#FECACA"/>
+  <text x="100" y="1052" font-size="17" fill="#475569">PK  Primary key</text>
+  <rect x="263" y="1037" width="26" height="18" rx="3" fill="#EFF6FF" stroke="#BFDBFE"/>
+  <text x="299" y="1052" font-size="17" fill="#475569">FK  Foreign key</text>
+  <line x1="462" y1="1046" x2="504" y2="1046" stroke="#64748b" stroke-width="2"/>
+  <text x="514" y="1052" font-size="17" fill="#475569">Relasi (ujung bercabang = sisi &quot;banyak&quot;)</text>
+  <line x1="892" y1="1046" x2="934" y2="1046" stroke="#64748b" stroke-width="2" stroke-dasharray="7 5"/>
+  <text x="944" y="1052" font-size="17" fill="#475569">Relasi hasil deteksi nama kolom</text>
+  <rect x="1244.6" y="1037" width="26" height="18" rx="3" fill="#FFFFFF" stroke="#94A3B8" stroke-dasharray="4 3"/>
+  <text x="1280.6" y="1052" font-size="17" fill="#475569">Tabel dari modul lain</text>
+</svg>

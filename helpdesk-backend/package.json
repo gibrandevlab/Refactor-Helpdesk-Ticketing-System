@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@prisma/client": "^6.4.0",
+    "@viz-js/viz": "^3.30.0",
     "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
@@ -25,6 +26,7 @@
     "nodemon": "^3.1.4",
     "prisma": "^6.4.0",
     "sequelize-auto": "^0.8.8",
+    "sequelize-erd": "^1.3.1",
     "tedious": "^20.0.0"
   }
 }

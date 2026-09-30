@@ -1,0 +1,195 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1920" height="1080" viewBox="0 0 1920 1080" font-family="Arial,Liberation Sans,Helvetica,sans-serif">
+  <rect width="1920" height="1080" fill="#ffffff"/>
+  <rect width="14" height="1080" fill="#0f172a"/>
+  <text x="64" y="70" font-size="42" font-weight="700" fill="#0f172a">Entity Relationship Diagram</text>
+  <text x="64" y="106" font-size="20" fill="#64748b">31 tabel · 58 relasi · 4 modul</text>
+  <g transform="translate(87.71 130.00) scale(1.4847)">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(18 572.3)">
+<title>ERD</title>
+<!-- master -->
+<g id="node1" class="node">
+<title>master</title>
+<polygon fill="#475569" stroke="none" points="0,-196 0,-242 143.44,-242 143.44,-196 0,-196"/>
+<polygon fill="none" stroke="#cbd5e1" points="0,-196 0,-242 143.44,-242 143.44,-196 0,-196"/>
+<text xml:space="preserve" text-anchor="start" x="23.53" y="-219.7" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-weight="bold" font-size="17.00" fill="#ffffff">Master Data</text>
+<text xml:space="preserve" text-anchor="start" x="52.2" y="-206.3" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="13.00" fill="#e2e8f0">7 tabel</text>
+<polygon fill="#ffffff" stroke="none" points="0,-168 0,-196 143.44,-196 143.44,-168 0,-168"/>
+<polygon fill="none" stroke="#cbd5e1" points="0,-168 0,-196 143.44,-196 143.44,-168 0,-168"/>
+<text xml:space="preserve" text-anchor="start" x="5" y="-176" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="15.00" fill="#334155">bagian_departemen</text>
+<polygon fill="#ffffff" stroke="none" points="0,-140 0,-168 143.44,-168 143.44,-140 0,-140"/>
+<polygon fill="none" stroke="#cbd5e1" points="0,-140 0,-168 143.44,-168 143.44,-140 0,-140"/>
+<text xml:space="preserve" text-anchor="start" x="5" y="-148" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="15.00" fill="#334155">departemen</text>
+<polygon fill="#ffffff" stroke="none" points="0,-112 0,-140 143.44,-140 143.44,-112 0,-112"/>
+<polygon fill="none" stroke="#cbd5e1" points="0,-112 0,-140 143.44,-140 143.44,-112 0,-112"/>
+<text xml:space="preserve" text-anchor="start" x="5" y="-120" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="15.00" fill="#334155">jabatan</text>
+<polygon fill="#ffffff" stroke="none" points="0,-84 0,-112 143.44,-112 143.44,-84 0,-84"/>
+<polygon fill="none" stroke="#cbd5e1" points="0,-84 0,-112 143.44,-112 143.44,-84 0,-84"/>
+<text xml:space="preserve" text-anchor="start" x="5" y="-92" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="15.00" fill="#334155">karyawan</text>
+<polygon fill="#ffffff" stroke="none" points="0,-56 0,-84 143.44,-84 143.44,-56 0,-56"/>
+<polygon fill="none" stroke="#cbd5e1" points="0,-56 0,-84 143.44,-84 143.44,-56 0,-56"/>
+<text xml:space="preserve" text-anchor="start" x="5" y="-64" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="15.00" fill="#334155">kategori</text>
+<polygon fill="#ffffff" stroke="none" points="0,-28 0,-56 143.44,-56 143.44,-28 0,-28"/>
+<polygon fill="none" stroke="#cbd5e1" points="0,-28 0,-56 143.44,-56 143.44,-28 0,-28"/>
+<text xml:space="preserve" text-anchor="start" x="5" y="-36" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="15.00" fill="#334155">sub_kategori</text>
+<polygon fill="#ffffff" stroke="none" points="0,0 0,-28 143.44,-28 143.44,0 0,0"/>
+<polygon fill="none" stroke="#cbd5e1" points="0,0 0,-28 143.44,-28 143.44,0 0,0"/>
+<text xml:space="preserve" text-anchor="start" x="5" y="-8" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="15.00" fill="#334155">user</text>
+</g>
+<!-- aset -->
+<g id="node2" class="node">
+<title>aset</title>
+<polygon fill="#0f766e" stroke="none" points="261.01,-484 261.01,-530 443.61,-530 443.61,-484 261.01,-484"/>
+<polygon fill="none" stroke="#cbd5e1" points="261.01,-484 261.01,-530 443.61,-530 443.61,-484 261.01,-484"/>
+<text xml:space="preserve" text-anchor="start" x="285.23" y="-507.7" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-weight="bold" font-size="17.00" fill="#ffffff">Manajemen Aset</text>
+<text xml:space="preserve" text-anchor="start" x="332.79" y="-494.3" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="13.00" fill="#e2e8f0">8 tabel</text>
+<polygon fill="#ffffff" stroke="none" points="261.01,-456 261.01,-484 443.61,-484 443.61,-456 261.01,-456"/>
+<polygon fill="none" stroke="#cbd5e1" points="261.01,-456 261.01,-484 443.61,-484 443.61,-456 261.01,-456"/>
+<text xml:space="preserve" text-anchor="start" x="266.01" y="-464" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="15.00" fill="#334155">asset_department_history</text>
+<polygon fill="#ffffff" stroke="none" points="261.01,-428 261.01,-456 443.61,-456 443.61,-428 261.01,-428"/>
+<polygon fill="none" stroke="#cbd5e1" points="261.01,-428 261.01,-456 443.61,-456 443.61,-428 261.01,-428"/>
+<text xml:space="preserve" text-anchor="start" x="266.01" y="-436" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="15.00" fill="#334155">asset_hardware</text>
+<polygon fill="#ffffff" stroke="none" points="261.01,-400 261.01,-428 443.61,-428 443.61,-400 261.01,-400"/>
+<polygon fill="none" stroke="#cbd5e1" points="261.01,-400 261.01,-428 443.61,-428 443.61,-400 261.01,-400"/>
+<text xml:space="preserve" text-anchor="start" x="266.01" y="-408" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="15.00" fill="#334155">asset_hardware_detail</text>
+<polygon fill="#ffffff" stroke="none" points="261.01,-372 261.01,-400 443.61,-400 443.61,-372 261.01,-372"/>
+<polygon fill="none" stroke="#cbd5e1" points="261.01,-372 261.01,-400 443.61,-400 443.61,-372 261.01,-372"/>
+<text xml:space="preserve" text-anchor="start" x="266.01" y="-380" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="15.00" fill="#334155">asset_history</text>
+<polygon fill="#ffffff" stroke="none" points="261.01,-344 261.01,-372 443.61,-372 443.61,-344 261.01,-344"/>
+<polygon fill="none" stroke="#cbd5e1" points="261.01,-344 261.01,-372 443.61,-372 443.61,-344 261.01,-344"/>
+<text xml:space="preserve" text-anchor="start" x="266.01" y="-352" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="15.00" fill="#334155">asset_holder_history</text>
+<polygon fill="#ffffff" stroke="none" points="261.01,-316 261.01,-344 443.61,-344 443.61,-316 261.01,-316"/>
+<polygon fill="none" stroke="#cbd5e1" points="261.01,-316 261.01,-344 443.61,-344 443.61,-316 261.01,-316"/>
+<text xml:space="preserve" text-anchor="start" x="266.01" y="-324" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="15.00" fill="#334155">asset_software</text>
+<polygon fill="#ffffff" stroke="none" points="261.01,-288 261.01,-316 443.61,-316 443.61,-288 261.01,-288"/>
+<polygon fill="none" stroke="#cbd5e1" points="261.01,-288 261.01,-316 443.61,-316 443.61,-288 261.01,-288"/>
+<text xml:space="preserve" text-anchor="start" x="266.01" y="-296" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="15.00" fill="#334155">asset_software_detail</text>
+<polygon fill="#ffffff" stroke="none" points="261.01,-260 261.01,-288 443.61,-288 443.61,-260 261.01,-260"/>
+<polygon fill="none" stroke="#cbd5e1" points="261.01,-260 261.01,-288 443.61,-288 443.61,-260 261.01,-260"/>
+<text xml:space="preserve" text-anchor="start" x="266.01" y="-268" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="15.00" fill="#334155">inventory</text>
+</g>
+<!-- master&#45;&gt;aset -->
+<g id="edge2" class="edge">
+<title>master:h&#45;&gt;aset:h</title>
+<path fill="none" stroke="#64748b" stroke-width="2.9" d="M157.75,-223.76C209.94,-261.2 197.15,-507 261.01,-507"/>
+<polygon fill="#64748b" stroke="#64748b" stroke-width="2.9" points="159.26,-220.2 147.61,-220.38 156.83,-227.51 159.26,-220.2"/>
+<text xml:space="preserve" text-anchor="middle" x="202.23" y="-476.12" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="16.00" fill="#334155"> &#160;7 FK &#160;</text>
+</g>
+<!-- tiket -->
+<g id="node3" class="node">
+<title>tiket</title>
+<polygon fill="#0369a1" stroke="none" points="561.18,-393 561.18,-439 714.16,-439 714.16,-393 561.18,-393"/>
+<polygon fill="none" stroke="#cbd5e1" points="561.18,-393 561.18,-439 714.16,-439 714.16,-393 561.18,-393"/>
+<text xml:space="preserve" text-anchor="start" x="569.18" y="-416.7" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-weight="bold" font-size="17.00" fill="#ffffff">Tiket &amp; Helpdesk</text>
+<text xml:space="preserve" text-anchor="start" x="618.15" y="-403.3" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="13.00" fill="#e2e8f0">7 tabel</text>
+<polygon fill="#ffffff" stroke="none" points="561.18,-365 561.18,-393 714.16,-393 714.16,-365 561.18,-365"/>
+<polygon fill="none" stroke="#cbd5e1" points="561.18,-365 561.18,-393 714.16,-393 714.16,-365 561.18,-365"/>
+<text xml:space="preserve" text-anchor="start" x="566.18" y="-373" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="15.00" fill="#334155">approval_ticket</text>
+<polygon fill="#ffffff" stroke="none" points="561.18,-337 561.18,-365 714.16,-365 714.16,-337 561.18,-337"/>
+<polygon fill="none" stroke="#cbd5e1" points="561.18,-337 561.18,-365 714.16,-365 714.16,-337 561.18,-337"/>
+<text xml:space="preserve" text-anchor="start" x="566.18" y="-345" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="15.00" fill="#334155">assignment_ticket</text>
+<polygon fill="#ffffff" stroke="none" points="561.18,-309 561.18,-337 714.16,-337 714.16,-309 561.18,-309"/>
+<polygon fill="none" stroke="#cbd5e1" points="561.18,-309 561.18,-337 714.16,-337 714.16,-309 561.18,-309"/>
+<text xml:space="preserve" text-anchor="start" x="566.18" y="-317" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="15.00" fill="#334155">laporan_feedback</text>
+<polygon fill="#ffffff" stroke="none" points="561.18,-281 561.18,-309 714.16,-309 714.16,-281 561.18,-281"/>
+<polygon fill="none" stroke="#cbd5e1" points="561.18,-281 561.18,-309 714.16,-309 714.16,-281 561.18,-281"/>
+<text xml:space="preserve" text-anchor="start" x="566.18" y="-289" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="15.00" fill="#334155">list_ticket</text>
+<polygon fill="#ffffff" stroke="none" points="561.18,-253 561.18,-281 714.16,-281 714.16,-253 561.18,-253"/>
+<polygon fill="none" stroke="#cbd5e1" points="561.18,-253 561.18,-281 714.16,-281 714.16,-253 561.18,-253"/>
+<text xml:space="preserve" text-anchor="start" x="566.18" y="-261" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="15.00" fill="#334155">teknisi</text>
+<polygon fill="#ffffff" stroke="none" points="561.18,-225 561.18,-253 714.16,-253 714.16,-225 561.18,-225"/>
+<polygon fill="none" stroke="#cbd5e1" points="561.18,-225 561.18,-253 714.16,-253 714.16,-225 561.18,-225"/>
+<text xml:space="preserve" text-anchor="start" x="566.18" y="-233" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="15.00" fill="#334155">ticket_chat</text>
+<polygon fill="#ffffff" stroke="none" points="561.18,-197 561.18,-225 714.16,-225 714.16,-197 561.18,-197"/>
+<polygon fill="none" stroke="#cbd5e1" points="561.18,-197 561.18,-225 714.16,-225 714.16,-197 561.18,-197"/>
+<text xml:space="preserve" text-anchor="start" x="566.18" y="-205" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="15.00" fill="#334155">ticket_progress_log</text>
+</g>
+<!-- master&#45;&gt;tiket -->
+<g id="edge1" class="edge">
+<title>master:h&#45;&gt;tiket:h</title>
+<path fill="none" stroke="#64748b" stroke-width="3.1" d="M159.09,-218.74C281.12,-214.73 332.51,-165.93 443.61,-229.8 528.45,-278.58 463.3,-416 561.18,-416"/>
+<polygon fill="#64748b" stroke="#64748b" stroke-width="3.1" points="159.07,-214.89 148.13,-218.92 159.19,-222.59 159.07,-214.89"/>
+<text xml:space="preserve" text-anchor="middle" x="352.31" y="-234.6" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="16.00" fill="#334155"> &#160;8 FK &#160;</text>
+</g>
+<!-- maintenance -->
+<g id="node4" class="node">
+<title>maintenance</title>
+<polygon fill="#7c3aed" stroke="none" points="831.73,-424 831.73,-470 1138.73,-470 1138.73,-424 831.73,-424"/>
+<polygon fill="none" stroke="#cbd5e1" points="831.73,-424 831.73,-470 1138.73,-470 1138.73,-424 831.73,-424"/>
+<text xml:space="preserve" text-anchor="start" x="839.73" y="-447.7" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-weight="bold" font-size="17.00" fill="#ffffff">Preventive Maintenance &amp; Checklist</text>
+<text xml:space="preserve" text-anchor="start" x="965.72" y="-434.3" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="13.00" fill="#e2e8f0">9 tabel</text>
+<polygon fill="#ffffff" stroke="none" points="831.73,-396 831.73,-424 1138.73,-424 1138.73,-396 831.73,-396"/>
+<polygon fill="none" stroke="#cbd5e1" points="831.73,-396 831.73,-424 1138.73,-424 1138.73,-396 831.73,-396"/>
+<text xml:space="preserve" text-anchor="start" x="836.73" y="-404" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="15.00" fill="#334155">checklist_approval</text>
+<polygon fill="#ffffff" stroke="none" points="831.73,-368 831.73,-396 1138.73,-396 1138.73,-368 831.73,-368"/>
+<polygon fill="none" stroke="#cbd5e1" points="831.73,-368 831.73,-396 1138.73,-396 1138.73,-368 831.73,-368"/>
+<text xml:space="preserve" text-anchor="start" x="836.73" y="-376" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="15.00" fill="#334155">checklist_template</text>
+<polygon fill="#ffffff" stroke="none" points="831.73,-340 831.73,-368 1138.73,-368 1138.73,-340 831.73,-340"/>
+<polygon fill="none" stroke="#cbd5e1" points="831.73,-340 831.73,-368 1138.73,-368 1138.73,-340 831.73,-340"/>
+<text xml:space="preserve" text-anchor="start" x="836.73" y="-348" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="15.00" fill="#334155">maintenance_asset_type</text>
+<polygon fill="#ffffff" stroke="none" points="831.73,-312 831.73,-340 1138.73,-340 1138.73,-312 831.73,-312"/>
+<polygon fill="none" stroke="#cbd5e1" points="831.73,-312 831.73,-340 1138.73,-340 1138.73,-312 831.73,-312"/>
+<text xml:space="preserve" text-anchor="start" x="836.73" y="-320" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="15.00" fill="#334155">maintenance_checklist_item</text>
+<polygon fill="#ffffff" stroke="none" points="831.73,-284 831.73,-312 1138.73,-312 1138.73,-284 831.73,-284"/>
+<polygon fill="none" stroke="#cbd5e1" points="831.73,-284 831.73,-312 1138.73,-312 1138.73,-284 831.73,-284"/>
+<text xml:space="preserve" text-anchor="start" x="836.73" y="-292" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="15.00" fill="#334155">maintenance_checklist_unit</text>
+<polygon fill="#ffffff" stroke="none" points="831.73,-256 831.73,-284 1138.73,-284 1138.73,-256 831.73,-256"/>
+<polygon fill="none" stroke="#cbd5e1" points="831.73,-256 831.73,-284 1138.73,-284 1138.73,-256 831.73,-256"/>
+<text xml:space="preserve" text-anchor="start" x="836.73" y="-264" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="15.00" fill="#334155">preventive_schedule</text>
+<polygon fill="#ffffff" stroke="none" points="831.73,-228 831.73,-256 1138.73,-256 1138.73,-228 831.73,-228"/>
+<polygon fill="none" stroke="#cbd5e1" points="831.73,-228 831.73,-256 1138.73,-256 1138.73,-228 831.73,-228"/>
+<text xml:space="preserve" text-anchor="start" x="836.73" y="-236" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="15.00" fill="#334155">schedule_asset</text>
+<polygon fill="#ffffff" stroke="none" points="831.73,-200 831.73,-228 1138.73,-228 1138.73,-200 831.73,-200"/>
+<polygon fill="none" stroke="#cbd5e1" points="831.73,-200 831.73,-228 1138.73,-228 1138.73,-200 831.73,-200"/>
+<text xml:space="preserve" text-anchor="start" x="836.73" y="-208" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="15.00" fill="#334155">schedule_asset_claim</text>
+<polygon fill="#ffffff" stroke="none" points="831.73,-172 831.73,-200 1138.73,-200 1138.73,-172 831.73,-172"/>
+<polygon fill="none" stroke="#cbd5e1" points="831.73,-172 831.73,-200 1138.73,-200 1138.73,-172 831.73,-172"/>
+<text xml:space="preserve" text-anchor="start" x="836.73" y="-180" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="15.00" fill="#334155">ticket_checklist_result</text>
+</g>
+<!-- master&#45;&gt;maintenance -->
+<g id="edge3" class="edge">
+<title>master:h&#45;&gt;maintenance:h</title>
+<path fill="none" stroke="#64748b" stroke-width="2.7" d="M158.05,-215.64C163.27,-212.98 167.73,-209.34 176.44,-207 213.31,-197.11 223.02,-195.73 261.01,-192 393.81,-178.98 427.75,-187.33 561.18,-186 629.17,-185.32 657.06,-149.09 714.16,-186 727.52,-194.63 815.83,-447 831.73,-447"/>
+<polygon fill="#64748b" stroke="#64748b" stroke-width="2.7" points="157.28,-211.87 147.42,-218.09 159.01,-219.37 157.28,-211.87"/>
+<text xml:space="preserve" text-anchor="middle" x="502.39" y="-190.95" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="16.00" fill="#334155"> &#160;6 FK &#160;</text>
+</g>
+<!-- aset&#45;&gt;tiket -->
+<g id="edge5" class="edge">
+<title>aset:h&#45;&gt;tiket:h</title>
+<path fill="none" stroke="#64748b" stroke-width="1.7" d="M456.33,-502.84C467.72,-492.03 457.97,-462.79 476.61,-446.8 506.96,-420.75 521.17,-416 561.18,-416"/>
+<polygon fill="#64748b" stroke="#64748b" stroke-width="1.7" points="455.31,-499.12 446.05,-506.2 457.7,-506.44 455.31,-499.12"/>
+<text xml:space="preserve" text-anchor="middle" x="502.39" y="-451.6" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="16.00" fill="#334155"> &#160;1 FK &#160;</text>
+</g>
+<!-- aset&#45;&gt;maintenance -->
+<g id="edge6" class="edge">
+<title>aset:h&#45;&gt;maintenance:h</title>
+<path fill="none" stroke="#64748b" stroke-width="1.9" d="M456.89,-510.34C462.61,-513.54 466.93,-518.16 476.61,-520 580.33,-539.69 610.61,-540.58 714.16,-520 754.06,-512.07 765.72,-508.77 798.73,-485 816.89,-471.93 809.37,-447 831.73,-447"/>
+<polygon fill="#64748b" stroke="#64748b" stroke-width="1.9" points="458,-506.65 446.39,-507.7 456.12,-514.12 458,-506.65"/>
+<text xml:space="preserve" text-anchor="middle" x="637.67" y="-539.9" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="16.00" fill="#334155"> &#160;2 FK &#160;</text>
+</g>
+<!-- tiket&#45;&gt;maintenance -->
+<g id="edge8" class="edge">
+<title>tiket:h&#45;&gt;maintenance:h</title>
+<path fill="none" stroke="#64748b" stroke-width="2.3" d="M727.64,-411.6C733.2,-407.36 737.12,-401.26 747.16,-398.8 769.43,-393.35 778.46,-388.11 798.73,-398.8 821.7,-410.91 805.77,-447 831.73,-447"/>
+<polygon fill="#64748b" stroke="#64748b" stroke-width="2.3" points="726.73,-407.84 717.47,-414.92 729.12,-415.16 726.73,-407.84"/>
+<text xml:space="preserve" text-anchor="middle" x="772.95" y="-403.6" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="16.00" fill="#334155"> &#160;4 FK &#160;</text>
+</g>
+<!-- maintenance&#45;&gt;aset -->
+<g id="edge4" class="edge">
+<title>maintenance:h&#45;&gt;aset:h</title>
+<path fill="none" stroke="#64748b" stroke-width="1.9" d="M818.63,-450.81C812.77,-454.79 808.84,-460.9 798.73,-464 760.74,-475.67 483.35,-507 443.61,-507"/>
+<polygon fill="#64748b" stroke="#64748b" stroke-width="1.9" points="819.48,-454.57 828.97,-447.8 817.33,-447.17 819.48,-454.57"/>
+<text xml:space="preserve" text-anchor="middle" x="637.67" y="-501.14" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="16.00" fill="#334155"> &#160;2 FK &#160;</text>
+</g>
+<!-- maintenance&#45;&gt;tiket -->
+<g id="edge7" class="edge">
+<title>maintenance:h&#45;&gt;tiket:h</title>
+<path fill="none" stroke="#64748b" stroke-width="1.7" d="M818.37,-445.33C787.57,-438.89 737.38,-416 714.16,-416"/>
+<polygon fill="#64748b" stroke="#64748b" stroke-width="1.7" points="817.79,-449.14 829.18,-446.68 818.74,-441.5 817.79,-449.14"/>
+<text xml:space="preserve" text-anchor="middle" x="772.95" y="-444.31" font-family="Arial,Liberation Sans,Helvetica,sans-serif" font-size="16.00" fill="#334155"> &#160;1 FK &#160;</text>
+</g>
+</g>
+
+  </g>
+  <text x="64" y="1052" font-size="17" fill="#475569">Panah menunjuk ke modul yang dirujuk. Angka = jumlah foreign key lintas modul.</text>
+</svg>
