@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { IonicModule, ToastController, AlertController, IonicSafeString } from '@ionic/angular';
+import { IonicModule, ToastController, AlertController } from '@ionic/angular';
 import { addIcons } from 'ionicons';
 import {
   menuOutline,
@@ -91,7 +91,6 @@ export class AssignmentTicketPage implements OnInit {
       duration: 3000,
       position: 'top',
       color,
-      cssClass: `custom-toast toast-${color}`,
       buttons: [{ text: 'OK', role: 'cancel' }]
     });
     await toast.present();
@@ -244,16 +243,17 @@ export class AssignmentTicketPage implements OnInit {
 
     const alertEl = await this.alertCtrl.create({
       header: 'Konfirmasi Assignment',
-      message: new IonicSafeString(`Assign tiket <strong>${ticket.idTicket}</strong> dengan prioritas <strong>${ticket.prioritas}</strong>?`),
-      cssClass: 'custom-alert-dialog',
+      message: `Assign tiket #${ticket.idTicket} dengan prioritas ${ticket.prioritas}?`,
+      cssClass: 'custom-alert-light',
       buttons: [
-        { text: 'Batal', role: 'cancel', cssClass: 'alert-button-cancel' },
+        { text: 'Batal', role: 'cancel', cssClass: 'alert-btn-cancel' },
         {
           text: 'Assign',
+          cssClass: 'alert-btn-primary',
           handler: () => {
             this.assignmentService.assignTicket(ticket.idTicket, ticket.teknisiTerpilih!, ticket.prioritas).subscribe({
               next: () => {
-                this.showToast(`Tiket ${ticket.idTicket} berhasil di-assign!`, 'success');
+                this.showToast(`Tiket #${ticket.idTicket} berhasil di-assign!`, 'success');
                 this.loadAssignableTickets();
               },
               error: (err: any) => {
@@ -274,25 +274,23 @@ export class AssignmentTicketPage implements OnInit {
     const isApprove = action === 'Approve';
     const alertEl = await this.alertCtrl.create({
       header: isApprove ? 'Setujui Pengembalian' : 'Tolak Pengembalian',
-      message: new IonicSafeString(
-        isApprove
-          ? `Setujui pengembalian tiket <strong>${ticket.id_ticket}</strong>? Tiket akan siap di-assign ulang.`
-          : `Tolak pengembalian tiket <strong>${ticket.id_ticket}</strong>? Tiket akan dikembalikan ke teknisi.`
-      ),
-      cssClass: 'custom-alert-dialog',
+      message: isApprove
+        ? `Setujui pengembalian tiket #${ticket.id_ticket}? Tiket akan siap di-assign ulang.`
+        : `Tolak pengembalian tiket #${ticket.id_ticket}? Tiket akan dikembalikan ke teknisi.`,
+      cssClass: 'custom-alert-light',
       buttons: [
-        { text: 'Batal', role: 'cancel', cssClass: 'alert-button-cancel' },
+        { text: 'Batal', role: 'cancel', cssClass: 'alert-btn-cancel' },
         {
           text: isApprove ? 'Setujui' : 'Tolak',
-          role: isApprove ? undefined : 'destructive',
+          cssClass: isApprove ? 'alert-btn-success' : 'alert-btn-danger',
           handler: () => {
             this.ticketService.reviewReturn(ticket.id_ticket, action).subscribe({
               next: () => {
-                this.showToast(`Pengembalian tiket ${isApprove ? 'disetujui' : 'ditolak'}.`, 'success');
+                this.showToast(`Pengembalian tiket #${ticket.id_ticket} ${isApprove ? 'disetujui' : 'ditolak'}.`, 'success');
                 this.loadReturnedTickets();
                 this.loadAssignableTickets();
               },
-              error: (err) => this.showToast(err?.error?.message || 'Gagal memproses review.', 'danger')
+              error: (err: any) => this.showToast(err?.error?.message || 'Gagal memproses review.', 'danger')
             });
           }
         }

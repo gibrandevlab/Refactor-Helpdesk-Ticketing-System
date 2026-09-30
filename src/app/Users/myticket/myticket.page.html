@@ -145,10 +145,11 @@
                     </ion-button>
 
                     <ion-button
-                      *ngIf="t.isPreventive && (t.status === 'Selesai' || t.status === 'Solved')"
-                      fill="clear" size="small" color="primary"
+                      *ngIf="t.isPreventive || t.status === 'Menunggu Approval User' || t.statusPengerjaan === 'Menunggu Approval User'"
+                      fill="outline" size="small" color="primary"
                       (click)="openChecklistModal(t.id)" title="Lihat & Approve Check Sheet">
-                      <ion-icon name="document-text-outline"></ion-icon>
+                      <ion-icon name="document-text-outline" slot="start"></ion-icon>
+                      {{ t.status === 'Menunggu Approval User' || t.statusPengerjaan === 'Menunggu Approval User' ? 'Review Check Sheet' : 'Lihat Check Sheet' }}
                     </ion-button>
                   </td>
                 </tr>
@@ -436,8 +437,7 @@
           <table class="checksheet-signature-table" *ngIf="selectedChecklistApproval as approval">
             <tr>
               <th>DIBUAT OLEH (TEKNISI)</th>
-              <th>DIKETAHUI (ANDA)</th>
-              <th>DISETUJUI (IT SERVICE)</th>
+              <th>DISETUJUI (ANDA)</th>
             </tr>
             <tr class="signature-row">
               <td>
@@ -454,14 +454,6 @@
                        [src]="getSignatureUrl(approval.ttd_diketahui_oleh)"
                        class="signature-img" alt="Tanda tangan" />
                   <span class="signature-name">{{ approval.nama_diketahui_oleh || 'Menunggu' }}</span>
-                </div>
-              </td>
-              <td>
-                <div class="signature-cell">
-                  <img *ngIf="approval.ttd_disetujui_oleh"
-                       [src]="getSignatureUrl(approval.ttd_disetujui_oleh)"
-                       class="signature-img" alt="Tanda tangan" />
-                  <span class="signature-name">{{ approval.nama_disetujui_oleh || 'Menunggu' }}</span>
                 </div>
               </td>
             </tr>

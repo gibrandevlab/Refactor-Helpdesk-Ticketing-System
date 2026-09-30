@@ -322,7 +322,7 @@ model ListTicket {
   deskripsi           String?             @db.NVarChar(Max)
   lampiran            String?             @db.NVarChar(255)
   tanggal_lapor       DateTime            @default(now())
-  status              String              @default("Menunggu Approval") @db.NVarChar(19)
+  status              String              @default("Menunggu Approval") @db.NVarChar(50)
   prioritas           String?             @default("Normal") @db.NVarChar(6)
   deadline            DateTime?
   id_schedule         Int?
@@ -360,7 +360,7 @@ model AssignmentTicket {
   tanggal_assign          DateTime            @default(now())
   progress                Int?                @default(0) @db.SmallInt
   catatan_penyelesaian    String?             @db.NVarChar(255)
-  status_pengerjaan       String              @default("Menunggu Diproses") @db.NVarChar(17)
+  status_pengerjaan       String              @default("Menunggu Diproses") @db.NVarChar(50)
   tanggal_selesai         DateTime?
   is_paused               Int?                @default(0) @db.SmallInt
   paused_at               DateTime?

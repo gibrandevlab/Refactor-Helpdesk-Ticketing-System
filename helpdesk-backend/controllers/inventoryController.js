@@ -13,6 +13,7 @@ const {
   sub_kategori,
   assignment_ticket,
   teknisi,
+  maintenance_asset_type,
   sequelize
 } = require('../models');
 const { ok, created, fail } = require('../utils/response');
@@ -27,7 +28,8 @@ exports.getAll = async (req, res) => {
       include: [
         { model: departemen, as: 'id_departemen_departemen' },
         { model: kategori, as: 'id_kategori_kategori' },
-        { model: karyawan, as: 'nik_pemegang_karyawan' }
+        { model: karyawan, as: 'nik_pemegang_karyawan' },
+        { model: maintenance_asset_type, as: 'maintenance_asset_type', required: false }
       ],
       order: [['kode_asset', 'ASC']]
     });
@@ -49,6 +51,7 @@ exports.getAll = async (req, res) => {
       dept: inv.id_departemen_departemen?.nama_departemen || null,
       kategori: inv.id_kategori_kategori?.nama_kategori || null,
       pemegang: inv.nik_pemegang_karyawan?.nama || null
+      , id_asset_type: inv.id_asset_type, jenis_aset_maintenance: inv.maintenance_asset_type?.nama_jenis || null
     }));
 
     return ok(res, rows);
@@ -134,6 +137,19 @@ exports.getJenisOptions = async (req, res) => {
   }
 };
 
+// Aset ini tidak boleh menerima checklist preventive baru sampai dipetakan admin.
+exports.getUnmappedMaintenanceAssets = async (_req, res) => {
+  try {
+    const rows = await inventory.findAll({
+      where: { id_asset_type: null },
+      attributes: ['kode_asset', 'nama_barang', 'merk_model', 'id_departemen'],
+      include: [{ model: departemen, as: 'id_departemen_departemen', required: false }],
+      order: [['kode_asset', 'ASC']]
+    });
+    return ok(res, rows.map(x => ({ ...x.toJSON(), departemen: x.id_departemen_departemen?.nama_departemen || null })), 'Aset yang belum memiliki jenis maintenance');
+  } catch (err) { return fail(res, 'Gagal mengambil aset belum dipetakan: ' + err.message, 500); }
+};
+
 // ==========================================
 // USER: Asset yang Dipegang Sendiri
 // ==========================================
@@ -169,20 +185,24 @@ exports.create = async (req, res) => {
   const transaction = await sequelize.transaction();
   try {
     const {
-      nama_barang, merk_model, id_departemen, id_kategori,
+      nama_barang, merk_model, id_departemen, id_kategori, id_asset_type,
       computer_name, it_priority, tahun_perolehan, user_pemakai,
       email, extension, divisi, gedung, ip_address, status_aset,
     } = req.body;
 
-    if (!nama_barang || !id_departemen || !id_kategori) {
+    if (!nama_barang || !id_departemen || !id_kategori || !id_asset_type) {
       await transaction.rollback();
-      return fail(res, 'nama_barang, id_departemen, id_kategori wajib diisi', 400);
+      return fail(res, 'nama_barang, id_departemen, id_kategori, dan kategori maintenance wajib diisi', 400);
     }
 
     const kodeAsset = 'AST-' + Date.now().toString().slice(-8);
     const nikPemegang = req.user.level === 'Admin' ? (req.body.nik_pemegang || null) : req.user.nik;
     const parsedDept = parseInt(id_departemen);
     const parsedKat = parseInt(id_kategori);
+    const maintenanceType = await maintenance_asset_type.findByPk(Number(id_asset_type), { transaction });
+    if (!maintenanceType || !maintenanceType.is_active) {
+      await transaction.rollback(); return fail(res, 'Kategori maintenance tidak ditemukan atau nonaktif', 400);
+    }
 
     await inventory.create({
       kode_asset: kodeAsset,
@@ -190,6 +210,7 @@ exports.create = async (req, res) => {
       merk_model: merk_model || null,
       id_departemen: parsedDept,
       id_kategori: parsedKat,
+      id_asset_type: id_asset_type ? Number(id_asset_type) : null,
       nik_pemegang: nikPemegang,
       status_aset: status_aset || 'Aktif',
       computer_name: computer_name || null,
@@ -252,7 +273,7 @@ exports.update = async (req, res) => {
   try {
     const { kode } = req.params;
     const {
-      nama_barang, merk_model, id_departemen, id_kategori, nik_pemegang,
+      nama_barang, merk_model, id_departemen, id_kategori, id_asset_type, nik_pemegang,
       computer_name, it_priority, tahun_perolehan, user_pemakai,
       email, extension, divisi, gedung, ip_address, status_aset,
       keterangan_pindah, keterangan_pindah_departemen,
@@ -274,12 +295,16 @@ exports.update = async (req, res) => {
 
     const idDeptLama = current.id_departemen;
     const idDeptBaru = id_departemen ? parseInt(id_departemen) : null;
+    if (!id_asset_type) { await transaction.rollback(); return fail(res, 'Kategori maintenance wajib diisi', 400); }
+    const maintenanceType = await maintenance_asset_type.findByPk(Number(id_asset_type), { transaction });
+    if (!maintenanceType || !maintenanceType.is_active) { await transaction.rollback(); return fail(res, 'Kategori maintenance tidak ditemukan atau nonaktif', 400); }
 
     await inventory.update({
       nama_barang,
       merk_model: merk_model || null,
       id_departemen: idDeptBaru,
       id_kategori: id_kategori ? parseInt(id_kategori) : undefined,
+      id_asset_type: id_asset_type === undefined ? undefined : (id_asset_type ? Number(id_asset_type) : null),
       nik_pemegang: nikBaru,
       computer_name: computer_name || null,
       it_priority: it_priority || null,
@@ -357,7 +382,8 @@ exports.getDetail = async (req, res) => {
       include: [
         { model: departemen, as: 'id_departemen_departemen' },
         { model: kategori, as: 'id_kategori_kategori' },
-        { model: karyawan, as: 'nik_pemegang_karyawan' }
+        { model: karyawan, as: 'nik_pemegang_karyawan' },
+        { model: maintenance_asset_type, as: 'maintenance_asset_type', required: false }
       ]
     });
 
@@ -382,6 +408,8 @@ exports.getDetail = async (req, res) => {
       id_departemen: inv.id_departemen,
       id_kategori: inv.id_kategori,
       nik_pemegang: inv.nik_pemegang,
+      id_asset_type: inv.id_asset_type,
+      jenis_aset_maintenance: inv.maintenance_asset_type?.nama_jenis || null,
       dept: inv.id_departemen_departemen?.nama_departemen || null,
       kategori: inv.id_kategori_kategori?.nama_kategori || null,
       pemegang: inv.nik_pemegang_karyawan?.nama || null

@@ -143,6 +143,14 @@
           </ion-select>
         </div>
 
+        <div class="form-group">
+          <label class="form-label">Kategori Maintenance <span class="required">*</span></label>
+          <ion-select [(ngModel)]="formData.idAssetType" interface="action-sheet" class="form-select" placeholder="Pilih kategori maintenance">
+            <ion-select-option *ngFor="let jenis of maintenanceTypeList" [value]="jenis.id_asset_type">{{ jenis.nama_jenis }}</ion-select-option>
+          </ion-select>
+          <small>Menentukan checklist ketika aset dijadwalkan preventive maintenance.</small>
+        </div>
+
         <!-- Tombol -->
         <div class="modal-actions">
           <ion-button class="cancel-modal-btn" fill="outline" color="medium" (click)="closeModal()">
@@ -151,7 +159,7 @@
           <ion-button
             class="submit-modal-btn"
             (click)="simpanAset()"
-            [disabled]="!formData.namaBarang || !formData.idDepartemen || !formData.idKategori"
+            [disabled]="!formData.namaBarang || !formData.idDepartemen || !formData.idKategori || !formData.idAssetType"
           >
             <ion-icon name="save-outline" slot="start"></ion-icon>
             Daftarkan

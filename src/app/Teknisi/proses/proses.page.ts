@@ -33,7 +33,7 @@ export interface ProsesTicket {
   deskripsi: string;
   progress: number;
   catatan: string;
-  status: 'Menunggu Diproses' | 'Proses' | 'Selesai';
+  status: 'Menunggu Diproses' | 'Proses' | 'Menunggu Approval User' | 'Selesai';
   isSaving?: boolean;
   isPaused?: boolean;
   isHistoryOpen?: boolean;
@@ -100,6 +100,7 @@ export class ProsesTiketPage implements OnInit, OnDestroy {
   selectedChecklistApproval: ChecklistApprovalRow | null = null;
   isLoadingApproval = false;
   isSubmittingApproval = false;
+  pendingChecklistSaves = 0;
 
   searchTerm = '';
   currentPage = 1;
@@ -231,7 +232,7 @@ export class ProsesTiketPage implements OnInit, OnDestroy {
       deskripsi: row.deskripsi,
       progress: row.progress,
       catatan: row.catatan_penyelesaian || '',
-      status: row.status_pengerjaan as 'Menunggu Diproses' | 'Proses' | 'Selesai',
+      status: row.status_pengerjaan as 'Menunggu Diproses' | 'Proses' | 'Menunggu Approval User' | 'Selesai',
       isPaused: (row as any).is_paused === 1,
       isHistoryOpen: false,
       history: [],
@@ -301,6 +302,14 @@ export class ProsesTiketPage implements OnInit, OnDestroy {
     return Array.from(map.entries()).map(([kategori, items]) => ({ kategori, items }));
   }
 
+  isPreventiveTicket(ticket: ProsesTicket): boolean {
+    return (ticket.deskripsi || '').includes('[PREVENTIVE]');
+  }
+
+  isChecklistLocked(): boolean {
+    return this.selectedChecklistTicket?.status === 'Menunggu Approval User';
+  }
+
   buildChecklistSections(groups: ChecklistGroup[]): ChecklistSection[] {
     const sections: ChecklistSection[] = [];
     let normalCounter = 0;
@@ -324,6 +333,7 @@ export class ProsesTiketPage implements OnInit, OnDestroy {
   }
 
   setKondisiOk(item: ChecklistItemApiRow, checked: boolean) {
+    if (this.isChecklistLocked()) return;
     item.kondisi = checked ? 'OK' : (null as any);
     item.kondisi_huruf = null;
     item._showHurufPicker = false;
@@ -342,10 +352,12 @@ export class ProsesTiketPage implements OnInit, OnDestroy {
   }
 
   onClickNcBox(item: ChecklistItemApiRow) {
+    if (this.isChecklistLocked()) return;
     this.setKondisiNc(item, item.kondisi !== 'NC');
   }
 
   pilihHurufNc(item: ChecklistItemApiRow, huruf: 'B' | 'C' | 'D') {
+    if (this.isChecklistLocked()) return;
     item.kondisi = 'NC';
     item.kondisi_huruf = huruf;
     item._showHurufPicker = false;
@@ -357,12 +369,18 @@ export class ProsesTiketPage implements OnInit, OnDestroy {
   }
 
   updateChecklistItem(item: ChecklistItemApiRow) {
+    if (this.isChecklistLocked()) return;
+    this.pendingChecklistSaves++;
     this.ticketService.updateChecklistItem(item.id_result, {
       kondisi: item.kondisi,
       kondisi_huruf: item.kondisi_huruf,
       catatan: item.catatan || ''
     }).subscribe({
-      error: (err: any) => alert(err?.error?.message || 'Gagal menyimpan checklist')
+      next: () => this.pendingChecklistSaves--,
+      error: (err: any) => {
+        this.pendingChecklistSaves--;
+        alert(err?.error?.message || 'Gagal menyimpan checklist');
+      }
     });
   }
 
@@ -389,8 +407,16 @@ export class ProsesTiketPage implements OnInit, OnDestroy {
   }
 
   ajukanApprovalChecklist(t: ProsesTicket) {
-    if (t.status !== 'Selesai') {
-      alert('Tiket harus berstatus Selesai sebelum diajukan approval.');
+    if (!this.isPreventiveTicket(t)) {
+      alert('Check Sheet approval hanya diperlukan untuk tiket preventive.');
+      return;
+    }
+    if (t.status === 'Menunggu Approval User') {
+      alert('Check Sheet sudah menunggu approval User.');
+      return;
+    }
+    if (this.pendingChecklistSaves > 0) {
+      alert('Checklist masih disimpan. Tunggu sebentar lalu ajukan kembali.');
       return;
     }
     const belumIsi = t.checklist.filter((i) => !i.kondisi).length;
@@ -403,7 +429,7 @@ export class ProsesTiketPage implements OnInit, OnDestroy {
     this.ticketService.ajukanApprovalChecklist(t.idTicket).subscribe({
       next: () => {
         this.isSubmittingApproval = false;
-        alert('Check Sheet berhasil diajukan. Tanda tangan Teknisi & IT Service otomatis terisi, menunggu approval User.');
+        alert('Check Sheet berhasil diajukan dan sekarang menunggu approval User.');
         this.loadChecklistApproval(t.idTicket);
         this.removeTicketFromList(t.idTicket);
         this.closeChecklistModal();
@@ -426,8 +452,9 @@ export class ProsesTiketPage implements OnInit, OnDestroy {
   get canAjukanApproval(): boolean {
     const t = this.selectedChecklistTicket;
     if (!t) return false;
-    if (t.status !== 'Selesai') return false;
-    if (this.selectedChecklistApproval?.dibuat_oleh_nik && this.selectedChecklistApproval.status_disetujui !== 'Reject') {
+    if (!this.isPreventiveTicket(t) || t.status === 'Menunggu Approval User') return false;
+    if (this.pendingChecklistSaves > 0 || t.checklist.some(item => !item.kondisi)) return false;
+    if (this.selectedChecklistApproval?.dibuat_oleh_nik && this.selectedChecklistApproval.status_diketahui !== 'Reject') {
       return false;
     }
     return true;
@@ -721,27 +748,10 @@ export class ProsesTiketPage implements OnInit, OnDestroy {
           });
         }
 
-        if (statusPengerjaan === 'Selesai') {
-          this.autoAjukanApproval(ticket);
-        }
       },
       error: (err: any) => {
         ticket.isSaving = false;
         alert(err?.error?.message || 'Gagal menyimpan perubahan');
-      }
-    });
-  }
-
-  private autoAjukanApproval(ticket: ProsesTicket) {
-    this.ticketService.ajukanApprovalChecklist(ticket.idTicket).subscribe({
-      next: () => {
-        this.removeTicketFromList(ticket.idTicket);
-      },
-      error: (err: any) => {
-        alert(
-          (err?.error?.message || 'Gagal mengajukan Check Sheet secara otomatis') +
-          '\n\nSilakan buka Check Sheet, lengkapi checklist OK/NC, lalu klik "Ajukan ke User".'
-        );
       }
     });
   }

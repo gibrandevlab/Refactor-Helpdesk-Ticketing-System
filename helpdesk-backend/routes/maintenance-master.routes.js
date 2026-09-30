@@ -1,0 +1,18 @@
+const router = require('express').Router();
+const c = require('../controllers/maintenanceMasterController');
+const { verifyToken, checkRole } = require('../middleware/auth');
+router.get('/asset-types/active', verifyToken, c.activeTypes);
+router.get('/asset-types', verifyToken, checkRole('Admin'), c.listTypes);
+router.post('/asset-types', verifyToken, checkRole('Admin'), c.createType);
+router.put('/asset-types/:id', verifyToken, checkRole('Admin'), c.updateType);
+router.delete('/asset-types/:id', verifyToken, checkRole('Admin'), c.deactivateType);
+router.get('/checklist-units/active/:typeId', verifyToken, c.activeUnits);
+router.get('/checklist-units', verifyToken, checkRole('Admin'), c.listUnits);
+router.post('/checklist-units', verifyToken, checkRole('Admin'), c.createUnit);
+router.put('/checklist-units/:id', verifyToken, checkRole('Admin'), c.updateUnit);
+router.delete('/checklist-units/:id', verifyToken, checkRole('Admin'), c.deactivateUnit);
+router.get('/checklist-items', verifyToken, checkRole('Admin'), c.listItems);
+router.post('/checklist-items', verifyToken, checkRole('Admin'), c.createItem);
+router.put('/checklist-items/:id', verifyToken, checkRole('Admin'), c.updateItem);
+router.delete('/checklist-items/:id', verifyToken, checkRole('Admin'), c.deactivateItem);
+module.exports = router;

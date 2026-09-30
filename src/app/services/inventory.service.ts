@@ -12,6 +12,8 @@ export interface InventoryItem {
   kategori: string;
   pemegang: string;
   status_aset?: string;
+  id_asset_type?: number | null;
+  jenis_aset_maintenance?: string | null;
 }
 
 // Hasil statistik jumlah asset per departemen
@@ -196,6 +198,10 @@ export class InventoryService {
           return throwError(() => new Error('Gagal memuat jenis asset'));
         })
       );
+  }
+
+  getMaintenanceAssetTypes(): Observable<any[]> {
+    return this.http.get<any[]>(`${environment.apiUrl}/maintenance-master/asset-types/active`, { headers: this.getHeaders() });
   }
 
   // ===== DETAIL ASSET =====

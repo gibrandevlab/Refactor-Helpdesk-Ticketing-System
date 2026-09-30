@@ -259,7 +259,7 @@ export class MyTicketPage implements OnInit {
       statusPengerjaan: row.status_pengerjaan || 'Menunggu Diproses',
       catatanPenyelesaian: row.catatan_penyelesaian || null,
       userKonfirmasi: row.user_konfirmasi ?? 0,
-      isPreventive: !!(row as any).deskripsi && (row as any).deskripsi.includes('[PREVENTIVE]'),
+      isPreventive: row.is_preventive === true || !!row.deskripsi?.includes('[PREVENTIVE]'),
       tanggalDibuatSchedule,
       catatanApproval: (row as any).catatan_approval || null,
     };
@@ -278,8 +278,9 @@ export class MyTicketPage implements OnInit {
     if (!status) return '-';
     const s = status.toLowerCase();
     if (s === 'solved') return 'Selesai';
-    if (s.includes('approve')) return 'Approve Internal';
+    if (s === 'menunggu approval user') return 'Menunggu Review Check Sheet';
     if (s.includes('menunggu')) return 'Menunggu Approval';
+    if (s.includes('approve')) return 'Approve Internal';
     if (s === 'reject' || s === 'rejected') return 'Ditolak';
     if (s.includes('proses')) return 'On Process';
     return status;
@@ -289,8 +290,9 @@ export class MyTicketPage implements OnInit {
     if (!status) return '';
     const s = status.toLowerCase();
     if (s === 'solved' || s === 'selesai') return 'status-success';
-    if (s.includes('approve')) return 'status-primary';
+    if (s === 'menunggu approval user') return 'status-warning';
     if (s.includes('menunggu')) return 'status-warning';
+    if (s.includes('approve')) return 'status-primary';
     if (s === 'reject' || s === 'rejected' || s === 'ditolak') return 'status-danger';
     if (s.includes('proses')) return 'status-info';
     return '';
@@ -453,7 +455,7 @@ export class MyTicketPage implements OnInit {
 
   get canApproveChecklist(): boolean {
     const a = this.selectedChecklistApproval;
-    return !!a?.dibuat_oleh_nik && a.status_diketahui !== 'Approve';
+    return !!a?.dibuat_oleh_nik && a.status_diketahui === 'Menunggu';
   }
 
   approveChecklist(action: 'Approve' | 'Reject') {

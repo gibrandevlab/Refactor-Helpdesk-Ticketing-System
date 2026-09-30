@@ -44,6 +44,8 @@ export interface Inventory {
   idKategori?: number;
   nikPemegang?: string;
   statusAset?: string;
+  idAssetType?: number | null;
+  jenisAsetMaintenance?: string | null;
 }
 
 type DetailTab = 'profile' | 'hardware' | 'software' | 'ip' | 'history';
@@ -65,6 +67,7 @@ export class InventoryPage implements OnInit {
   departemenList: any[] = [];
   karyawanList: any[] = [];
   kategoriList: any[] = [];
+  maintenanceTypeList: any[] = [];
 
   searchTerm = '';
   filterDept = '';
@@ -92,6 +95,7 @@ export class InventoryPage implements OnInit {
     merk_model: '',
     id_departemen: null,
     id_kategori: null,
+    id_asset_type: null,
     nik_pemegang: null,
     computer_name: '',
     it_priority: '',
@@ -185,6 +189,7 @@ export class InventoryPage implements OnInit {
     this.loadDepartemenList();
     this.loadKaryawanList();
     this.loadKategoriList();
+    this.loadMaintenanceTypes();
 
     this.loadStats();
     this.loadJenisOptions();
@@ -251,6 +256,8 @@ export class InventoryPage implements OnInit {
             idKategori: item.id_kategori,
             nikPemegang: item.nik_pemegang,
             statusAset: item.status_aset || 'Aktif',
+            idAssetType: item.id_asset_type || null,
+            jenisAsetMaintenance: item.jenis_aset_maintenance || null,
           }));
           this.buildFilterOptions();
           this.tryOpenAssetFromQuery();
@@ -357,6 +364,13 @@ export class InventoryPage implements OnInit {
         }));
       },
       error: (err) => console.error('Gagal memuat kategori:', err)
+    });
+  }
+
+  private loadMaintenanceTypes() {
+    this.inventoryService.getMaintenanceAssetTypes().subscribe({
+      next: (rows) => this.maintenanceTypeList = rows || [],
+      error: (err) => console.error('Gagal memuat jenis aset maintenance:', err)
     });
   }
 
@@ -518,6 +532,7 @@ export class InventoryPage implements OnInit {
       merk_model: '',
       id_departemen: null,
       id_kategori: null,
+      id_asset_type: null,
       nik_pemegang: null,
       computer_name: '',
       it_priority: '',
@@ -555,6 +570,7 @@ export class InventoryPage implements OnInit {
     this.resetDetailState();
     this.selectedDepartemenNama = '';
     this.loadKategoriList();
+    this.loadMaintenanceTypes();
     this.isModalOpen = true;
   }
 
@@ -564,6 +580,7 @@ export class InventoryPage implements OnInit {
     this.resetDetailState();
     this.selectedDepartemenNama = item.dept || '';
     this.loadKategoriList();
+    this.loadMaintenanceTypes();
     this.isModalOpen = true;
     this.isDetailLoading = true;
 
@@ -575,6 +592,7 @@ export class InventoryPage implements OnInit {
           merk_model: p.merk_model,
           id_departemen: p.id_departemen,
           id_kategori: p.id_kategori,
+          id_asset_type: p.id_asset_type || null,
           nik_pemegang: p.nik_pemegang,
           computer_name: p.computer_name || '',
           it_priority: p.it_priority || '',
@@ -649,8 +667,8 @@ export class InventoryPage implements OnInit {
   }
 
   simpanInventory() {
-    if (!this.formData.nama_barang || !this.formData.id_departemen || !this.formData.id_kategori) {
-      this.showToast('Nama Barang, Departemen, dan Kategori wajib diisi!', 'warning');
+    if (!this.formData.nama_barang || !this.formData.id_departemen || !this.formData.id_kategori || !this.formData.id_asset_type) {
+      this.showToast('Nama Barang, Departemen, Kategori, dan Kategori Maintenance wajib diisi!', 'warning');
       return;
     }
 

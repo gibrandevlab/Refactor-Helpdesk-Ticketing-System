@@ -38,9 +38,9 @@
 
 /* ===================== MAIN CONTENT ===================== */
 .main-content {
-  margin-left: var(--sidebar-width);
-  width: calc(100% - var(--sidebar-width));
-  max-width: calc(100% - var(--sidebar-width));
+  margin-left: 250px;
+  width: calc(100% - 250px);
+  max-width: calc(100% - 250px);
   min-width: 0;
   display: flex;
   flex-direction: column;
@@ -487,6 +487,7 @@
     font-size: 13px;
     width: 100%;
     background: transparent;
+    color: var(--text-dark);
     min-width: 0;
   }
 
@@ -711,7 +712,7 @@
 }
 
 /* ========================================== */
-/* 🔥 MODAL STYLING & ICON FIX               */
+/* MODAL STYLING & PERBAIKAN WARNA KONTRAST   */
 /* ========================================== */
 ion-modal.custom-modal,
 ion-modal {
@@ -780,7 +781,42 @@ ion-modal {
   color: #ef4444;
 }
 
-.form-select,
+.form-select-native {
+  width: 100%;
+  height: 42px;
+  padding: 8px 36px 8px 14px;
+  font-size: 13.5px;
+  color: #1e293b !important;
+  background-color: #ffffff !important;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  outline: none;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%3c1e293b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 16px;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+
+  &:focus {
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+  }
+
+  option {
+    color: #1e293b !important;
+    background-color: #ffffff !important;
+    padding: 8px;
+
+    &:disabled {
+      color: #94a3b8 !important;
+    }
+  }
+}
+
 .form-textarea {
   --background: #ffffff !important;
   --color: #1e293b !important;
@@ -849,6 +885,83 @@ ion-modal {
 }
 
 /* ========================================== */
+/* DETAIL MODAL STYLING                       */
+/* ========================================== */
+.detail-header-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 12px;
+  margin-bottom: 16px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.detail-date {
+  font-size: 12.5px;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.detail-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  margin-bottom: 18px;
+
+  @media (max-width: 576px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.detail-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.detail-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #64748b;
+}
+
+.detail-val {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.detail-section {
+  margin-bottom: 18px;
+}
+
+.detail-description {
+  margin-top: 6px;
+  padding: 12px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 13px;
+  color: #334155;
+  line-height: 1.5;
+}
+
+.detail-image-preview {
+  margin-top: 8px;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid #e2e8f0;
+  max-height: 240px;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+}
+
+/* ========================================== */
 /* COUNTDOWN TIMER                            */
 /* ========================================== */
 .countdown-timer {
@@ -860,47 +973,70 @@ ion-modal {
   color: #1e293b;
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
-}
 
-.countdown-timer.is-late {
-  color: #ef4444 !important;
-}
-
-.countdown-timer ion-icon {
-  font-size: 14px;
-}
-/* ========================================== */
-/* 🔥 STYLING DROPDOWN HTML NATIVE            */
-/* ========================================== */
-.form-select-native {
-  width: 100%;
-  height: 42px;
-  padding: 8px 36px 8px 14px;
-  font-size: 13.5px;
-  color: #1e293b;
-  background-color: #ffffff;
-  border: 1px solid #cbd5e1;
-  border-radius: 8px;
-  outline: none;
-  appearance: none; /* Sembunyikan panah bawaan OS */
-  -webkit-appearance: none;
-  -moz-appearance: none;
-
-  /* Icon panah chevron custom warna gelap agar kontras */
-  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%3c1e293b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
-  background-repeat: no-repeat;
-  background-position: right 12px center;
-  background-size: 16px;
-  transition: border-color 0.15s ease, box-shadow 0.15s ease;
-
-  &:focus {
-    border-color: #2563eb;
-    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+  &.is-late {
+    color: #ef4444 !important;
   }
 
-  option {
-    color: #1e293b;
-    background: #ffffff;
-    padding: 8px;
+  ion-icon {
+    font-size: 14px;
+  }
+}
+
+/* ========================================== */
+/* 🔥 CUSTOM IONIC ALERT (LIGHT MODE STYLING)  */
+/* ========================================== */
+::ng-deep .custom-alert-light {
+  --background: #ffffff !important;
+  --color: #1e293b !important;
+
+  .alert-wrapper {
+    background: #ffffff !important;
+    border-radius: 14px !important;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1) !important;
+    border: 1px solid #e2e8f0 !important;
+  }
+
+  .alert-head {
+    padding-bottom: 8px !important;
+
+    .alert-title {
+      color: #1e293b !important;
+      font-size: 17px !important;
+      font-weight: 700 !important;
+    }
+  }
+
+  .alert-message {
+    color: #475569 !important;
+    font-size: 13.5px !important;
+    line-height: 1.5 !important;
+  }
+
+  .alert-button-group {
+    padding: 8px 16px 12px !important;
+    gap: 8px !important;
+  }
+
+  /* Tombol Batal */
+  .alert-btn-cancel {
+    color: #64748b !important;
+    font-weight: 600 !important;
+    background: #f1f5f9 !important;
+    border-radius: 8px !important;
+    padding: 8px 16px !important;
+  }
+
+  /* Tombol Hapus */
+  .alert-btn-danger {
+    color: #ffffff !important;
+    background: #ef4444 !important;
+    font-weight: 600 !important;
+    border-radius: 8px !important;
+    padding: 8px 16px !important;
+
+    &:hover {
+      background: #dc2626 !important;
+    }
   }
 }

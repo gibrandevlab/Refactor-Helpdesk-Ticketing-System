@@ -13,6 +13,9 @@ var _checklist_approval = require("./checklist_approval");
 var _checklist_template = require("./checklist_template");
 var _departemen = require("./departemen");
 var _inventory = require("./inventory");
+var _maintenance_asset_type = require("./maintenance_asset_type");
+var _maintenance_checklist_item = require("./maintenance_checklist_item");
+var _maintenance_checklist_unit = require("./maintenance_checklist_unit");
 var _jabatan = require("./jabatan");
 var _karyawan = require("./karyawan");
 var _kategori = require("./kategori");
@@ -43,6 +46,9 @@ function initModels(sequelize) {
   var checklist_template = _checklist_template(sequelize, DataTypes);
   var departemen = _departemen(sequelize, DataTypes);
   var inventory = _inventory(sequelize, DataTypes);
+  var maintenance_asset_type = _maintenance_asset_type(sequelize, DataTypes);
+  var maintenance_checklist_item = _maintenance_checklist_item(sequelize, DataTypes);
+  var maintenance_checklist_unit = _maintenance_checklist_unit(sequelize, DataTypes);
   var jabatan = _jabatan(sequelize, DataTypes);
   var karyawan = _karyawan(sequelize, DataTypes);
   var kategori = _kategori(sequelize, DataTypes);
@@ -66,6 +72,14 @@ function initModels(sequelize) {
   bagian_departemen.hasMany(karyawan, { as: "karyawans", foreignKey: "id_bagian"});
   ticket_checklist_result.belongsTo(checklist_template, { as: "id_item_checklist_template", foreignKey: "id_item"});
   checklist_template.hasMany(ticket_checklist_result, { as: "ticket_checklist_results", foreignKey: "id_item"});
+  inventory.belongsTo(maintenance_asset_type, { as: 'maintenance_asset_type', foreignKey: 'id_asset_type' });
+  maintenance_asset_type.hasMany(inventory, { as: 'inventories', foreignKey: 'id_asset_type' });
+  maintenance_checklist_item.belongsTo(maintenance_asset_type, { as: 'maintenance_asset_type', foreignKey: 'id_asset_type' });
+  maintenance_asset_type.hasMany(maintenance_checklist_item, { as: 'checklist_items', foreignKey: 'id_asset_type' });
+  maintenance_checklist_unit.belongsTo(maintenance_asset_type, { as: 'maintenance_asset_type', foreignKey: 'id_asset_type' });
+  maintenance_asset_type.hasMany(maintenance_checklist_unit, { as: 'checklist_units', foreignKey: 'id_asset_type' });
+  maintenance_checklist_item.belongsTo(maintenance_checklist_unit, { as: 'maintenance_checklist_unit', foreignKey: 'id_checklist_unit' });
+  maintenance_checklist_unit.hasMany(maintenance_checklist_item, { as: 'checklist_items', foreignKey: 'id_checklist_unit' });
   bagian_departemen.belongsTo(departemen, { as: "id_departemen_departemen", foreignKey: "id_departemen"});
   departemen.hasMany(bagian_departemen, { as: "bagian_departemens", foreignKey: "id_departemen"});
   inventory.belongsTo(departemen, { as: "id_departemen_departemen", foreignKey: "id_departemen"});
@@ -140,6 +154,9 @@ function initModels(sequelize) {
     checklist_template,
     departemen,
     inventory,
+    maintenance_asset_type,
+    maintenance_checklist_item,
+    maintenance_checklist_unit,
     jabatan,
     karyawan,
     kategori,

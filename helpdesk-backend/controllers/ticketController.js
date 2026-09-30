@@ -90,6 +90,8 @@ const formatTicket = (t) => {
     tanggal_selesai: asg?.tanggal_selesai || null,
     catatan_penyelesaian: asg?.catatan_penyelesaian || null,
     user_konfirmasi: asg?.user_konfirmasi ?? null,
+    // Frontend memakai penanda eksplisit ini untuk menampilkan Check Sheet.
+    is_preventive: Boolean(t.deskripsi && t.deskripsi.includes('[PREVENTIVE]')),
     tanggal_konfirmasi_user: asg?.tanggal_konfirmasi_user || null,
     admin_approve: asg?.admin_approve ?? null,
     admin_approve_by: asg?.admin_approve_by || null,
@@ -398,7 +400,7 @@ exports.getAssignedToMe = async (req, res) => {
     const assignments = await assignment_ticket.findAll({
       where: {
         id_teknisi: dataTeknisi.id_teknisi,
-        status_pengerjaan: { [Op.ne]: 'Selesai' }
+        status_pengerjaan: { [Op.notIn]: ['Selesai', 'Menunggu Approval User'] }
       },
       include: [
         {
@@ -575,6 +577,17 @@ exports.togglePause = async (req, res) => {
       return fail(res, 'Tiket ini bukan tugas Anda.', 404);
     }
 
+    const ticketInfo = await list_ticket.findByPk(id_ticket, { transaction });
+    const isPreventive = ticketInfo?.deskripsi?.includes('[PREVENTIVE]');
+    if (isPreventive && status_pengerjaan === 'Selesai') {
+      if (transaction) await transaction.rollback();
+      return fail(res, 'Tiket preventive tidak dapat diselesaikan langsung. Lengkapi lalu ajukan Check Sheet untuk approval User.', 400);
+    }
+    if (assignment.status_pengerjaan === 'Menunggu Approval User') {
+      if (transaction) await transaction.rollback();
+      return fail(res, 'Check Sheet sedang menunggu approval User dan tidak dapat diubah.', 400);
+    }
+
     const currentPaused = assignment.is_paused;
     const newPausedStatus = currentPaused ? 0 : 1;
     const currentProgress = progress !== undefined ? parseInt(progress) : assignment.progress;
@@ -677,7 +690,6 @@ exports.updateProgress = async (req, res) => {
     if (status_pengerjaan === 'Selesai') {
       await list_ticket.update({ status: 'Solved' }, { where: { id_ticket }, transaction });
 
-      const ticketInfo = await list_ticket.findByPk(id_ticket, { transaction });
       if (ticketInfo?.kode_asset && ticketInfo?.deskripsi?.includes('[PREVENTIVE]')) {
         await inventory.update(
           { last_maintenance: sequelize.fn('GETDATE') },

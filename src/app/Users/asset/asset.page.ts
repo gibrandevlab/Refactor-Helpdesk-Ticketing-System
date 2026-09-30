@@ -7,6 +7,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { AssetService } from 'src/app/services/asset.service';
 import { DepartemenService } from 'src/app/services/departemen.services';
 import { KategoriService } from 'src/app/services/kategori.service';
+import { InventoryService } from 'src/app/services/inventory.service';
 import { Asset } from 'src/app/models/asset.model';
 import { SidebarComponent } from '../shared/components/sidebar/sidebar.component';
 
@@ -20,6 +21,7 @@ interface AssetFormData {
   merkModel: string;
   idDepartemen: number | null;
   idKategori: number | null;
+  idAssetType: number | null;
 }
 
 @Component({
@@ -44,6 +46,7 @@ export class AssetPage implements OnInit {
   // ===== DATA PENDUKUNG FORM TAMBAH =====
   departemenList: DepartemenOption[] = [];
   kategoriList: any[] = [];
+  maintenanceTypeList: any[] = [];
 
   searchTerm = '';
   currentPage = 1;
@@ -56,13 +59,15 @@ export class AssetPage implements OnInit {
     merkModel: '',
     idDepartemen: null,
     idKategori: null,
+    idAssetType: null,
   };
 
   constructor(
     private router: Router,
     private assetService: AssetService,
     private departemenService: DepartemenService,
-    private kategoriService: KategoriService
+    private kategoriService: KategoriService,
+    private inventoryService: InventoryService
   ) {}
 
   ngOnInit() {
@@ -78,6 +83,7 @@ export class AssetPage implements OnInit {
     this.loadMyAssets();
     this.loadDepartemenList();
     this.loadKategoriList();
+    this.loadMaintenanceTypes();
   }
 
   private loadMyAssets() {
@@ -121,6 +127,13 @@ export class AssetPage implements OnInit {
     });
   }
 
+  private loadMaintenanceTypes() {
+    this.inventoryService.getMaintenanceAssetTypes().subscribe({
+      next: (rows) => this.maintenanceTypeList = rows || [],
+      error: (err: HttpErrorResponse) => console.error('Gagal mengambil kategori maintenance:', err),
+    });
+  }
+
   get filteredAssets(): Asset[] {
     const term = this.searchTerm.trim().toLowerCase();
     if (!term) return this.assetList;
@@ -147,7 +160,7 @@ export class AssetPage implements OnInit {
   nextPage() { if (this.currentPage < this.totalPages) this.currentPage++; }
 
   openTambahModal() {
-    this.formData = { namaBarang: '', merkModel: '', idDepartemen: null, idKategori: null };
+    this.formData = { namaBarang: '', merkModel: '', idDepartemen: null, idKategori: null, idAssetType: null };
     this.isModalOpen = true;
   }
 
@@ -156,8 +169,8 @@ export class AssetPage implements OnInit {
   }
 
   simpanAset() {
-    if (!this.formData.namaBarang || !this.formData.idDepartemen || !this.formData.idKategori) {
-      alert('Nama Barang, Departemen, dan Kategori wajib diisi!');
+    if (!this.formData.namaBarang || !this.formData.idDepartemen || !this.formData.idKategori || !this.formData.idAssetType) {
+      alert('Nama Barang, Departemen, Kategori, dan Kategori Maintenance wajib diisi!');
       return;
     }
 
@@ -166,6 +179,7 @@ export class AssetPage implements OnInit {
       merkModel: this.formData.merkModel,
       idDepartemen: this.formData.idDepartemen,
       idKategori: this.formData.idKategori,
+      idAssetType: this.formData.idAssetType,
     }).subscribe({
       next: () => {
         this.loadMyAssets();

@@ -79,7 +79,6 @@ export class ApprovalTicketPage implements OnInit {
     private alertCtrl: AlertController,
     private toastCtrl: ToastController
   ) {
-    // 🔥 Registrasi icon agar muncul di Angular Standalone Component
     addIcons({
       menuOutline,
       searchOutline,
@@ -173,7 +172,7 @@ export class ApprovalTicketPage implements OnInit {
     });
   }
 
-  /** Confirm & Approve Ticket dengan AlertController */
+  /** Confirm & Approve Ticket dengan AlertController (Light Theme) */
   async approveTicket(ticket: ApprovalTicket) {
     if (!ticket?.id_ticket) {
       this.showToast('ID Tiket tidak valid.', 'warning');
@@ -182,11 +181,13 @@ export class ApprovalTicketPage implements OnInit {
 
     const alertEl = await this.alertCtrl.create({
       header: 'Konfirmasi Approval',
-      message: `Apakah Anda yakin ingin menyetujui tiket <strong>${ticket.id_ticket}</strong>?`,
+      message: `Apakah Anda yakin ingin menyetujui tiket #${ticket.id_ticket}?`,
+      cssClass: 'custom-alert-light',
       buttons: [
-        { text: 'Batal', role: 'cancel' },
+        { text: 'Batal', role: 'cancel', cssClass: 'alert-btn-cancel' },
         {
           text: 'Setujui',
+          cssClass: 'alert-btn-success',
           handler: () => {
             this.ticketService.approve(ticket.id_ticket, 'Approve').subscribe({
               next: () => {
@@ -202,7 +203,7 @@ export class ApprovalTicketPage implements OnInit {
     await alertEl.present();
   }
 
-  /** Reject Ticket dengan Input Alasan Wajib */
+  /** Reject Ticket dengan Input Alasan Wajib (Light Theme) */
   async rejectTicket(ticket: ApprovalTicket) {
     if (!ticket?.id_ticket) {
       this.showToast('ID Tiket tidak valid.', 'warning');
@@ -211,8 +212,9 @@ export class ApprovalTicketPage implements OnInit {
 
     const alertEl = await this.alertCtrl.create({
       header: 'Tolak Tiket',
-      subHeader: `Tiket ${ticket.id_ticket}`,
+      subHeader: `Tiket #${ticket.id_ticket}`,
       message: 'Masukkan alasan penolakan tiket ini (wajib diisi):',
+      cssClass: 'custom-alert-light',
       inputs: [
         {
           name: 'alasan',
@@ -221,10 +223,10 @@ export class ApprovalTicketPage implements OnInit {
         },
       ],
       buttons: [
-        { text: 'Batal', role: 'cancel' },
+        { text: 'Batal', role: 'cancel', cssClass: 'alert-btn-cancel' },
         {
           text: 'Tolak Tiket',
-          role: 'destructive',
+          cssClass: 'alert-btn-danger',
           handler: (data) => {
             const alasan = (data?.alasan || '').trim();
             if (!alasan) {
@@ -251,7 +253,7 @@ export class ApprovalTicketPage implements OnInit {
     });
   }
 
-  /** Confirm & Approve Return Ticket */
+  /** Confirm & Approve Return Ticket (Light Theme) */
   async approveReturn(ticket: ReturnedTicket) {
     if (!ticket?.id_ticket) {
       this.showToast('ID Tiket tidak valid.', 'warning');
@@ -260,11 +262,13 @@ export class ApprovalTicketPage implements OnInit {
 
     const alertEl = await this.alertCtrl.create({
       header: 'Setujui Pengembalian',
-      message: `Setujui pengembalian tiket <strong>${ticket.id_ticket}</strong>? Tiket akan siap di-assign ulang.`,
+      message: `Setujui pengembalian tiket #${ticket.id_ticket}? Tiket akan siap di-assign ulang.`,
+      cssClass: 'custom-alert-light',
       buttons: [
-        { text: 'Batal', role: 'cancel' },
+        { text: 'Batal', role: 'cancel', cssClass: 'alert-btn-cancel' },
         {
           text: 'Setujui',
+          cssClass: 'alert-btn-success',
           handler: () => {
             this.ticketService.reviewReturn(ticket.id_ticket, 'Approve').subscribe({
               next: () => {
@@ -281,7 +285,7 @@ export class ApprovalTicketPage implements OnInit {
     await alertEl.present();
   }
 
-  /** Confirm & Reject Return Ticket */
+  /** Confirm & Reject Return Ticket (Light Theme) */
   async rejectReturn(ticket: ReturnedTicket) {
     if (!ticket?.id_ticket) {
       this.showToast('ID Tiket tidak valid.', 'warning');
@@ -290,12 +294,13 @@ export class ApprovalTicketPage implements OnInit {
 
     const alertEl = await this.alertCtrl.create({
       header: 'Tolak Pengembalian',
-      message: `Tolak pengembalian tiket <strong>${ticket.id_ticket}</strong>? Tiket akan dikembalikan ke teknisi.`,
+      message: `Tolak pengembalian tiket #${ticket.id_ticket}? Tiket akan dikembalikan ke teknisi.`,
+      cssClass: 'custom-alert-light',
       buttons: [
-        { text: 'Batal', role: 'cancel' },
+        { text: 'Batal', role: 'cancel', cssClass: 'alert-btn-cancel' },
         {
           text: 'Tolak',
-          role: 'destructive',
+          cssClass: 'alert-btn-danger',
           handler: () => {
             this.ticketService.reviewReturn(ticket.id_ticket, 'Reject').subscribe({
               next: () => {
@@ -350,9 +355,6 @@ export class ApprovalTicketPage implements OnInit {
     this.activeMenu = menu;
     if (window.innerWidth < 1024) this.isSidebarOpen = false;
   }
-
-  // ===== NAVIGASI MENU =====
-
 
   logout() {
     localStorage.removeItem('token');

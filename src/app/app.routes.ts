@@ -93,6 +93,12 @@ export const routes: Routes = [
     data: { roles: ['Admin'] }
   },
   {
+    path: 'maintenance-master',
+    loadComponent: () => import('./Admin/maintenance-master/maintenance-master.page').then(m => m.MaintenanceMasterPage),
+    canActivate: [AuthGuard, RoleGuard],
+    data: { roles: ['Admin'] }
+  },
+  {
     path: 'laporan-feedback',
     loadComponent: () => import('./Admin/feedback/feedback.page').then(m => m.LaporanFeedbackPage),
     canActivate: [AuthGuard, RoleGuard],

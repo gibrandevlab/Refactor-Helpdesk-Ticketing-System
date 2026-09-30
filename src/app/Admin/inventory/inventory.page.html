@@ -128,6 +128,7 @@
                   <th>Merk/Model</th>
                   <th>Dept</th>
                   <th>Kategori</th>
+                  <th>Jenis Maintenance</th>
                   <th>Pemegang</th>
                   <th>Status</th>
                   <th>Aksi</th>
@@ -141,6 +142,7 @@
                   <td class="text-muted">{{ item.merkModel }}</td>
                   <td><span class="dept-badge">{{ item.dept }}</span></td>
                   <td><span class="kategori-badge">{{ item.kategori }}</span></td>
+                  <td>{{ item.jenisAsetMaintenance || 'Belum dipetakan' }}</td>
                   <td>{{ item.pemegang || '-' }}</td>
                   <td>
                     <span class="status-badge" [ngClass]="item.statusAset === 'Aktif' ? 'status-aktif' : 'status-nonaktif'">
@@ -311,6 +313,15 @@
             </div>
 
             <div class="form-group">
+              <label class="form-label">Kategori Aset Maintenance <span class="required">*</span></label>
+              <select [(ngModel)]="formData.id_asset_type" class="form-select-native">
+                <option [ngValue]="null" disabled selected hidden>Pilih kategori maintenance</option>
+                <option *ngFor="let type of maintenanceTypeList" [value]="type.id_asset_type">{{ type.nama_jenis }}</option>
+              </select>
+              <small>Wajib diisi agar aset mendapat checklist yang sesuai saat masuk schedule preventive.</small>
+            </div>
+
+            <div class="form-group">
               <label class="form-label">Status Asset</label>
               <select
                 [(ngModel)]="formData.status_aset"
@@ -369,7 +380,7 @@
               <ion-button class="cancel-modal-btn" fill="outline" (click)="closeModal()">
                 Batal
               </ion-button>
-              <ion-button class="submit-modal-btn" (click)="simpanInventory()" [disabled]="!formData.nama_barang || !formData.id_departemen || !formData.id_kategori">
+              <ion-button class="submit-modal-btn" (click)="simpanInventory()" [disabled]="!formData.nama_barang || !formData.id_departemen || !formData.id_kategori || !formData.id_asset_type">
                 <ion-icon name="save-outline" slot="start"></ion-icon>
                 {{ isEditing ? 'Update Profile' : 'Simpan' }}
               </ion-button>

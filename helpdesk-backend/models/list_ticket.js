@@ -60,7 +60,7 @@ module.exports = function(sequelize, DataTypes) {
       defaultValue: Sequelize.Sequelize.fn('getdate')
     },
     status: {
-      type: DataTypes.STRING(19),
+      type: DataTypes.STRING(50),
       allowNull: false,
       defaultValue: "Menunggu Approval"
     },

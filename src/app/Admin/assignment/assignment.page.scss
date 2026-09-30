@@ -24,9 +24,9 @@
 /* ===================== MAIN CONTENT ===================== */
 .main-content {
   flex: 1;
-  margin-left: var(--sidebar-width, 250px);
+  margin-left: 250px;
   min-width: 0;
-  max-width: calc(100% - var(--sidebar-width, 250px));
+  max-width: calc(100% - 250px);
   display: flex;
   flex-direction: column;
 
@@ -167,7 +167,6 @@
   gap: 10px;
 }
 
-/* 🔥 NATIVE SELECT STYLING */
 .form-select-native {
   height: 38px;
   padding: 6px 32px 6px 12px;
@@ -282,7 +281,6 @@
   word-break: break-word;
 }
 
-/* BADGES PRIORITAS */
 .prioritas-badge {
   display: inline-flex;
   align-items: center;
@@ -375,139 +373,93 @@
     font-weight: 600;
   }
 }
-.custom-alert-dialog {
-  --background: #ffffff;
-  --max-width: 400px;
+
+/* ========================================== */
+/* 🔥 CUSTOM IONIC ALERT (LIGHT MODE STYLING)  */
+/* ========================================== */
+::ng-deep .custom-alert-light {
+  --background: #ffffff !important;
+  --color: #1e293b !important;
 
   .alert-wrapper {
-    border-radius: 16px !important;
-    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1) !important;
-    border: 1px solid #e2e8f0;
-    padding: 6px;
+    background: #ffffff !important;
+    border-radius: 14px !important;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1) !important;
+    border: 1px solid #e2e8f0 !important;
   }
 
   .alert-head {
-    padding: 18px 20px 8px;
-    text-align: left;
+    padding-bottom: 8px !important;
 
     .alert-title {
-      font-size: 18px;
-      font-weight: 700;
-      color: #0f172a;
-      letter-spacing: -0.01em;
+      color: #1e293b !important;
+      font-size: 17px !important;
+      font-weight: 700 !important;
     }
 
     .alert-sub-title {
-      font-size: 13px;
-      color: #64748b;
-      margin-top: 4px;
+      color: #64748b !important;
+      font-size: 13px !important;
+      font-weight: 600 !important;
     }
   }
 
   .alert-message {
-    padding: 0 20px 16px;
-    font-size: 14px;
-    color: #334155;
-    line-height: 1.5;
-    text-align: left;
-
-    strong {
-      color: #2563eb;
-      font-weight: 600;
-    }
+    color: #475569 !important;
+    font-size: 13.5px !important;
+    line-height: 1.5 !important;
   }
 
-  /* Styling Input Textarea di Alert (Penolakan Tiket) */
-  .alert-input-group {
-    padding: 0 20px 16px;
-
-    textarea, input {
-      border: 1px solid #cbd5e1 !important;
-      border-radius: 10px !important;
-      padding: 10px 12px !important;
-      font-size: 13.5px !important;
-      color: #0f172a !important;
-      background: #f8fafc !important;
-      outline: none !important;
-
-      &:focus {
-        border-color: #2563eb !important;
-        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1) !important;
-      }
-    }
-  }
-
-  /* Styling Tombol Aksi */
   .alert-button-group {
-    padding: 12px 16px;
-    gap: 8px;
-    justify-content: flex-end;
+    padding: 8px 16px 12px !important;
+    gap: 8px !important;
+  }
 
-    button {
-      border-radius: 8px !important;
-      font-size: 13px !important;
-      font-weight: 600 !important;
-      padding: 10px 16px !important;
-      height: 38px !important;
-      margin: 0 !important;
-      text-transform: none !important;
+  /* Tombol Batal */
+  .alert-btn-cancel {
+    color: #64748b !important;
+    font-weight: 600 !important;
+    background: #f1f5f9 !important;
+    border-radius: 8px !important;
+    padding: 8px 16px !important;
+  }
 
-      /* Tombol Batal */
-      &.alert-button-cancel {
-        color: #64748b !important;
-        background: #f1f5f9 !important;
+  /* Tombol Utama (Assign - Biru) */
+  .alert-btn-primary {
+    color: #ffffff !important;
+    background: #2563eb !important;
+    font-weight: 600 !important;
+    border-radius: 8px !important;
+    padding: 8px 16px !important;
 
-        &:hover {
-          background: #e2e8f0 !important;
-        }
-      }
-
-      /* Tombol Konfirmasi Utama (Assign / Approve) */
-      &:not(.alert-button-cancel) {
-        background: #2563eb !important;
-        color: #ffffff !important;
-
-        &:hover {
-          background: #1d4ed8 !important;
-        }
-      }
-
-      /* Tombol Bahaya (Reject / Tolak) */
-      &.alert-button-role-destructive {
-        background: #ef4444 !important;
-        color: #ffffff !important;
-
-        &:hover {
-          background: #dc2626 !important;
-        }
-      }
+    &:hover {
+      background: #1d4ed8 !important;
     }
   }
-}
 
-/* ========================================== */
-/* 🔥 STYLING KUSTOM TOAST NOTIFICATION       */
-/* ========================================== */
-.custom-toast {
-  --border-radius: 12px;
-  --box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
-  --padding-start: 16px;
-  --padding-end: 16px;
-  font-weight: 500;
-  font-size: 13.5px;
+  /* Tombol Setujui (Hijau) */
+  .alert-btn-success {
+    color: #ffffff !important;
+    background: #22c55e !important;
+    font-weight: 600 !important;
+    border-radius: 8px !important;
+    padding: 8px 16px !important;
 
-  &.toast-success {
-    --background: #10b981;
-    --color: #ffffff;
+    &:hover {
+      background: #16a34a !important;
+    }
   }
 
-  &.toast-danger {
-    --background: #ef4444;
-    --color: #ffffff;
-  }
+  /* Tombol Tolak (Merah) */
+  .alert-btn-danger {
+    color: #ffffff !important;
+    background: #ef4444 !important;
+    font-weight: 600 !important;
+    border-radius: 8px !important;
+    padding: 8px 16px !important;
 
-  &.toast-warning {
-    --background: #f59e0b;
-    --color: #ffffff;
+    &:hover {
+      background: #dc2626 !important;
+    }
   }
 }

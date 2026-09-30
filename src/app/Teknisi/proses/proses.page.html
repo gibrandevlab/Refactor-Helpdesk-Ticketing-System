@@ -95,8 +95,11 @@
                           <ion-button fill="solid" color="warning" size="small" class="btn-proses" (click)="updateStatus(t, 'Proses')">
                             {{ t.status === 'Proses' ? 'Update' : 'Proses' }}
                           </ion-button>
-                          <ion-button fill="solid" color="success" size="small" class="btn-selesai" [disabled]="t.status === 'Selesai'" (click)="updateStatus(t, 'Selesai')">
+                          <ion-button *ngIf="!isPreventiveTicket(t)" fill="solid" color="success" size="small" class="btn-selesai" [disabled]="t.status === 'Selesai'" (click)="updateStatus(t, 'Selesai')">
                             Selesai
+                          </ion-button>
+                          <ion-button *ngIf="isPreventiveTicket(t)" fill="solid" color="tertiary" size="small" (click)="openChecklistModal(t)">
+                            Check Sheet
                           </ion-button>
                         </div>
                       </div>
@@ -434,7 +437,7 @@
                     </td>
 
                     <td>
-                      <ion-input type="text" [(ngModel)]="item.catatan" (ionBlur)="updateChecklistItem(item)" placeholder="Catatan..."></ion-input>
+                      <ion-input type="text" [(ngModel)]="item.catatan" (ionBlur)="updateChecklistItem(item)" [disabled]="isChecklistLocked()" placeholder="Catatan..."></ion-input>
                     </td>
                   </tr>
                 </ng-container>
@@ -504,6 +507,14 @@
             <td class="signature-label">IT Service</td>
           </tr>
         </table>
+
+        <div class="modal-actions" *ngIf="t.checklist.length > 0">
+          <span *ngIf="isChecklistLocked()">Check Sheet sudah dikirim dan menunggu approval User.</span>
+          <span *ngIf="pendingChecklistSaves > 0">Menyimpan perubahan checklist...</span>
+          <ion-button *ngIf="canAjukanApproval" color="primary" (click)="ajukanApprovalChecklist(t)" [disabled]="isSubmittingApproval">
+            Ajukan ke User
+          </ion-button>
+        </div>
 
       </div>
     </ion-content>

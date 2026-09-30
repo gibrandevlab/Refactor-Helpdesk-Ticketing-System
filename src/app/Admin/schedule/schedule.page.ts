@@ -1076,7 +1076,8 @@ export class SchedulePage implements OnInit, OnDestroy {
       tanggal_selesai: '',
       deskripsi: '',
       aset_list: [],
-      checklist_kategori: [...this.checklistKategoriOptions],
+      // Dipertahankan di skema lama hanya untuk kompatibilitas; bukan sumber checklist baru.
+      checklist_kategori: [],
       id_teknis: [] as string[],
       id_teknis_single: null,
       teknisi_list: '',
@@ -1274,7 +1275,7 @@ export class SchedulePage implements OnInit, OnDestroy {
       tanggal_selesai: tglSelesai,
       deskripsi: this.formData.deskripsi,
       aset_list: this.formData.aset_list || [],
-      checklist_kategori: this.formData.checklist_kategori || [...this.checklistKategoriOptions],
+      checklist_kategori: [],
       id_teknis: this.formData.id_teknis || [],
       is_active: this.formData.is_active ? 1 : 0
     };

@@ -78,7 +78,7 @@ exports.getTeknisiByKategori = async (req, res) => {
         {
           model: assignment_ticket,
           as: 'assignment_tickets',
-          where: { status_pengerjaan: { [Op.ne]: 'Selesai' } },
+          where: { status_pengerjaan: { [Op.notIn]: ['Selesai', 'Menunggu Approval User'] } },
           required: false
         }
       ]
@@ -138,7 +138,7 @@ exports.assignTicket = async (req, res) => {
     const busyCheck = await assignment_ticket.findOne({
       where: {
         id_teknisi,
-        status_pengerjaan: { [Op.ne]: 'Selesai' }
+        status_pengerjaan: { [Op.notIn]: ['Selesai', 'Menunggu Approval User'] }
       },
       transaction
     });

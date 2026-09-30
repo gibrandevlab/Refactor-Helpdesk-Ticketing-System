@@ -11,6 +11,7 @@ router.get('/my', verifyToken, checkRole('Users'), c.getMyAssets);
 // berdasarkan urutan pendaftaran, bukan spesifisitas).
 router.get('/stats', verifyToken, checkRole('Admin'), c.getStats);
 router.get('/jenis-options', verifyToken, checkRole('Admin'), c.getJenisOptions);
+router.get('/maintenance-unmapped', verifyToken, checkRole('Admin'), c.getUnmappedMaintenanceAssets);
 
 router.post('/', verifyToken, checkRole('Admin', 'Users'), c.create);
 router.put('/:kode', verifyToken, checkRole('Admin'), c.update);

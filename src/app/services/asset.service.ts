@@ -22,6 +22,7 @@ export interface AssetCreatePayload {
   merkModel?: string;
   idDepartemen: number;
   idKategori: number;
+  idAssetType: number;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -53,6 +54,7 @@ export class AssetService {
         merk_model: payload.merkModel || null,
         id_departemen: payload.idDepartemen,
         id_kategori: payload.idKategori,
+        id_asset_type: payload.idAssetType,
       },
       { headers: this.getHeaders() }
     );

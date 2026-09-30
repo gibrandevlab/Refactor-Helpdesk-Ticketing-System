@@ -36,7 +36,16 @@ module.exports = function(sequelize, DataTypes) {
     checked_at: {
       type: DataTypes.DATE,
       allowNull: true
-    }
+    },
+    snapshot_uraian: { type: DataTypes.STRING(255), allowNull: true },
+    snapshot_alat_metode: { type: DataTypes.STRING(255), allowNull: true },
+    snapshot_kriteria_hasil: { type: DataTypes.STRING(255), allowNull: true },
+    snapshot_urutan: { type: DataTypes.INTEGER, allowNull: true },
+    id_asset_type_snapshot: { type: DataTypes.INTEGER, allowNull: true },
+    nama_jenis_snapshot: { type: DataTypes.STRING(100), allowNull: true },
+    id_checklist_unit_snapshot: { type: DataTypes.INTEGER, allowNull: true },
+    nama_unit_snapshot: { type: DataTypes.STRING(100), allowNull: true },
+    urutan_unit_snapshot: { type: DataTypes.INTEGER, allowNull: true }
   }, {
     sequelize,
     tableName: 'ticket_checklist_result',

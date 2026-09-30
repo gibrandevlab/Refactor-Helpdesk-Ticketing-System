@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
 import {
-  IonicModule, ToastController, AlertController, IonicSafeString, IonModal
+  IonicModule, ToastController, AlertController, IonModal
 } from '@ionic/angular';
 import { addIcons } from 'ionicons';
 import {
@@ -63,7 +63,6 @@ export class KaryawanPage implements OnInit {
     return [...new Set([...fromMaster, ...fromKaryawan])].filter(Boolean);
   }
 
-  /** Opsi Bagian untuk Filter Toolbar (hanya aktif dan terfilter jika Departemen filter telah dipilih) */
   get bagianOptions(): string[] {
     if (!this.filterDepartemen) return [];
 
@@ -83,7 +82,6 @@ export class KaryawanPage implements OnInit {
     return [...new Set([...fromMaster, ...fromKaryawan])].filter(Boolean);
   }
 
-  /** Opsi Bagian untuk Modal Form (hanya terfilter sesuai departemen di modal) */
   get filteredBagianOptions(): string[] {
     if (!this.formData.departemen) return [];
 
@@ -150,14 +148,12 @@ export class KaryawanPage implements OnInit {
     this.loadMasterData();
   }
 
-  /** Helper Toast Notification */
   async showToast(message: string, color: 'success' | 'danger' | 'warning' = 'success') {
     const toast = await this.toastCtrl.create({
       message,
       duration: 3000,
       position: 'top',
       color,
-      cssClass: `custom-toast toast-${color}`,
       buttons: [{ text: 'OK', role: 'cancel' }]
     });
     await toast.present();
@@ -253,10 +249,22 @@ export class KaryawanPage implements OnInit {
     this.isModalOpen = true;
   }
 
-  openEditModal(karyawan: Karyawan) {
+  openEditModal(karyawan: any) {
     this.isEditing = true;
-    this.formData = { ...karyawan };
     this.loadMasterData();
+
+    // 🔥 MAPING LENGKAP & FALLBACK KEY BACKEND (snake_case / camelCase)
+    this.formData = {
+      id: karyawan.id || karyawan.id_karyawan,
+      nik: karyawan.nik || '',
+      nama: karyawan.nama || karyawan.nama_karyawan || '',
+      alamat: karyawan.alamat || '',
+      jenisKelamin: karyawan.jenisKelamin || karyawan.jenis_kelamin || 'Laki-laki',
+      departemen: karyawan.departemen || karyawan.nama_departemen || '',
+      bagian: karyawan.bagian || karyawan.nama_bagian || '',
+      jabatan: karyawan.jabatan || karyawan.nama_jabatan || ''
+    };
+
     this.isModalOpen = true;
   }
 
@@ -297,14 +305,19 @@ export class KaryawanPage implements OnInit {
 
   async hapusKaryawan(karyawan: Karyawan) {
     const alertEl = await this.alertCtrl.create({
-      header: 'Hapus Karyawan',
-      message: new IonicSafeString(`Apakah Anda yakin ingin menghapus data karyawan <strong>${karyawan.nama}</strong>?`),
-      cssClass: 'custom-alert-dialog',
+      header: 'Konfirmasi Hapus',
+      message: `Apakah Anda yakin ingin menghapus data karyawan ${karyawan.nama}? Action ini tidak dapat dibatalkan.`,
+      cssClass: 'custom-alert-light',
       buttons: [
-        { text: 'Batal', role: 'cancel', cssClass: 'alert-button-cancel' },
+        {
+          text: 'Batal',
+          role: 'cancel',
+          cssClass: 'alert-btn-cancel'
+        },
         {
           text: 'Hapus',
-          role: 'destructive',
+          role: 'confirm',
+          cssClass: 'alert-btn-danger',
           handler: () => {
             this.karyawanService.delete(karyawan.id).subscribe({
               next: () => {

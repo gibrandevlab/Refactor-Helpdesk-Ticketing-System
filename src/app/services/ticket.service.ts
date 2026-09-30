@@ -41,6 +41,8 @@ export interface TicketApiRow {
   tanggal_selesai?: string | null;
   progress?: number;
   status_pengerjaan?: string;
+  deskripsi?: string | null;
+  is_preventive?: boolean;
   user_konfirmasi?: number;
   tanggal_konfirmasi_user?: string | null;
   catatan_penyelesaian?: string | null;
@@ -73,7 +75,6 @@ export interface AssignedTicketApiRow {
   admin_approve_at?: string | null;
 }
 
-// Kondisi_huruf: kode B/C/D — hanya relevan kalau kondisi === 'NC'
 export interface ChecklistItemApiRow {
   id_result: number;
   id_item: number;
@@ -83,17 +84,12 @@ export interface ChecklistItemApiRow {
   penerimaan_default: string | null;
   urutan: number;
   kondisi: 'OK' | 'NC' | null;
-  // B = Masih Baik, C = Segera Diperbaiki, D = Harus Diganti
   kondisi_huruf: 'B' | 'C' | 'D' | null;
   catatan: string | null;
   checked_at: string | null;
-  // flag UI-only (tidak dikirim ke backend) — true saat popup B/C/D terbuka
   _showHurufPicker?: boolean;
 }
 
-// 🔥 status approval Check Sheet 3 tingkat, sekarang termasuk path tanda tangan
-// (ttd_*) yang otomatis terisi begitu masing-masing user pernah upload
-// tanda tangan sekali lewat halaman profil mereka
 export interface ChecklistApprovalRow {
   id_ticket: string;
   dibuat_oleh_nik: string | null;
@@ -194,6 +190,25 @@ export class TicketService {
     return this.http.post(this.baseUrl, formData);
   }
 
+  // 🔥 TAMBAHAN METHOD UPDATE UNTUK EDIT TIKET
+  update(idTicket: string, payload: any, file?: File): Observable<any> {
+    const formData = new FormData();
+    Object.keys(payload).forEach((key) => {
+      if (payload[key] !== null && payload[key] !== undefined) {
+        formData.append(key, payload[key]);
+      }
+    });
+
+    if (file) {
+      formData.append('lampiran', file);
+    }
+
+    // Menggunakan _method PUT agar support multipart/form-data pada REST API
+    formData.append('_method', 'PUT');
+
+    return this.http.post(`${this.baseUrl}/${idTicket}`, formData);
+  }
+
   getAssignedMe(): Observable<AssignedTicketApiRow[]> {
     return this.http
       .get<ApiResponse<AssignedTicketApiRow[]>>(`${this.baseUrl}/assigned/me`)
@@ -219,7 +234,7 @@ export class TicketService {
 
   updateProgress(
     idTicket: string,
-    payload: { progress: number; catatan_penyelesaian?: string; status_pengerjaan: 'Menunggu Diproses' | 'Proses' | 'Selesai' }
+    payload: { progress: number; catatan_penyelesaian?: string; status_pengerjaan: 'Menunggu Diproses' | 'Proses' | 'Menunggu Approval User' | 'Selesai' }
   ): Observable<any> {
     return this.http.put(`${this.baseUrl}/${idTicket}/proses`, payload);
   }
@@ -251,7 +266,6 @@ export class TicketService {
     return this.http.get<ChecklistItemApiRow[]>(`${this.checklistUrl}/ticket/${idTicket}`);
   }
 
-  // payload menerima kondisi_huruf (wajib diisi kalau kondisi = 'NC')
   updateChecklistItem(
     idResult: number,
     payload: { kondisi: 'OK' | 'NC' | null; kondisi_huruf?: 'B' | 'C' | 'D' | null; catatan?: string }
@@ -260,7 +274,7 @@ export class TicketService {
   }
 
   // ================================================================
-  // 🔥 APPROVAL CHECK SHEET 3 TINGKAT: Teknisi -> User -> IT Service
+  // APPROVAL CHECK SHEET 3 TINGKAT: Teknisi -> User -> IT Service
   // ================================================================
   getChecklistApproval(idTicket: string): Observable<ChecklistApprovalRow> {
     return this.http.get<ChecklistApprovalRow>(`${this.checklistUrl}/ticket/${idTicket}/approval`);
@@ -296,7 +310,7 @@ export class TicketService {
   }
 
   // ================================================================
-  // 🔥 TANDA TANGAN DIGITAL (upload sekali, otomatis dipakai saat approve)
+  // TANDA TANGAN DIGITAL
   // ================================================================
   uploadMySignature(file: File): Observable<any> {
     const formData = new FormData();

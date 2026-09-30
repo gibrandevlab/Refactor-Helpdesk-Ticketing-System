@@ -210,6 +210,7 @@
           <div class="form-group">
             <label class="form-label">Jenis Kelamin</label>
             <select [(ngModel)]="formData.jenisKelamin" class="form-select-native">
+              <option value="" disabled selected hidden>Pilih JK</option>
               <option *ngFor="let jk of jenisKelaminOptions" [value]="jk">{{ jk }}</option>
             </select>
           </div>

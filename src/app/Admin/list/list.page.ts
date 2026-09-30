@@ -2,8 +2,8 @@ import { Component, OnInit, OnDestroy, NgZone, ChangeDetectorRef } from '@angula
 import { environment } from 'src/environments/environment';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
-import { IonicModule, ToastController } from '@ionic/angular';
+import { Router, RouterLink } from '@angular/router';
+import { IonicModule, ToastController, AlertController } from '@ionic/angular';
 import { addIcons } from 'ionicons';
 import {
   closeOutline,
@@ -51,6 +51,10 @@ export interface ListTicket {
   statusPengerjaan?: string | null;
   countdownText?: string;
   isLate?: boolean;
+  id_departemen?: number | string;
+  id_kategori?: number | string;
+  id_sub_kategori?: number | string;
+  kode_asset?: string;
 }
 
 @Component({
@@ -58,7 +62,7 @@ export interface ListTicket {
   templateUrl: './list.page.html',
   styleUrls: ['./list.page.scss'],
   standalone: true,
-  imports: [CommonModule, FormsModule, IonicModule, SidebarComponent],
+  imports: [CommonModule, FormsModule, IonicModule, SidebarComponent, RouterLink],
 })
 export class ListTicketPage implements OnInit, OnDestroy {
   isSidebarOpen = false;
@@ -83,6 +87,10 @@ export class ListTicketPage implements OnInit, OnDestroy {
   isEditing = false;
   selectedId: string | null = null;
   selectedFile: File | null = null;
+
+  // Detail Modal State
+  isDetailModalOpen = false;
+  selectedTicketDetail: ListTicket | null = null;
 
   formData: any = {
     id_departemen: '',
@@ -117,7 +125,7 @@ export class ListTicketPage implements OnInit, OnDestroy {
     { key: 'rejected', label: 'Ditolak' },
   ];
 
-  // 🚀 STATE VARIABLES (Pengganti Getter untuk Mencegah CPU Spike)
+  // STATE VARIABLES
   chartBaseTickets: ListTicket[] = [];
   chartBulan: { bulan: number; label: string; jumlah: number }[] = [];
   chartDepartemen: { departemen: string; jumlah: number }[] = [];
@@ -139,6 +147,7 @@ export class ListTicketPage implements OnInit, OnDestroy {
     private subKategoriService: SubKategoriService,
     private departemenService: DepartemenService,
     private toastCtrl: ToastController,
+    private alertCtrl: AlertController,
     private ngZone: NgZone,
     private cdr: ChangeDetectorRef
   ) {
@@ -241,7 +250,7 @@ export class ListTicketPage implements OnInit, OnDestroy {
     const diff = target - now;
 
     if (diff <= 0) {
-      t.countdownText = '⚠️ TELAT';
+      t.countdownText = '⚠️️ TELAT';
       t.isLate = true;
       return;
     }
@@ -254,23 +263,23 @@ export class ListTicketPage implements OnInit, OnDestroy {
     t.isLate = false;
   }
 
-getLampiranUrl(lampiranPath: string): string {
-  if (!lampiranPath) return '';
-  if (lampiranPath.startsWith('http')) {
-    return lampiranPath;
+  getLampiranUrl(lampiranPath: string): string {
+    if (!lampiranPath) return '';
+    if (lampiranPath.startsWith('http')) {
+      return lampiranPath;
+    }
+
+    let cleanPath = lampiranPath.replace(/^\/?uploads\/?/, '');
+    cleanPath = cleanPath.replace(/^\/?lampiran\/?/, '');
+
+    return `${environment.storageUrl}/${cleanPath}`;
   }
-
-  let cleanPath = lampiranPath.replace(/^\/?uploads\/?/, '');
-  cleanPath = cleanPath.replace(/^\/?lampiran\/?/, '');
-
-  return `${environment.storageUrl}/${cleanPath}`;
-}
 
   loadTickets() {
     this.isLoading = true;
     this.ticketService.getAllRaw().subscribe({
       next: (data: TicketApiRow[]) => {
-        this.tickets = data.map(item => {
+        this.tickets = data.map((item: any) => {
           const t: ListTicket = {
             id_ticket: item.id_ticket,
             reported: item.reported,
@@ -285,10 +294,14 @@ getLampiranUrl(lampiranPath: string): string {
             teknisi: item.teknisi || '',
             status: item.status,
             statusClass: this.getStatusClass(item.status),
-            deskripsi: '',
+            deskripsi: item.deskripsi || '',
             prioritas: item.prioritas || 'Normal',
             deadline: item.deadline || null,
             statusPengerjaan: item.status_pengerjaan || null,
+            id_departemen: item.id_departemen || '',
+            id_kategori: item.id_kategori || '',
+            id_sub_kategori: item.id_sub_kategori || '',
+            kode_asset: item.kode_asset || ''
           };
           this.updateTicketCountdown(t);
           return t;
@@ -304,7 +317,7 @@ getLampiranUrl(lampiranPath: string): string {
         this.isLoading = false;
         this.cdr.detectChanges();
       },
-      error: (err) => {
+      error: (err: any) => {
         console.error(err);
         this.isLoading = false;
         if (err.status === 403 || err.status === 401) {
@@ -320,7 +333,7 @@ getLampiranUrl(lampiranPath: string): string {
         this.inventoryList = data;
         this.filteredAssetOptions = data;
       },
-      error: (err) => console.error('Gagal load inventory', err)
+      error: (err: any) => console.error('Gagal load inventory', err)
     });
   }
 
@@ -329,21 +342,21 @@ getLampiranUrl(lampiranPath: string): string {
       next: (res: any) => {
         this.kategoriOptionsForModal = Array.isArray(res) ? res : (res.data || []);
       },
-      error: (err) => console.error('Gagal load kategori modal', err)
+      error: (err: any) => console.error('Gagal load kategori modal', err)
     });
 
     this.subKategoriService.getAll().subscribe({
       next: (res: any) => {
         this.subKategoriOptionsForModal = Array.isArray(res) ? res : (res.data || []);
       },
-      error: (err) => console.error('Gagal load sub kategori modal', err)
+      error: (err: any) => console.error('Gagal load sub kategori modal', err)
     });
 
     this.departemenService.getAll().subscribe({
       next: (res: any) => {
         this.departemenOptionsForModal = Array.isArray(res) ? res : (res.data || []);
       },
-      error: (err) => console.error('Gagal load departemen modal', err)
+      error: (err: any) => console.error('Gagal load departemen modal', err)
     });
   }
 
@@ -352,7 +365,6 @@ getLampiranUrl(lampiranPath: string): string {
     this.filteredSubKategoriOptions = this.subKategoriOptionsForModal.filter(
       (sub: any) => Number(sub.idKategori ?? sub.id_kategori) === selectedKatId
     );
-    this.formData.id_sub_kategori = '';
   }
 
   onDepartemenChange() {
@@ -400,9 +412,11 @@ getLampiranUrl(lampiranPath: string): string {
   matchesStatusGroup(t: ListTicket, key: string): boolean {
     return this.getFunnelStage(t) === key;
   }
- countByStatusGroup(key: string): number {
+
+  countByStatusGroup(key: string): number {
     return this.statusCounts[key] || 0;
   }
+
   get tahunOptions(): number[] {
     const set = new Set<number>();
     this.tickets.forEach(t => {
@@ -412,7 +426,6 @@ getLampiranUrl(lampiranPath: string): string {
     return [...set].sort((a, b) => b - a);
   }
 
-  // 🚀 KALKULASI DATA TERPUSAT (Hanya Dipanggil Saat Ada Perubahan Filter/Data)
   recalculateFilteredData() {
     // 1. Chart Base
     this.chartBaseTickets = this.tickets.filter(t => {
@@ -588,7 +601,31 @@ getLampiranUrl(lampiranPath: string): string {
     this.isEditing = true;
     this.selectedId = ticket.id_ticket;
     this.selectedFile = null;
-    this.formData = { ...ticket };
+
+    const matchedDept = this.departemenOptionsForModal.find(
+      (d) => (d.nama_departemen || d.nama) === ticket.dept
+    );
+    const matchedKat = this.kategoriOptionsForModal.find(
+      (k) => (k.nama_kategori || k.nama) === ticket.nama_kategori
+    );
+
+    this.formData = {
+      id_ticket: ticket.id_ticket,
+      id_departemen: matchedDept ? (matchedDept.id_departemen ?? matchedDept.id) : (ticket.id_departemen || ''),
+      id_kategori: matchedKat ? (matchedKat.id_kategori ?? matchedKat.id) : (ticket.id_kategori || ''),
+      id_sub_kategori: ticket.id_sub_kategori || '',
+      kode_asset: ticket.kode_asset || '',
+      deskripsi: ticket.deskripsi || '',
+      prioritas: ticket.prioritas || 'Normal'
+    };
+
+    if (this.formData.id_kategori) {
+      this.onKategoriChange();
+    }
+    if (this.formData.id_departemen) {
+      this.onDepartemenChange();
+    }
+
     this.isModalOpen = true;
   }
 
@@ -609,37 +646,82 @@ getLampiranUrl(lampiranPath: string): string {
       return;
     }
 
-    this.ticketService.create(this.formData, this.selectedFile || undefined).subscribe({
-      next: () => {
-        this.showToast('Tiket berhasil ditambahkan!', 'success');
-        this.loadTickets();
-        this.loadInventory();
-        this.closeModal();
-      },
-      error: (err) => {
-        console.error('Gagal menyimpan tiket:', err);
-        this.showToast('Gagal menyimpan tiket: ' + (err.error?.message || err.message), 'danger');
-      }
-    });
-  }
-
-  hapusTicket(ticket: ListTicket) {
-    if (confirm(`Apakah Anda yakin ingin menghapus tiket "${ticket.id_ticket}"?`)) {
-      this.ticketService.remove(ticket.id_ticket).subscribe({
+    if (this.isEditing && this.selectedId) {
+      this.ticketService.update(this.selectedId, this.formData, this.selectedFile || undefined).subscribe({
         next: () => {
-          this.showToast('Tiket berhasil dihapus.', 'success');
+          this.showToast('Tiket berhasil diperbarui!', 'success');
           this.loadTickets();
+          this.loadInventory();
+          this.closeModal();
         },
-        error: (err) => {
-          console.error('Gagal menghapus tiket:', err);
-          this.showToast(err.error?.message || 'Gagal menghapus tiket.', 'danger');
+        error: (err: any) => {
+          console.error('Gagal memperbarui tiket:', err);
+          this.showToast('Gagal memperbarui tiket: ' + (err.error?.message || err.message), 'danger');
+        }
+      });
+    } else {
+      this.ticketService.create(this.formData, this.selectedFile || undefined).subscribe({
+        next: () => {
+          this.showToast('Tiket berhasil ditambahkan!', 'success');
+          this.loadTickets();
+          this.loadInventory();
+          this.closeModal();
+        },
+        error: (err: any) => {
+          console.error('Gagal menyimpan tiket:', err);
+          this.showToast('Gagal menyimpan tiket: ' + (err.error?.message || err.message), 'danger');
         }
       });
     }
   }
 
-  downloadChecklistPdf(ticket: ListTicket) {
-    this.ticketService.downloadChecklistPdf(ticket.id_ticket);
+  // 🔥 Menggunakan Ionic AlertController dengan Custom Class Light Theme & Teks Tanpa HTML Mentah
+  async hapusTicket(ticket: ListTicket) {
+    const alert = await this.alertCtrl.create({
+      header: 'Konfirmasi Hapus',
+      message: `Apakah Anda yakin ingin menghapus tiket #${ticket.id_ticket}? Action ini tidak dapat dibatalkan.`,
+      cssClass: 'custom-alert-light',
+      buttons: [
+        {
+          text: 'Batal',
+          role: 'cancel',
+          cssClass: 'alert-btn-cancel'
+        },
+        {
+          text: 'Hapus',
+          role: 'confirm',
+          cssClass: 'alert-btn-danger',
+          handler: () => {
+            this.executeHapusTicket(ticket.id_ticket);
+          }
+        }
+      ]
+    });
+
+    await alert.present();
+  }
+
+  private executeHapusTicket(idTicket: string) {
+    this.ticketService.remove(idTicket).subscribe({
+      next: () => {
+        this.showToast('Tiket berhasil dihapus.', 'success');
+        this.loadTickets();
+      },
+      error: (err: any) => {
+        console.error('Gagal menghapus tiket:', err);
+        this.showToast(err.error?.message || 'Gagal menghapus tiket.', 'danger');
+      }
+    });
+  }
+
+  onViewDetail(ticket: ListTicket) {
+    this.selectedTicketDetail = ticket;
+    this.isDetailModalOpen = true;
+  }
+
+  closeDetailModal() {
+    this.isDetailModalOpen = false;
+    this.selectedTicketDetail = null;
   }
 
   getStatusClass(status: string): string {
@@ -667,8 +749,4 @@ getLampiranUrl(lampiranPath: string): string {
     localStorage.removeItem('user');
     this.router.navigate(['/login']);
   }
-
-  onViewDetail(ticket: ListTicket) { console.log('View detail', ticket.id_ticket); }
-  onEditTicket(ticket: ListTicket) { this.openEditModal(ticket); }
-  onNewTicket() { this.openTambahModal(); }
 }

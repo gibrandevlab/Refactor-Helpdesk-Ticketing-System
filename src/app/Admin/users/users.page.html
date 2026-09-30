@@ -34,25 +34,10 @@
 
       <!-- CONTENT -->
       <div class="content-area">
-        <div class="page-header">
-          <div class="header-left">
-            <div>
-              <h1 class="page-title">Manajemen User</h1>
-              <p class="page-subtitle">
-                Kelola akun login user, teknisi, dan admin
-              </p>
-            </div>
-          </div>
-          <div class="header-right">
-            <ion-button
-              class="tambah-btn"
-              fill="solid"
-              (click)="openTambahModal()"
-            >
-              <ion-icon name="add-outline" slot="start"></ion-icon>
-              Tambah User
-            </ion-button>
-          </div>
+        <!-- Page Heading -->
+        <div class="page-heading">
+          <h1 class="page-title">Manajemen User</h1>
+          <p class="page-subtitle">Kelola akun login user, teknisi, dan admin</p>
         </div>
 
         <!-- STATISTIK -->
@@ -95,18 +80,19 @@
           </div>
         </div>
 
-        <!-- FILTER -->
-        <div class="filter-section">
-          <div class="filter-group">
+        <!-- TOOLBAR: SEARCH + FILTER + TOMBOL BARU -->
+        <div class="list-toolbar">
+          <div class="search-box">
+            <ion-icon name="search-outline" class="search-icon"></ion-icon>
             <input
               type="text"
               placeholder="Cari Username / Nama..."
               [(ngModel)]="searchTerm"
               (ngModelChange)="onFilterChange()"
-              class="filter-input"
             />
           </div>
-          <div class="filter-group">
+
+          <div class="toolbar-filters">
             <select
               [(ngModel)]="filterLevel"
               (change)="onFilterChange()"
@@ -115,8 +101,7 @@
               <option value="">Semua Level</option>
               <option *ngFor="let l of levelOptions" [value]="l">{{ l }}</option>
             </select>
-          </div>
-          <div class="filter-group">
+
             <select
               [(ngModel)]="filterDepartemen"
               (change)="onFilterChange()"
@@ -126,6 +111,14 @@
               <option *ngFor="let d of departemenOptions" [value]="d">{{ d }}</option>
             </select>
           </div>
+
+          <ion-button
+            class="btn-new-user"
+            (click)="openTambahModal()"
+          >
+            <ion-icon name="add-outline" slot="start"></ion-icon>
+            Tambah User
+          </ion-button>
         </div>
 
         <!-- TABLE -->
@@ -158,18 +151,16 @@
                       <ion-button
                         fill="clear"
                         size="small"
-                        class="edit-btn"
                         (click)="openEditModal(u)"
                       >
-                        <ion-icon name="create-outline"></ion-icon>
+                        <ion-icon name="create-outline" style="color: var(--primary);"></ion-icon>
                       </ion-button>
                       <ion-button
                         fill="clear"
                         size="small"
-                        class="hapus-btn"
                         (click)="hapusUser(u)"
                       >
-                        <ion-icon name="trash-outline"></ion-icon>
+                        <ion-icon name="trash-outline" style="color: var(--danger);"></ion-icon>
                       </ion-button>
                     </div>
                   </td>
@@ -316,7 +307,7 @@
         <!-- Password -->
         <div
           class="form-group"
-          *ngIf="!isEditing || (isEditing && formData.password)"
+          *ngIf="!isEditing || (isEditing && formData.password !== undefined)"
         >
           <label class="form-label">
             {{ isEditing ? 'Password Baru (kosongkan jika tidak diubah)' : 'Password' }}

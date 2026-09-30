@@ -39,7 +39,7 @@ module.exports = function(sequelize, DataTypes) {
       allowNull: true
     },
     status_pengerjaan: {
-      type: DataTypes.STRING(17),
+      type: DataTypes.STRING(50),
       allowNull: false,
       defaultValue: "Menunggu Diproses"
     },

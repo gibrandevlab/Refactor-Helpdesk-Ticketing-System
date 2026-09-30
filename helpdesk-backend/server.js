@@ -33,6 +33,7 @@ app.use('/api/inventory', require('./routes/inventory.routes'));
 app.use('/api/feedback', require('./routes/feedback.routes'));
 app.use('/api/schedule', require('./routes/schedule.routes'));
 app.use('/api/checklist', require('./routes/checklist.routes'));
+app.use('/api/maintenance-master', require('./routes/maintenance-master.routes'));
 app.use('/api/profile', require('./routes/profile.routes'));
 
 app.get('/', (req, res) => {

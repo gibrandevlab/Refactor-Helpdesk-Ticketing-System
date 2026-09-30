@@ -110,6 +110,11 @@ module.exports = function(sequelize, DataTypes) {
         model: 'preventive_schedule',
         key: 'id_schedule'
       }
+    },
+    id_asset_type: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      references: { model: 'maintenance_asset_type', key: 'id_asset_type' }
     }
   }, {
     sequelize,

@@ -513,7 +513,7 @@
           >
           <select class="form-select-native" [(ngModel)]="formData.prioritas">
             <option value="Low">Low</option>
-            <option value="Normal" selected>Normal</option>
+            <option value="Normal">Normal</option>
             <option value="Urgent">Urgent</option>
           </select>
         </div>
@@ -548,6 +548,90 @@
           >
             <ion-icon name="save-outline" slot="start"></ion-icon>
             {{ isEditing ? 'Update' : 'Simpan' }}
+          </ion-button>
+        </div>
+      </div>
+    </ion-content>
+  </ng-template>
+</ion-modal>
+
+<!-- ========================================== -->
+<!-- MODAL DETAIL TICKET                        -->
+<!-- ========================================== -->
+<ion-modal
+  [isOpen]="isDetailModalOpen"
+  (didDismiss)="closeDetailModal()"
+  class="custom-modal"
+>
+  <ng-template>
+    <ion-header class="modal-header">
+      <ion-toolbar>
+        <ion-title>Detail Ticket #{{ selectedTicketDetail?.id_ticket }}</ion-title>
+        <ion-buttons slot="end">
+          <ion-button (click)="closeDetailModal()" class="btn-close-modal">
+            <ion-icon name="close-outline"></ion-icon>
+          </ion-button>
+        </ion-buttons>
+      </ion-toolbar>
+    </ion-header>
+
+    <ion-content class="modal-content" *ngIf="selectedTicketDetail">
+      <div class="modal-body">
+        <div class="detail-header-card">
+          <span class="status-badge" [ngClass]="selectedTicketDetail.statusClass">
+            {{ selectedTicketDetail.status }}
+          </span>
+          <span class="detail-date">{{ selectedTicketDetail.formattedTanggal }}</span>
+        </div>
+
+        <div class="detail-grid">
+          <div class="detail-item">
+            <span class="detail-label">Pelapor:</span>
+            <span class="detail-val">{{ selectedTicketDetail.reported }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Departemen:</span>
+            <span class="detail-val">{{ selectedTicketDetail.dept }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Kategori:</span>
+            <span class="detail-val">{{ selectedTicketDetail.nama_kategori }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Sub Kategori:</span>
+            <span class="detail-val">{{ selectedTicketDetail.nama_sub_kategori || '-' }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Aset:</span>
+            <span class="detail-val">{{ selectedTicketDetail.aset || '-' }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Teknisi:</span>
+            <span class="detail-val">{{ selectedTicketDetail.teknisi || '-' }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Prioritas:</span>
+            <span class="detail-val">{{ selectedTicketDetail.prioritas || 'Normal' }}</span>
+          </div>
+        </div>
+
+        <div class="detail-section">
+          <span class="detail-label">Deskripsi Keluhan:</span>
+          <p class="detail-description">
+            {{ selectedTicketDetail.deskripsi || 'Tidak ada deskripsi rinci.' }}
+          </p>
+        </div>
+
+        <div class="detail-section" *ngIf="selectedTicketDetail.lampiran">
+          <span class="detail-label">Lampiran Foto:</span>
+          <div class="detail-image-preview">
+            <img [src]="selectedTicketDetail.lampiranUrl" alt="Lampiran Ticket" />
+          </div>
+        </div>
+
+        <div class="modal-actions">
+          <ion-button class="cancel-btn" fill="outline" color="medium" (click)="closeDetailModal()">
+            Tutup
           </ion-button>
         </div>
       </div>

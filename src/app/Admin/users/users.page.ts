@@ -2,11 +2,11 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { IonicModule, ToastController, AlertController, IonicSafeString } from '@ionic/angular';
+import { IonicModule, ToastController, AlertController } from '@ionic/angular';
 import { HttpErrorResponse } from '@angular/common/http';
 import { addIcons } from 'ionicons';
 import {
-  menuOutline, peopleOutline, shieldCheckmarkOutline, constructOutline,
+  menuOutline, searchOutline, peopleOutline, shieldCheckmarkOutline, constructOutline,
   personOutline, addOutline, createOutline, trashOutline, chevronBackOutline,
   chevronForwardOutline, closeOutline, saveOutline
 } from 'ionicons/icons';
@@ -83,7 +83,7 @@ export class UsersPage implements OnInit {
     private alertCtrl: AlertController
   ) {
     addIcons({
-      menuOutline, peopleOutline, shieldCheckmarkOutline, constructOutline,
+      menuOutline, searchOutline, peopleOutline, shieldCheckmarkOutline, constructOutline,
       personOutline, addOutline, createOutline, trashOutline, chevronBackOutline,
       chevronForwardOutline, closeOutline, saveOutline
     });
@@ -94,14 +94,12 @@ export class UsersPage implements OnInit {
     this.loadDepartemenMaster();
   }
 
-  /** Helper Toast Notification */
   async showToast(message: string, color: 'success' | 'danger' | 'warning' = 'success') {
     const toast = await this.toastCtrl.create({
       message,
       duration: 3000,
       position: 'top',
       color,
-      cssClass: `custom-toast toast-${color}`,
       buttons: [{ text: 'OK', role: 'cancel' }]
     });
     await toast.present();
@@ -238,19 +236,25 @@ export class UsersPage implements OnInit {
     }
   }
 
+  // 🔥 Menggunakan Light Mode Alert & Menghapus String HTML Mentah
   async hapusUser(u: User) {
     const targetId = u.id_user || u.id;
     if (!targetId) return;
 
     const alertEl = await this.alertCtrl.create({
-      header: 'Hapus User',
-      message: new IonicSafeString(`Apakah Anda yakin ingin menghapus user <strong>${u.username}</strong>?`),
-      cssClass: 'custom-alert-dialog',
+      header: 'Konfirmasi Hapus',
+      message: `Apakah Anda yakin ingin menghapus user ${u.username}? Action ini tidak dapat dibatalkan.`,
+      cssClass: 'custom-alert-light',
       buttons: [
-        { text: 'Batal', role: 'cancel', cssClass: 'alert-button-cancel' },
+        {
+          text: 'Batal',
+          role: 'cancel',
+          cssClass: 'alert-btn-cancel'
+        },
         {
           text: 'Hapus',
-          role: 'destructive',
+          role: 'confirm',
+          cssClass: 'alert-btn-danger',
           handler: () => {
             this.userService.deleteUser(targetId).subscribe({
               next: () => {

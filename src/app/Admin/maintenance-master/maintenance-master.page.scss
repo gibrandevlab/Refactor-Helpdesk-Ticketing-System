@@ -2,6 +2,7 @@
   --primary: #2563eb;
   --sidebar-bg: #16213e;
   --sidebar-bg-hover: #1e2a4a;
+  --sidebar-width: 250px;
   --content-bg: #f4f6fb;
   --card-bg: #ffffff;
   --text-dark: #0f172a;
@@ -10,7 +11,7 @@
   --danger: #ef4444;
 }
 
-.karyawan-content {
+.maintenance-content {
   --background: var(--content-bg);
 }
 
@@ -19,12 +20,11 @@
   min-height: 100vh;
 }
 
-/* ===================== MAIN CONTENT ===================== */
 .main-content {
   flex: 1;
-  margin-left: 250px;
+  margin-left: var(--sidebar-width);
   min-width: 0;
-  max-width: calc(100% - 250px);
+  max-width: calc(100% - var(--sidebar-width));
   display: flex;
   flex-direction: column;
 
@@ -65,120 +65,100 @@
   color: var(--text-dark);
 }
 
-.header-right {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-}
-
-.header-avatar {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  cursor: pointer;
-
-  img {
-    width: 34px;
-    height: 34px;
-    border-radius: 50%;
-  }
-
-  .header-avatar-name {
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--text-dark);
-
-    @media (max-width: 576px) {
-      display: none;
-    }
-  }
-}
-
 .content-area {
   padding: 24px;
 }
 
-.page-heading {
+.page-header {
   margin-bottom: 18px;
-}
 
-.page-title {
-  margin: 0;
-  font-size: 22px;
-  font-weight: 700;
-  color: var(--text-dark);
-}
-
-.page-subtitle {
-  margin: 4px 0 0;
-  font-size: 13.5px;
-  color: var(--text-muted);
-}
-
-/* ===================== STATS 3 KOLOM ===================== */
-.stats-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 16px;
-  margin-bottom: 20px;
-}
-
-.stat-card {
-  background: var(--card-bg);
-  border-radius: 14px;
-  padding: 18px 20px;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  border: 1px solid #e2e8f0;
-}
-
-.stat-icon {
-  width: 44px;
-  height: 44px;
-  border-radius: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  ion-icon {
-    font-size: 22px;
-    color: #ffffff;
-  }
-
-  &.blue { background: var(--primary); }
-  &.green { background: #16a34a; }
-  &.orange { background: #d97706; }
-}
-
-.stat-info {
-  h3 {
+  h1 {
     margin: 0;
-    font-size: 24px;
-    font-weight: 800;
+    font-size: 22px;
+    font-weight: 700;
     color: var(--text-dark);
   }
+
   p {
-    margin: 0;
-    font-size: 13px;
+    margin: 4px 0 0;
+    font-size: 13.5px;
     color: var(--text-muted);
-    font-weight: 500;
   }
 }
 
-/* ========================================== */
-/* 🔥 TOOLBAR, SEARCH BAR & DROPDOWN UI/UX   */
-/* ========================================== */
+/* ===================== TABS ===================== */
+.master-tabs {
+  display: flex;
+  gap: 4px;
+  border-bottom: 1px solid var(--border-color);
+  margin-bottom: 20px;
+
+  button {
+    border: 0;
+    border-bottom: 3px solid transparent;
+    background: transparent;
+    padding: 11px 16px;
+    color: var(--text-muted);
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+
+    &.active {
+      color: var(--primary);
+      border-bottom-color: var(--primary);
+    }
+  }
+}
+
+/* ===================== TABLE CARD & TOOLBAR ===================== */
+.table-card {
+  background: var(--card-bg);
+  border-radius: 14px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+  border: 1px solid #e2e8f0;
+  overflow: hidden;
+  margin-bottom: 22px;
+}
+
+.table-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 18px 20px;
+  border-bottom: 1px solid #e2e8f0;
+
+  h2 {
+    margin: 0;
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--text-dark);
+  }
+
+  p {
+    margin: 4px 0 0;
+    font-size: 13px;
+    color: var(--text-muted);
+  }
+}
+
+.tambah-btn {
+  --background: var(--primary);
+  --border-radius: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  height: 40px;
+}
+
 .list-toolbar {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: 12px;
-  margin-bottom: 16px;
+  padding: 14px 20px;
 }
 
-/* 🔥 SEARCH BOX: Tingginya dikunci 40px agar tidak melar di HP/Tablet */
 .search-box {
   display: flex;
   align-items: center;
@@ -190,6 +170,7 @@
   height: 40px;
   box-sizing: border-box;
   min-width: 260px;
+  max-width: 380px;
   flex: 1 1 260px;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
   transition: all 0.2s ease;
@@ -220,12 +201,6 @@
   }
 }
 
-.toolbar-filters {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-}
-
 .form-select-native {
   height: 40px !important;
   padding: 8px 36px 8px 14px !important;
@@ -254,13 +229,6 @@
     box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1) !important;
   }
 
-  &:disabled {
-    background-color: #f1f5f9 !important;
-    color: #94a3b8 !important;
-    cursor: not-allowed !important;
-    opacity: 0.7;
-  }
-
   option {
     background-color: #ffffff !important;
     color: #0f172a !important;
@@ -268,29 +236,12 @@
   }
 }
 
-.btn-new-karyawan {
-  --background: var(--primary);
-  --border-radius: 10px;
-  font-size: 13px;
-  font-weight: 600;
-  height: 40px;
-  margin-left: auto;
-}
-
 /* ===================== TABLE ===================== */
-.table-card {
-  background: var(--card-bg);
-  border-radius: 14px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
-  border: 1px solid #e2e8f0;
-  overflow: hidden;
-}
-
 .table-wrapper {
   overflow-x: auto;
 }
 
-.karyawan-table {
+table {
   width: 100%;
   border-collapse: collapse;
   font-size: 13px;
@@ -331,30 +282,13 @@
   }
 }
 
-.nik-id {
-  font-weight: 700;
-  color: var(--primary);
-}
-
-.fw-bold {
-  font-weight: 700;
+.font-medium {
+  font-weight: 600;
   color: var(--text-dark);
 }
 
-.dept-badge {
-  background: #e2e8f0;
-  padding: 4px 10px;
-  border-radius: 20px;
-  font-size: 12px;
-  font-weight: 600;
-  color: #334155;
-  display: inline-block;
-}
-
-.action-buttons {
-  display: flex;
-  align-items: center;
-  gap: 2px;
+.actions {
+  white-space: nowrap;
 
   ion-button {
     --padding-start: 6px;
@@ -363,68 +297,46 @@
   }
 }
 
+.status-pill {
+  display: inline-block;
+  border-radius: 999px;
+  padding: 4px 10px;
+  background: #f1f5f9;
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 600;
+
+  &.active {
+    background: #dcfce7;
+    color: #15803d;
+  }
+}
+
 .empty-row {
   text-align: center;
-  padding: 32px 0;
   color: var(--text-muted);
+  padding: 32px 0;
   font-weight: 500;
   white-space: normal;
 }
 
 .table-footer {
   display: flex;
-  flex-wrap: wrap;
-  align-items: center;
   justify-content: space-between;
-  gap: 12px;
+  align-items: center;
   padding: 14px 18px;
+  color: var(--text-muted);
+  font-size: 12.5px;
   border-top: 1px solid #e2e8f0;
   background: #ffffff;
 }
 
-.table-info {
-  font-size: 12.5px;
-  color: var(--text-muted);
-  font-weight: 500;
-}
-
-.pagination {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
-
-.page-number {
-  width: 28px;
-  height: 28px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 6px;
-  font-size: 12.5px;
-  color: var(--text-muted);
-  font-weight: 500;
-  cursor: pointer;
-
-  &:hover {
-    background: #f1f5f9;
-  }
-
-  &.active {
-    background: var(--primary);
-    color: #fff;
-    font-weight: 600;
-  }
-}
-
-/* ========================================== */
-/* MODAL CONTAINER & HEIGHT STYLING           */
-/* ========================================== */
-ion-modal.custom-karyawan-modal {
+/* ===================== MODAL STYLING ===================== */
+ion-modal.master-modal {
   --width: 90%;
-  --max-width: 620px;
-  --height: 80vh;
-  --max-height: 650px;
+  --max-width: 550px;
+  --height: 560px;
+  --max-height: 80vh;
   --border-radius: 16px;
   --box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.15);
 
@@ -441,66 +353,86 @@ ion-modal.custom-karyawan-modal {
   }
 }
 
+/* 🔥 FIX FORM INPUT & SELECT TEXT COLOR (AGAR TEKS JELAS DIBACA) */
 .modal-body {
   padding: 24px;
-  max-width: 700px;
-  margin: 0 auto;
+
+  label {
+    display: block;
+    margin: 12px 0 6px;
+    color: #0f172a !important;
+    font-weight: 600;
+    font-size: 13px;
+
+    span {
+      color: var(--danger);
+    }
+  }
+
+  ion-input {
+    --color: #0f172a !important;
+    --highlight-color-focused: var(--primary) !important;
+    --placeholder-color: #64748b !important;
+    --placeholder-opacity: 1 !important;
+    --background: #ffffff !important;
+    --padding-start: 12px !important;
+    --padding-end: 12px !important;
+    color: #0f172a !important;
+    border: 1px solid #cbd5e1 !important;
+    border-radius: 8px !important;
+    font-size: 13.5px !important;
+    font-weight: 500 !important;
+    min-height: 42px !important;
+
+    input {
+      color: #0f172a !important;
+      -webkit-text-fill-color: #0f172a !important;
+    }
+  }
+
+  select.form-select-native {
+    color: #0f172a !important;
+    background-color: #ffffff !important;
+    border: 1px solid #cbd5e1 !important;
+    font-size: 13.5px !important;
+    font-weight: 500 !important;
+
+    option {
+      color: #0f172a !important;
+      background-color: #ffffff !important;
+    }
+  }
+
+  .checkbox {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    font-weight: 500;
+    color: #0f172a !important;
+    margin-top: 14px;
+    cursor: pointer;
+  }
 }
 
-.form-row {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 14px;
-}
-
-.form-group {
-  margin-bottom: 16px;
-}
-
-.form-label {
+.field-hint {
   display: block;
-  font-size: 13px;
-  font-weight: 600;
-  color: #0f172a !important;
-  margin-bottom: 6px;
-}
-
-.required {
-  color: var(--danger);
-}
-
-ion-input.form-input {
-  --color: #0f172a !important;
-  --placeholder-color: #64748b !important;
-  --placeholder-opacity: 1 !important;
-  --background: #ffffff !important;
-  --padding-start: 12px !important;
-  --padding-end: 12px !important;
-  border: 1px solid #cbd5e1 !important;
-  border-radius: 8px !important;
-  font-size: 13.5px !important;
-  font-weight: 500 !important;
-  color: #0f172a !important;
+  margin-top: 6px;
+  color: var(--text-muted);
+  font-size: 12px;
 }
 
 .modal-actions {
   display: flex;
   justify-content: flex-end;
-  gap: 12px;
-  margin-top: 20px;
+  gap: 10px;
+  margin-top: 24px;
   padding-top: 16px;
   border-top: 1px solid #e2e8f0;
-}
 
-.cancel-btn {
-  --border-radius: 8px;
-  font-weight: 600;
-}
-
-.submit-btn {
-  --background: var(--primary);
-  --border-radius: 8px;
-  font-weight: 600;
+  ion-button {
+    --border-radius: 8px;
+    font-weight: 600;
+  }
 }
 
 /* ========================================== */
@@ -538,7 +470,6 @@ ion-input.form-input {
     gap: 8px !important;
   }
 
-  /* Tombol Batal */
   .alert-btn-cancel {
     color: #64748b !important;
     font-weight: 600 !important;
@@ -547,7 +478,6 @@ ion-input.form-input {
     padding: 8px 16px !important;
   }
 
-  /* Tombol Hapus */
   .alert-btn-danger {
     color: #ffffff !important;
     background: #ef4444 !important;
@@ -564,40 +494,44 @@ ion-input.form-input {
 /* ========================================== */
 /* 🔥 RESPONSIVE MOBILE & TABLET              */
 /* ========================================== */
-@media (max-width: 768px) {
-  .stats-grid {
-    grid-template-columns: 1fr;
+@media (max-width: 992px) {
+  .main-content {
+    margin-left: 0;
+    width: 100%;
+  }
+  .menu-toggle {
+    display: block;
+  }
+}
+
+@media (max-width: 576px) {
+  .content-area {
+    padding: 14px;
   }
 
-  .form-row {
-    grid-template-columns: 1fr;
-  }
-
-  .list-toolbar {
+  .table-title {
+    align-items: flex-start;
     flex-direction: column;
-    align-items: stretch;
-    gap: 10px;
+  }
+
+  .tambah-btn {
+    width: 100%;
   }
 
   .search-box {
-    min-width: unset;
+    max-width: 100%;
     width: 100%;
     height: 40px !important;
   }
 
-  .toolbar-filters {
-    display: flex;
+  .table-footer {
+    align-items: flex-start;
     flex-direction: column;
-    width: 100%;
-    gap: 10px;
-
-    .form-select-native {
-      width: 100% !important;
-    }
+    gap: 8px;
   }
 
-  .btn-new-karyawan {
-    margin-left: 0;
-    width: 100%;
+  .master-tabs button {
+    padding: 10px 9px;
+    font-size: 13px;
   }
 }

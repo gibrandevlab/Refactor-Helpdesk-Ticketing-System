@@ -10,6 +10,9 @@ const {
   teknisi,
   karyawan,
   checklist_template,
+  maintenance_asset_type,
+  maintenance_checklist_unit,
+  maintenance_checklist_item,
   list_ticket,
   assignment_ticket,
   ticket_checklist_result,
@@ -54,6 +57,42 @@ function formatDateTime(val) {
   return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
 }
 
+async function checklistForAsset(kodeAsset, transaction) {
+  const asset = await inventory.findOne({ where: { kode_asset: kodeAsset }, include: [{ model: maintenance_asset_type, as: 'maintenance_asset_type', required: false }], transaction });
+  if (!asset) throw new Error(`Aset ${kodeAsset} tidak ditemukan`);
+  if (!asset.id_asset_type || !asset.maintenance_asset_type) throw new Error(`Aset ${kodeAsset} belum memiliki jenis aset maintenance. Lengkapi pemetaan aset terlebih dahulu.`);
+  if (!asset.maintenance_asset_type.is_active) throw new Error(`Jenis aset maintenance ${asset.maintenance_asset_type.nama_jenis} untuk ${kodeAsset} sedang nonaktif.`);
+  const items = await maintenance_checklist_item.findAll({ where: { id_asset_type: asset.id_asset_type, is_active: true }, include: [{ model: maintenance_checklist_unit, as: 'maintenance_checklist_unit', required: true, where: { is_active: true } }], order: [[{ model: maintenance_checklist_unit, as: 'maintenance_checklist_unit' }, 'urutan', 'ASC'], ['urutan', 'ASC'], ['id_maintenance_item', 'ASC']], transaction });
+  if (!items.length) throw new Error(`Jenis aset ${asset.maintenance_asset_type.nama_jenis} belum memiliki checklist aktif.`);
+  return { asset, type: asset.maintenance_asset_type, items };
+}
+
+function snapshotRows(idTicket, checklist) {
+  return checklist.items.map(item => ({
+    id_ticket: idTicket,
+    // id_item tetap wajib untuk skema lama; nilainya adalah ID master baru dan
+    // detail tampilan selalu memakai snapshot, bukan lookup template lama.
+    id_item: item.id_maintenance_item,
+    snapshot_uraian: item.uraian_pemeriksaan,
+    snapshot_alat_metode: item.alat_metode,
+    snapshot_kriteria_hasil: item.kriteria_hasil,
+    snapshot_urutan: item.urutan,
+    id_asset_type_snapshot: checklist.type.id_asset_type,
+    nama_jenis_snapshot: checklist.type.nama_jenis,
+    id_checklist_unit_snapshot: item.id_checklist_unit,
+    nama_unit_snapshot: item.maintenance_checklist_unit.nama_unit,
+    urutan_unit_snapshot: item.maintenance_checklist_unit.urutan
+  }));
+}
+
+async function validateAssetsForChecklist(kodeAssets) {
+  const errors = [];
+  for (const kode of kodeAssets || []) {
+    try { await checklistForAsset(kode); } catch (error) { errors.push(error.message); }
+  }
+  if (errors.length) throw new Error(`Tiket preventive tidak dibuat. ${errors.join(' ')}`);
+}
+
 // ============================================================
 // AUTO-CREATE TICKET (UNTUK SATU SCHEDULE)
 // ============================================================
@@ -67,16 +106,6 @@ async function autoCreateTicketsForSchedule(scheduleId) {
     if (!schedule) {
       console.log(`❌ Schedule ${numericScheduleId} tidak ditemukan`);
       return;
-    }
-
-    let checklistKategoriList = [];
-    if (schedule.checklist_kategori) {
-      try {
-        checklistKategoriList = JSON.parse(schedule.checklist_kategori);
-        if (!Array.isArray(checklistKategoriList)) checklistKategoriList = [];
-      } catch {
-        checklistKategoriList = [];
-      }
     }
 
     const assets = await schedule_asset.findAll({
@@ -142,15 +171,6 @@ async function autoCreateTicketsForSchedule(scheduleId) {
       return;
     }
 
-    let checklistItems = [];
-    if (checklistKategoriList.length > 0) {
-      checklistItems = await checklist_template.findAll({
-        where: { kategori_unit: { [Op.in]: checklistKategoriList } },
-        attributes: ['id_item'],
-        raw: true
-      });
-    }
-
     let nextMaintenanceDate = formatDateOnly(schedule.tanggal_selesai);
 
     if (!nextMaintenanceDate) {
@@ -196,9 +216,10 @@ async function autoCreateTicketsForSchedule(scheduleId) {
 
       const transaction = await sequelize.transaction();
       try {
+        const checklist = await checklistForAsset(asset.kode_asset, transaction);
         await list_ticket.create({
           id_ticket: idTicket,
-          nik_pelapor: adminNik,
+          nik_pelapor: checklist.asset.nik_pemegang || adminNik,
           id_departemen: schedule.id_departemen,
           id_kategori: schedule.id_kategori || null,
           id_sub_kategori: schedule.id_sub_kategori || null,
@@ -218,15 +239,7 @@ async function autoCreateTicketsForSchedule(scheduleId) {
           status_pengerjaan: 'Menunggu Diproses'
         }, { transaction });
 
-        if (checklistItems.length > 0) {
-          await ticket_checklist_result.bulkCreate(
-            checklistItems.map(item => ({
-              id_ticket: idTicket,
-              id_item: item.id_item
-            })),
-            { transaction }
-          );
-        }
+        await ticket_checklist_result.bulkCreate(snapshotRows(idTicket, checklist), { transaction });
 
         const currentInv = await inventory.findOne({
           where: { kode_asset: asset.kode_asset },
@@ -283,16 +296,6 @@ async function createTicketForSingleAsset(scheduleId, kodeAsset, idTeknisi) {
     }
   }
 
-  let checklistKategoriList = [];
-  if (schedule.checklist_kategori) {
-    try {
-      checklistKategoriList = JSON.parse(schedule.checklist_kategori);
-      if (!Array.isArray(checklistKategoriList)) checklistKategoriList = [];
-    } catch {
-      checklistKategoriList = [];
-    }
-  }
-
   const adminUser = await user.findOne({
     where: { level: { [Op.in]: ['Admin', 'IT Service', 'admin'] } }
   }) || await user.findOne();
@@ -300,20 +303,12 @@ async function createTicketForSingleAsset(scheduleId, kodeAsset, idTeknisi) {
 
   const idTicket = `T${Date.now()}${Math.floor(Math.random() * 1000)}`.substring(0, 20);
 
-  let checklistItems = [];
-  if (checklistKategoriList.length > 0) {
-    checklistItems = await checklist_template.findAll({
-      where: { kategori_unit: { [Op.in]: checklistKategoriList } },
-      attributes: ['id_item'],
-      raw: true
-    });
-  }
-
   const transaction = await sequelize.transaction();
   try {
+    const checklist = await checklistForAsset(kodeAsset, transaction);
     await list_ticket.create({
       id_ticket: idTicket,
-      nik_pelapor: adminNik,
+      nik_pelapor: checklist.asset.nik_pemegang || adminNik,
       id_departemen: schedule.id_departemen,
       id_kategori: schedule.id_kategori || null,
       id_sub_kategori: schedule.id_sub_kategori || null,
@@ -333,15 +328,7 @@ async function createTicketForSingleAsset(scheduleId, kodeAsset, idTeknisi) {
       status_pengerjaan: 'Proses'
     }, { transaction });
 
-    if (checklistItems.length > 0) {
-      await ticket_checklist_result.bulkCreate(
-        checklistItems.map(item => ({
-          id_ticket: idTicket,
-          id_item: item.id_item
-        })),
-        { transaction }
-      );
-    }
+    await ticket_checklist_result.bulkCreate(snapshotRows(idTicket, checklist), { transaction });
 
     const currentInv = await inventory.findOne({
       where: { kode_asset: kodeAsset },
@@ -846,6 +833,10 @@ exports.createSchedule = async (req, res) => {
       return res.status(400).json({ message: 'Field wajib: nama_schedule, id_departemen, tanggal_mulai, tanggal_selesai' });
     }
 
+    // Schedule boleh disimpan untuk persiapan, tetapi saat langsung ditugaskan
+    // seluruh aset wajib sudah memiliki pemetaan dan checklist aktif.
+    if (id_teknis && Array.isArray(aset_list) && aset_list.length) await validateAssetsForChecklist(aset_list);
+
     const tglMulaiStr = formatDateOnly(tanggal_mulai);
     const tglSelesaiStr = formatDateOnly(tanggal_selesai);
 
@@ -1026,6 +1017,10 @@ exports.updateSchedule = async (req, res) => {
     }
 
     const isActive = is_active !== undefined ? (is_active ? 1 : 0) : check.is_active;
+    if (isActive === 1 && idTeknisStr) {
+      const toValidate = aset_list !== undefined ? aset_list : (await schedule_asset.findAll({ where: { id_schedule: idSchedule }, attributes: ['kode_asset'], raw: true })).map(x => x.kode_asset);
+      await validateAssetsForChecklist(toValidate);
+    }
     if (isActive === 1 && idTeknisStr) {
       await autoCreateTicketsForSchedule(idSchedule);
     }
@@ -1258,6 +1253,9 @@ exports.claimSchedule = async (req, res) => {
     if (check.id_teknis && check.id_teknis !== dataTeknisi.id_teknisi) {
       return res.status(409).json({ message: 'Schedule ini baru saja diklaim teknisi lain' });
     }
+
+    const scheduleAssets = await schedule_asset.findAll({ where: { id_schedule: idSchedule }, attributes: ['kode_asset'], raw: true });
+    await validateAssetsForChecklist(scheduleAssets.map(x => x.kode_asset));
 
     await preventive_schedule.update(
       { id_teknis: dataTeknisi.id_teknisi, updated_at: sequelize.fn('getdate') },

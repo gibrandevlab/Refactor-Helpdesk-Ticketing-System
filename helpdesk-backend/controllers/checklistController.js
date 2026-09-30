@@ -16,11 +16,23 @@ const PDFDocument = require('pdfkit');
 const path = require('path');
 const fs = require('fs');
 
-// NIK akun IT Service default yang tanda tangannya otomatis dipakai
-const DEFAULT_IT_SERVICE_NIK = process.env.DEFAULT_IT_SERVICE_NIK || 'GANTI_DENGAN_NIK_IT_SERVICE';
-
 // Urutan kategori dipakai bersama
 const KATEGORI_ORDER = ['CPU', 'Monitor', 'Software', 'Printer/Scanner', 'Network Equipment'];
+
+function resultToChecklistRow(r) {
+  const ct = r.id_item_checklist_template;
+  return {
+    id_result: r.id_result, id_item: r.id_item, kondisi: r.kondisi, kondisi_huruf: r.kondisi_huruf,
+    catatan: r.catatan, checked_at: r.checked_at,
+    // Snapshot is authoritative for new preventive tickets; fallback preserves old tickets.
+    kategori_unit: r.nama_unit_snapshot || r.nama_jenis_snapshot || ct?.kategori_unit || 'Data lama',
+    uraian_pekerjaan: r.snapshot_uraian || ct?.uraian_pekerjaan || 'Item checklist tidak tersedia',
+    alat_yang_digunakan: r.snapshot_alat_metode || ct?.alat_yang_digunakan || null,
+    penerimaan_default: r.snapshot_kriteria_hasil || ct?.penerimaan_default || null,
+    urutan: r.snapshot_urutan ?? ct?.urutan ?? 0,
+    urutan_unit: r.urutan_unit_snapshot ?? 0
+  };
+}
 
 // ============================================================
 // GET daftar kategori unit yang tersedia
@@ -65,22 +77,7 @@ exports.getByTicket = async (req, res) => {
       ]
     });
 
-    const rows = results.map((r) => {
-      const ct = r.id_item_checklist_template;
-      return {
-        id_result: r.id_result,
-        id_item: r.id_item,
-        kondisi: r.kondisi,
-        kondisi_huruf: r.kondisi_huruf,
-        catatan: r.catatan,
-        checked_at: r.checked_at,
-        kategori_unit: ct?.kategori_unit,
-        uraian_pekerjaan: ct?.uraian_pekerjaan,
-        alat_yang_digunakan: ct?.alat_yang_digunakan,
-        penerimaan_default: ct?.penerimaan_default,
-        urutan: ct?.urutan
-      };
-    });
+    const rows = results.map(resultToChecklistRow);
 
     rows.sort((a, b) => {
       const idxA = KATEGORI_ORDER.indexOf(a.kategori_unit);
@@ -88,6 +85,7 @@ exports.getByTicket = async (req, res) => {
       const orderA = idxA !== -1 ? idxA : 99;
       const orderB = idxB !== -1 ? idxB : 99;
       if (orderA !== orderB) return orderA - orderB;
+      if ((a.urutan_unit || 0) !== (b.urutan_unit || 0)) return (a.urutan_unit || 0) - (b.urutan_unit || 0);
       return (a.urutan || 0) - (b.urutan || 0);
     });
 
@@ -105,6 +103,17 @@ exports.updateItem = async (req, res) => {
   try {
     const idResult = parseInt(req.params.idResult);
     let { kondisi, kondisi_huruf, catatan } = req.body;
+
+    const result = await ticket_checklist_result.findByPk(idResult);
+    if (!result) return res.status(404).json({ message: 'Item checklist tidak ditemukan' });
+    const technician = await teknisi.findOne({ where: { nik: req.user.nik } });
+    const assignment = await assignment_ticket.findOne({ where: { id_ticket: result.id_ticket } });
+    if (!technician || !assignment || assignment.id_teknisi !== technician.id_teknisi) {
+      return res.status(403).json({ message: 'Item checklist ini bukan tugas Anda' });
+    }
+    if (['Menunggu Approval User', 'Selesai'].includes(assignment.status_pengerjaan)) {
+      return res.status(400).json({ message: 'Check Sheet sudah diajukan atau selesai dan tidak dapat diubah' });
+    }
 
     if (kondisi !== null && kondisi !== undefined && !['OK', 'NC'].includes(kondisi)) {
       return res.status(400).json({ message: 'kondisi harus OK, NC, atau null' });
@@ -136,15 +145,16 @@ exports.updateItem = async (req, res) => {
 };
 
 // Helper: Memastikan baris checklist_approval tersedia
-async function ensureApprovalRow(idTicket) {
+async function ensureApprovalRow(idTicket, transaction = undefined) {
   const existing = await checklist_approval.findOne({
-    where: { id_ticket: idTicket }
+    where: { id_ticket: idTicket },
+    transaction
   });
 
   if (!existing) {
     await checklist_approval.create({
       id_ticket: idTicket
-    });
+    }, { transaction });
   }
 }
 
@@ -196,40 +206,68 @@ exports.getApprovalStatus = async (req, res) => {
 // TAHAP 1 — Teknisi mengajukan Check Sheet ke User
 // ============================================================
 exports.ajukanApproval = async (req, res) => {
+  let transaction;
   try {
     const { idTicket } = req.params;
+    transaction = await sequelize.transaction();
+
+    const ticket = await list_ticket.findByPk(idTicket, { transaction });
+    if (!ticket?.deskripsi?.includes('[PREVENTIVE]')) {
+      await transaction.rollback();
+      return res.status(400).json({ message: 'Check Sheet approval hanya berlaku untuk tiket preventive dari scheduler' });
+    }
+
+    const technician = await teknisi.findOne({ where: { nik: req.user.nik }, transaction });
+    if (!technician) {
+      await transaction.rollback();
+      return res.status(403).json({ message: 'Anda tidak terdaftar sebagai teknisi' });
+    }
 
     const asg = await assignment_ticket.findOne({
       where: { id_ticket: idTicket },
-      order: [['tanggal_assign', 'DESC']]
+      order: [['tanggal_assign', 'DESC']],
+      transaction
     });
 
     if (!asg) {
+      await transaction.rollback();
       return res.status(404).json({ message: 'Assignment ticket tidak ditemukan' });
     }
-    if (asg.status_pengerjaan !== 'Selesai') {
-      return res.status(400).json({ message: 'Ticket harus berstatus Selesai sebelum diajukan approval' });
+    if (asg.id_teknisi !== technician.id_teknisi) {
+      await transaction.rollback();
+      return res.status(403).json({ message: 'Tiket ini bukan tugas Anda' });
+    }
+    if (asg.status_pengerjaan === 'Menunggu Approval User') {
+      await transaction.rollback();
+      // Request duplikat dapat terjadi saat pengguna menekan tombol saat respons
+      // pertama belum diterima. Kondisi akhir sudah benar, jadi balas sukses.
+      return res.json({ message: 'Check Sheet sudah diajukan dan menunggu approval User.', alreadySubmitted: true });
+    }
+    if (asg.status_pengerjaan === 'Selesai') {
+      await transaction.rollback();
+      return res.status(400).json({ message: 'Tiket ini sudah selesai' });
+    }
+
+    const totalItemCount = await ticket_checklist_result.count({ where: { id_ticket: idTicket }, transaction });
+    if (!totalItemCount) {
+      await transaction.rollback();
+      return res.status(400).json({ message: 'Tiket preventive ini tidak memiliki snapshot Check Sheet' });
     }
 
     const belumIsiCount = await ticket_checklist_result.count({
       where: {
         id_ticket: idTicket,
         kondisi: null
-      }
+      },
+      transaction
     });
 
     if (belumIsiCount > 0) {
+      await transaction.rollback();
       return res.status(400).json({ message: `Masih ada ${belumIsiCount} item checklist yang belum diisi (OK/NC)` });
     }
 
-    const itServiceKaryawan = await karyawan.findOne({
-      where: { nik: DEFAULT_IT_SERVICE_NIK }
-    });
-    if (!itServiceKaryawan) {
-      console.warn('DEFAULT_IT_SERVICE_NIK tidak ditemukan di tabel karyawan:', DEFAULT_IT_SERVICE_NIK);
-    }
-
-    await ensureApprovalRow(idTicket);
+    await ensureApprovalRow(idTicket, transaction);
 
     await checklist_approval.update(
       {
@@ -239,18 +277,29 @@ exports.ajukanApproval = async (req, res) => {
         diketahui_oleh_nik: null,
         tanggal_diketahui: null,
         catatan_diketahui: null,
-        disetujui_oleh_nik: DEFAULT_IT_SERVICE_NIK,
-        tanggal_disetujui: new Date(),
-        status_disetujui: 'Approve',
+        // Approval akhir preventive dilakukan oleh User pemegang/pelapor aset.
+        // Jangan simpan NIK placeholder untuk tanda tangan IT karena nilainya
+        // bukan identitas karyawan dan dapat melebihi batas kolom NIK.
+        disetujui_oleh_nik: null,
+        tanggal_disetujui: null,
+        status_disetujui: 'Menunggu',
         catatan_disetujui: null
       },
-      { where: { id_ticket: idTicket } }
+      { where: { id_ticket: idTicket }, transaction }
     );
 
-    return res.json({ message: 'Check Sheet berhasil diajukan. Tanda tangan Teknisi & IT Service otomatis terisi, menunggu approval User.' });
+    await assignment_ticket.update(
+      { status_pengerjaan: 'Menunggu Approval User', progress: 100, tanggal_selesai: null },
+      { where: { id_ticket: idTicket }, transaction }
+    );
+    await list_ticket.update({ status: 'Menunggu Approval User' }, { where: { id_ticket: idTicket }, transaction });
+
+    await transaction.commit();
+    return res.json({ message: 'Check Sheet berhasil diajukan dan tiket sekarang menunggu approval User.' });
   } catch (error) {
+    if (transaction && !transaction.finished) await transaction.rollback();
     console.error('ajukanApproval error (Sequelize):', error);
-    return res.status(500).json({ message: 'Gagal mengajukan approval' });
+    return res.status(500).json({ message: `Gagal mengajukan approval: ${error?.original?.message || error.message}` });
   }
 };
 
@@ -278,6 +327,19 @@ exports.approveByUser = async (req, res) => {
       return res.status(400).json({ message: 'Check Sheet belum diajukan Teknisi' });
     }
 
+    const ticket = await list_ticket.findByPk(idTicket, { transaction });
+    if (!ticket?.deskripsi?.includes('[PREVENTIVE]')) {
+      await transaction.rollback();
+      return res.status(400).json({ message: 'Approval Check Sheet hanya berlaku untuk tiket preventive' });
+    }
+    const asset = ticket.kode_asset
+      ? await inventory.findOne({ where: { kode_asset: ticket.kode_asset }, transaction })
+      : null;
+    if (ticket.nik_pelapor !== req.user.nik && asset?.nik_pemegang !== req.user.nik) {
+      await transaction.rollback();
+      return res.status(403).json({ message: 'Hanya user pemegang/pelapor aset yang dapat menyetujui Check Sheet ini' });
+    }
+
     await checklist_approval.update(
       {
         diketahui_oleh_nik: req.user.nik,
@@ -292,10 +354,22 @@ exports.approveByUser = async (req, res) => {
       await assignment_ticket.update(
         {
           user_konfirmasi: 1,
-          tanggal_konfirmasi_user: new Date()
+          tanggal_konfirmasi_user: new Date(),
+          status_pengerjaan: 'Selesai',
+          tanggal_selesai: new Date()
         },
         { where: { id_ticket: idTicket }, transaction }
       );
+      await list_ticket.update({ status: 'Solved' }, { where: { id_ticket: idTicket }, transaction });
+      if (ticket.kode_asset) {
+        await inventory.update({ last_maintenance: sequelize.fn('GETDATE') }, { where: { kode_asset: ticket.kode_asset }, transaction });
+      }
+    } else {
+      await assignment_ticket.update(
+        { user_konfirmasi: 0, status_pengerjaan: 'Proses', tanggal_selesai: null },
+        { where: { id_ticket: idTicket }, transaction }
+      );
+      await list_ticket.update({ status: 'On Process' }, { where: { id_ticket: idTicket }, transaction });
     }
 
     await transaction.commit();
@@ -514,19 +588,7 @@ exports.downloadPdf = async (req, res) => {
       ]
     });
 
-    const checklist = rawChecklist.map((r) => {
-      const ct = r.id_item_checklist_template;
-      return {
-        kategori_unit: ct?.kategori_unit,
-        uraian_pekerjaan: ct?.uraian_pekerjaan,
-        alat_yang_digunakan: ct?.alat_yang_digunakan,
-        penerimaan_default: ct?.penerimaan_default,
-        kondisi: r.kondisi,
-        kondisi_huruf: r.kondisi_huruf,
-        catatan: r.catatan,
-        urutan: ct?.urutan
-      };
-    });
+    const checklist = rawChecklist.map(resultToChecklistRow);
 
     checklist.sort((a, b) => {
       const idxA = KATEGORI_ORDER.indexOf(a.kategori_unit);
@@ -534,6 +596,7 @@ exports.downloadPdf = async (req, res) => {
       const orderA = idxA !== -1 ? idxA : 99;
       const orderB = idxB !== -1 ? idxB : 99;
       if (orderA !== orderB) return orderA - orderB;
+      if ((a.urutan_unit || 0) !== (b.urutan_unit || 0)) return (a.urutan_unit || 0) - (b.urutan_unit || 0);
       return (a.urutan || 0) - (b.urutan || 0);
     });
 
