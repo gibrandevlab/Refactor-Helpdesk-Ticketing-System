@@ -289,6 +289,13 @@
   }
 }
 
+.card-pagination {
+  margin-top: 16px;
+  background: var(--card-bg);
+  border-radius: 10px;
+  border: 1px solid var(--border-color);
+}
+
 /* ===================== HALAMAN DETAIL TEKNISI ===================== */
 .page-header-detail {
   margin-bottom: 20px;

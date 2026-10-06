@@ -40,9 +40,20 @@ interface AssetType {
 interface ChecklistItem {
   id_maintenance_item: number;
   id_asset_type: number;
+  id_checklist_unit: number | null;
   uraian_pemeriksaan: string;
   alat_metode: string | null;
   kriteria_hasil: string | null;
+  urutan: number;
+  is_active: boolean;
+  maintenance_asset_type?: AssetType;
+  maintenance_checklist_unit?: ChecklistUnit;
+}
+
+interface ChecklistUnit {
+  id_checklist_unit: number;
+  id_asset_type: number;
+  nama_unit: string;
   urutan: number;
   is_active: boolean;
   maintenance_asset_type?: AssetType;
@@ -79,6 +90,7 @@ export class MaintenanceMasterPage implements OnInit {
   itemPage = 1;
 
   types: AssetType[] = [];
+  units: ChecklistUnit[] = [];
   items: ChecklistItem[] = [];
   activeTypes: AssetType[] = [];
   activeUnits: any[] = [];
@@ -167,6 +179,13 @@ export class MaintenanceMasterPage implements OnInit {
       });
 
     this.http
+      .get<ChecklistUnit[]>(`${environment.apiUrl}/maintenance-master/checklist-units`, this.headers())
+      .subscribe({
+        next: (data) => (this.units = data || []),
+        error: (e) => this.toast(this.errorMessage(e, 'Gagal memuat unit pemeriksaan'), 'danger')
+      });
+
+    this.http
       .get<ChecklistItem[]>(`${environment.apiUrl}/maintenance-master/checklist-items`, this.headers())
       .subscribe({
         next: (data) => (this.items = data || []),
@@ -174,21 +193,40 @@ export class MaintenanceMasterPage implements OnInit {
       });
   }
 
-  get visibleRows() {
+  get visibleRows(): AssetType[] {
     const q = this.search.trim().toLowerCase();
-    if (this.activeTab === 'kategori') {
-      return this.types.filter((x) => !q || String(x.nama_jenis || '').toLowerCase().includes(q));
-    }
-    return this.items.filter(
-      (x) =>
-        !q ||
-        [
-          x.uraian_pemeriksaan,
-          x.alat_metode,
-          x.kriteria_hasil,
-          x.maintenance_asset_type?.nama_jenis
-        ].some((v) => String(v || '').toLowerCase().includes(q))
-    );
+    return this.types.filter((x) => !q || String(x.nama_jenis || '').toLowerCase().includes(q));
+  }
+
+  get unitGroups(): { category: string; units: ChecklistUnit[] }[] {
+    const q = this.search.trim().toLowerCase();
+    const groups = new Map<string, ChecklistUnit[]>();
+    this.units
+      .filter((unit) => !q || [unit.nama_unit, unit.maintenance_asset_type?.nama_jenis].some((v) => String(v || '').toLowerCase().includes(q)))
+      .sort((a, b) => (a.id_asset_type - b.id_asset_type) || (Number(a.urutan) - Number(b.urutan)) || a.nama_unit.localeCompare(b.nama_unit))
+      .forEach((unit) => {
+        const category = unit.maintenance_asset_type?.nama_jenis || 'Kategori tidak tersedia';
+        groups.set(category, [...(groups.get(category) || []), unit]);
+      });
+    return Array.from(groups, ([category, units]) => ({ category, units }));
+  }
+
+  get itemGroups(): { category: string; unit: string; items: ChecklistItem[] }[] {
+    const q = this.search.trim().toLowerCase();
+    const groups = new Map<string, { category: string; unit: string; unitOrder: number; items: ChecklistItem[] }>();
+    this.items
+      .filter((item) => !q || [item.uraian_pemeriksaan, item.alat_metode, item.kriteria_hasil, item.maintenance_asset_type?.nama_jenis, item.maintenance_checklist_unit?.nama_unit].some((v) => String(v || '').toLowerCase().includes(q)))
+      .forEach((item) => {
+        const category = item.maintenance_asset_type?.nama_jenis || 'Kategori tidak tersedia';
+        const unit = item.maintenance_checklist_unit?.nama_unit || 'Unit belum dipilih';
+        const key = `${item.id_asset_type}|${item.id_checklist_unit || 0}`;
+        const group = groups.get(key) || { category, unit, unitOrder: Number(item.maintenance_checklist_unit?.urutan) || 0, items: [] };
+        group.items.push(item);
+        groups.set(key, group);
+      });
+    return Array.from(groups.values())
+      .sort((a, b) => a.category.localeCompare(b.category) || a.unitOrder - b.unitOrder || a.unit.localeCompare(b.unit))
+      .map((group) => ({ ...group, items: group.items.sort((a, b) => Number(a.urutan) - Number(b.urutan) || a.id_maintenance_item - b.id_maintenance_item) }));
   }
 
   setTab(tab: any) {
@@ -241,7 +279,8 @@ export class MaintenanceMasterPage implements OnInit {
           kriteria_hasil: '',
           urutan: 1,
           is_active: true
-        };
+    };
+    if (item?.id_asset_type) this.loadUnits(item.id_asset_type);
     this.itemModalOpen = true;
   }
 
@@ -263,7 +302,15 @@ export class MaintenanceMasterPage implements OnInit {
       this.activeUnits = [];
       return;
     }
-    // Stub call loadUnits
+    this.http
+      .get<ChecklistUnit[]>(`${environment.apiUrl}/maintenance-master/checklist-units/active/${idAssetType}`, this.headers())
+      .subscribe({
+        next: (data) => (this.activeUnits = (data || []).sort((a, b) => Number(a.urutan) - Number(b.urutan) || a.nama_unit.localeCompare(b.nama_unit))),
+        error: (e) => {
+          this.activeUnits = [];
+          this.toast(this.errorMessage(e, 'Gagal memuat unit pemeriksaan'), 'danger');
+        }
+      });
   }
 
   saveType() {
@@ -295,13 +342,27 @@ export class MaintenanceMasterPage implements OnInit {
   }
 
   saveUnit() {
-    this.close('unit');
-    this.toast('Unit pemeriksaan berhasil disimpan');
+    if (!this.unitForm.id_asset_type || !this.unitForm.nama_unit.trim()) {
+      this.toast('Kategori maintenance dan nama unit wajib diisi', 'warning');
+      return;
+    }
+    const data = { ...this.unitForm, nama_unit: this.unitForm.nama_unit.trim() };
+    const req = this.editingUnit
+      ? this.http.put(`${environment.apiUrl}/maintenance-master/checklist-units/${this.editingUnit.id_checklist_unit}`, data, this.headers())
+      : this.http.post(`${environment.apiUrl}/maintenance-master/checklist-units`, data, this.headers());
+    req.subscribe({
+      next: () => {
+        this.close('unit');
+        this.toast('Unit pemeriksaan berhasil disimpan');
+        this.reload();
+      },
+      error: (e) => this.toast(this.errorMessage(e, 'Gagal menyimpan unit pemeriksaan'), 'danger')
+    });
   }
 
   saveItem() {
-    if (!this.itemForm.id_asset_type || !this.itemForm.uraian_pemeriksaan.trim()) {
-      this.toast('Jenis aset dan uraian pemeriksaan wajib diisi', 'warning');
+    if (!this.itemForm.id_asset_type || !this.itemForm.id_checklist_unit || !this.itemForm.uraian_pemeriksaan.trim()) {
+      this.toast('Kategori maintenance, unit, dan uraian pemeriksaan wajib diisi', 'warning');
       return;
     }
     const data = { ...this.itemForm, uraian_pemeriksaan: this.itemForm.uraian_pemeriksaan.trim() };
@@ -339,7 +400,18 @@ export class MaintenanceMasterPage implements OnInit {
           role: 'confirm',
           cssClass: 'alert-btn-danger',
           handler: () => {
-            this.toast('Data berhasil dinonaktifkan');
+            const endpoint = this.activeTab === 'kategori'
+              ? `asset-types/${row.id_asset_type}`
+              : this.activeTab === 'unit'
+                ? `checklist-units/${row.id_checklist_unit}`
+                : `checklist-items/${row.id_maintenance_item}`;
+            this.http.delete(`${environment.apiUrl}/maintenance-master/${endpoint}`, this.headers()).subscribe({
+              next: () => {
+                this.toast('Data berhasil dinonaktifkan');
+                this.reload();
+              },
+              error: (e) => this.toast(this.errorMessage(e, 'Gagal menonaktifkan data'), 'danger')
+            });
           }
         }
       ]

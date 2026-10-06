@@ -30,8 +30,11 @@ export class LaporanFeedbackPage implements OnInit, OnDestroy {
   rawFeedbackList: any[] = [];
   selectedTeknisi: any = null; // Jika null -> Tampil Card Utama. Jika terisi -> Tampil Detail Feedback
 
-  // Data terolah (disimpan di variabel biasa agar tidak nge-freeze karena Change Detection)
-  teknisiSummaryList: any[] = [];
+  // Data terolah
+  allTeknisiSummaryList: any[] = [];
+  filteredTeknisiList: any[] = [];
+  pagedTeknisiList: any[] = [];
+
   filteredFeedbackDetail: any[] = [];
   pagedFeedback: any[] = [];
 
@@ -39,17 +42,23 @@ export class LaporanFeedbackPage implements OnInit, OnDestroy {
   isDetailOpen = false;
   selectedFeedback: any = null;
 
-  // ===== FILTER & SEARCH (DIPISAH) =====
+  // ===== FILTER & SEARCH =====
   searchTeknisi = ''; // Pencarian di Tampilan 1 (Grid Card Teknisi)
   searchDetail = '';  // Pencarian di Tampilan 2 (Tabel Detail Feedback)
   filterRating = '';
   ratingOptions: string[] = ['Positif', 'Negatif'];
 
-  // Pagination untuk tabel detail feedback (15 row per halaman)
+  // ===== PAGINATION GRID TEKNISI =====
+  teknisiCurrentPage = 1;
+  teknisiPageSize = 12;
+  teknisiTotalPages = 1;
+  visibleTeknisiPages: number[] = [];
+
+  // ===== PAGINATION DETAIL FEEDBACK (15 ROW) =====
   currentPage = 1;
   pageSize = 15;
   totalPages = 1;
-  totalPagesArray: number[] = [];
+  visibleDetailPages: number[] = [];
 
   constructor(
     private router: Router,
@@ -63,7 +72,6 @@ export class LaporanFeedbackPage implements OnInit, OnDestroy {
   }
 
   ngOnDestroy() {
-    // Membebaskan memori saat halaman dihancurkan / pindah route
     this.destroy$.next();
     this.destroy$.complete();
   }
@@ -87,7 +95,6 @@ export class LaporanFeedbackPage implements OnInit, OnDestroy {
             keterangan: item.keterangan || '-',
           }));
 
-          // Process rekap data awal
           this.processTeknisiSummary();
         }
       },
@@ -102,7 +109,8 @@ export class LaporanFeedbackPage implements OnInit, OnDestroy {
     const term = this.searchTeknisi.trim().toLowerCase();
     const groups: { [key: string]: any } = {};
 
-    this.rawFeedbackList.forEach((f) => {
+    for (let i = 0; i < this.rawFeedbackList.length; i++) {
+      const f = this.rawFeedbackList[i];
       const key = f.idTeknisi !== '-' ? f.idTeknisi : 'unassigned';
       if (!groups[key]) {
         groups[key] = {
@@ -112,9 +120,9 @@ export class LaporanFeedbackPage implements OnInit, OnDestroy {
         };
       }
       groups[key].items.push(f);
-    });
+    }
 
-    let list = Object.values(groups).map((group: any) => {
+    this.allTeknisiSummaryList = Object.values(groups).map((group: any) => {
       const totalRating = group.items.reduce((sum: number, item: any) => sum + item.rating, 0);
       const avg = group.items.length > 0 ? totalRating / group.items.length : 0;
       return {
@@ -125,20 +133,38 @@ export class LaporanFeedbackPage implements OnInit, OnDestroy {
     });
 
     if (term) {
-      list = list.filter((t: any) =>
+      this.filteredTeknisiList = this.allTeknisiSummaryList.filter((t: any) =>
         t.namaTeknisi.toLowerCase().includes(term) ||
         t.idTeknisi.toLowerCase().includes(term)
       );
+    } else {
+      this.filteredTeknisiList = [...this.allTeknisiSummaryList];
     }
 
-    this.teknisiSummaryList = list;
+    this.teknisiCurrentPage = 1;
+    this.updateTeknisiPagination();
+  }
+
+  updateTeknisiPagination() {
+    this.teknisiTotalPages = Math.max(1, Math.ceil(this.filteredTeknisiList.length / this.teknisiPageSize));
+    this.visibleTeknisiPages = this.getVisiblePages(this.teknisiCurrentPage, this.teknisiTotalPages);
+
+    const start = (this.teknisiCurrentPage - 1) * this.teknisiPageSize;
+    this.pagedTeknisiList = this.filteredTeknisiList.slice(start, start + this.teknisiPageSize);
   }
 
   onSearchTeknisiChange() {
     this.processTeknisiSummary();
   }
 
-  // ===== NAVIGASI BUKA/TUTUP DETAIL TEKNISI =====
+  goToTeknisiPage(page: number) {
+    if (page >= 1 && page <= this.teknisiTotalPages) {
+      this.teknisiCurrentPage = page;
+      this.updateTeknisiPagination();
+    }
+  }
+
+  // ===== NAVIGASI DETAIL TEKNISI =====
   selectTeknisi(teknisi: any) {
     this.selectedTeknisi = teknisi;
     this.searchDetail = '';
@@ -156,38 +182,37 @@ export class LaporanFeedbackPage implements OnInit, OnDestroy {
   }
 
   // ===== FILTER & PAGINATION HALAMAN DETAIL =====
-processDetailFilter() {
-  if (!this.selectedTeknisi) {
-    this.filteredFeedbackDetail = [];
-    this.pagedFeedback = [];
-    return;
+  processDetailFilter() {
+    if (!this.selectedTeknisi) {
+      this.filteredFeedbackDetail = [];
+      this.pagedFeedback = [];
+      return;
+    }
+
+    const term = this.searchDetail.trim().toLowerCase();
+
+    this.filteredFeedbackDetail = this.selectedTeknisi.items.filter((f: any) => {
+      const matchSearch =
+        !term ||
+        f.idTicket.toLowerCase().includes(term) ||
+        f.reportedBy.toLowerCase().includes(term) ||
+        f.keterangan.toLowerCase().includes(term);
+
+      const matchRating =
+        !this.filterRating ||
+        String(f.feedback).toLowerCase() === this.filterRating.toLowerCase();
+
+      return matchSearch && matchRating;
+    });
+
+    this.totalPages = Math.max(1, Math.ceil(this.filteredFeedbackDetail.length / this.pageSize));
+    this.visibleDetailPages = this.getVisiblePages(this.currentPage, this.totalPages);
+
+    this.updatePagedFeedback();
   }
 
-  const term = this.searchDetail.trim().toLowerCase();
-
-  this.filteredFeedbackDetail = this.selectedTeknisi.items.filter((f: any) => {
-    const matchSearch =
-      !term ||
-      f.idTicket.toLowerCase().includes(term) ||
-      f.reportedBy.toLowerCase().includes(term) ||
-      f.keterangan.toLowerCase().includes(term);
-
-    // 🔥 FIX: Konversi kedua nilai ke lowercase agar tidak bermasalah karena huruf kapital
-    const matchRating =
-      !this.filterRating ||
-      String(f.feedback).toLowerCase() === this.filterRating.toLowerCase();
-
-    return matchSearch && matchRating;
-  });
-
-  // Recalculate Pagination
-  this.totalPages = Math.max(1, Math.ceil(this.filteredFeedbackDetail.length / this.pageSize));
-  this.totalPagesArray = Array.from({ length: this.totalPages }, (_, i) => i + 1);
-
-  this.updatePagedFeedback();
-}
-
   updatePagedFeedback() {
+    this.visibleDetailPages = this.getVisiblePages(this.currentPage, this.totalPages);
     const start = (this.currentPage - 1) * this.pageSize;
     this.pagedFeedback = this.filteredFeedbackDetail.slice(start, start + this.pageSize);
   }
@@ -198,8 +223,10 @@ processDetailFilter() {
   }
 
   goToPage(page: number) {
-    this.currentPage = page;
-    this.updatePagedFeedback();
+    if (page >= 1 && page <= this.totalPages) {
+      this.currentPage = page;
+      this.updatePagedFeedback();
+    }
   }
 
   prevPage() {
@@ -216,6 +243,33 @@ processDetailFilter() {
     }
   }
 
+  // Helper untuk membuat daftar halaman ter-paginasi secara dinamis (maksimal 5 angka tampil)
+  private getVisiblePages(current: number, total: number): number[] {
+    const pages: number[] = [];
+    const maxVisible = 5;
+    let start = Math.max(1, current - Math.floor(maxVisible / 2));
+    let end = start + maxVisible - 1;
+
+    if (end > total) {
+      end = total;
+      start = Math.max(1, end - maxVisible + 1);
+    }
+
+    for (let i = start; i <= end; i++) {
+      pages.push(i);
+    }
+    return pages;
+  }
+
+  // TrackBy functions untuk optimasi performa rendering DOM
+  trackByTeknisi(index: number, item: any): string {
+    return item.idTeknisi;
+  }
+
+  trackByTicket(index: number, item: any): string {
+    return item.idTicket;
+  }
+
   // ===== POP-UP DETAIL FEEDBACK ITEM =====
   openDetail(item: any) {
     this.selectedFeedback = item;
@@ -227,12 +281,12 @@ processDetailFilter() {
     this.selectedFeedback = null;
   }
 
-getRatingClass(rating: string): string {
-  const val = String(rating || '').toLowerCase();
-  if (val === 'positif') return 'feedback-positif';
-  if (val === 'negatif') return 'feedback-negatif';
-  return 'feedback-default';
-}
+  getRatingClass(rating: string): string {
+    const val = String(rating || '').toLowerCase();
+    if (val === 'positif') return 'feedback-positif';
+    if (val === 'negatif') return 'feedback-negatif';
+    return 'feedback-default';
+  }
 
   toggleSidebar() {
     this.isSidebarOpen = !this.isSidebarOpen;

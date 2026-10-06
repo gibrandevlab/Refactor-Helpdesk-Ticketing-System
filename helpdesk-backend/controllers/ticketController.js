@@ -661,6 +661,16 @@ exports.updateProgress = async (req, res) => {
       return fail(res, 'Tiket ini bukan tugas Anda.', 404);
     }
 
+    const ticketInfo = await list_ticket.findByPk(id_ticket, { transaction });
+    if (!ticketInfo) {
+      if (transaction) await transaction.rollback();
+      return fail(res, 'Data tiket tidak ditemukan.', 404);
+    }
+    if (ticketInfo.deskripsi?.includes('[PREVENTIVE]') && status_pengerjaan === 'Selesai') {
+      if (transaction) await transaction.rollback();
+      return fail(res, 'Tiket preventive tidak dapat diselesaikan langsung. Lengkapi lalu ajukan Check Sheet untuk approval User.', 400);
+    }
+
     if (assignment.is_paused && status_pengerjaan !== 'Selesai') {
       if (transaction) await transaction.rollback();
       return fail(res, 'Tiket sedang di-pause. Lanjutkan timer terlebih dahulu.', 400);

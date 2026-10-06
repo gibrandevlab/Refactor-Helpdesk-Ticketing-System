@@ -52,8 +52,11 @@
           </div>
 
           <!-- GRID CARD REKAP TEKNISI -->
-          <div class="teknisi-grid">
-            <div class="teknisi-card" *ngFor="let tek of teknisiSummaryList" (click)="selectTeknisi(tek)">
+          <div class="teknisi-grid" *ngIf="pagedTeknisiList.length > 0">
+            <div
+              class="teknisi-card"
+              *ngFor="let tek of pagedTeknisiList; trackBy: trackByTeknisi"
+              (click)="selectTeknisi(tek)">
               <div class="teknisi-card-header">
                 <div class="avatar-circle">
                   <ion-icon name="person-outline"></ion-icon>
@@ -85,8 +88,26 @@
             </div>
           </div>
 
+          <!-- PAGINASI GRID CARD TEKNISI -->
+          <div class="table-footer card-pagination" *ngIf="teknisiTotalPages > 1">
+            <span class="table-info">Menampilkan {{ pagedTeknisiList.length }} dari {{ filteredTeknisiList.length }} teknisi</span>
+            <div class="pagination">
+              <ion-button fill="clear" size="small" [disabled]="teknisiCurrentPage === 1" (click)="goToTeknisiPage(teknisiCurrentPage - 1)">
+                <ion-icon name="chevron-back-outline"></ion-icon>
+              </ion-button>
+              <span
+                class="page-number"
+                *ngFor="let p of visibleTeknisiPages"
+                [class.active]="p === teknisiCurrentPage"
+                (click)="goToTeknisiPage(p)">{{ p }}</span>
+              <ion-button fill="clear" size="small" [disabled]="teknisiCurrentPage === teknisiTotalPages" (click)="goToTeknisiPage(teknisiCurrentPage + 1)">
+                <ion-icon name="chevron-forward-outline"></ion-icon>
+              </ion-button>
+            </div>
+          </div>
+
           <!-- EMPTY STATE TEKNISI -->
-          <div class="empty-state" *ngIf="teknisiSummaryList.length === 0">
+          <div class="empty-state" *ngIf="filteredTeknisiList.length === 0">
             <ion-icon name="people-outline"></ion-icon>
             <h3>Tidak Ada Data Teknisi</h3>
             <p>Belum ada feedback yang masuk atau teknisi tidak ditemukan.</p>
@@ -142,7 +163,7 @@
                   </tr>
                 </thead>
                 <tbody>
-                  <tr *ngFor="let f of pagedFeedback; let i = index">
+                  <tr *ngFor="let f of pagedFeedback; let i = index; trackBy: trackByTicket">
                     <td>{{ (currentPage - 1) * pageSize + i + 1 }}</td>
                     <td class="ticket-id">{{ f.idTicket }}</td>
                     <td class="fw-bold">{{ f.reportedBy }}</td>
@@ -176,7 +197,7 @@
               <span class="table-info">Menampilkan {{ pagedFeedback.length }} dari {{ filteredFeedbackDetail.length }} data (15 baris/hal)</span>
               <div class="pagination">
                 <ion-button fill="clear" size="small" [disabled]="currentPage === 1" (click)="prevPage()"><ion-icon name="chevron-back-outline"></ion-icon></ion-button>
-                <span class="page-number" *ngFor="let p of totalPagesArray" [class.active]="p === currentPage" (click)="goToPage(p)">{{ p }}</span>
+                <span class="page-number" *ngFor="let p of visibleDetailPages" [class.active]="p === currentPage" (click)="goToPage(p)">{{ p }}</span>
                 <ion-button fill="clear" size="small" [disabled]="currentPage === totalPages" (click)="nextPage()"><ion-icon name="chevron-forward-outline"></ion-icon></ion-button>
               </div>
             </div>
